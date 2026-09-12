@@ -187,8 +187,22 @@ const OPENSKY_SOURCE_STALE_MS = 120_000;
 // ---------------------------------------------------------------------------
 // Overpass API proxy constants and cache state
 // ---------------------------------------------------------------------------
-/** Ordered list of Overpass API mirrors; tried sequentially on failure/rate-limit. */
-const OVERPASS_UPSTREAMS = [
+/**
+ * Public Overpass mirrors, tried in order on failure/rate-limit.
+ *
+ * These four names are two operators: lz4 aliases overpass-api.de, and
+ * kumi.systems and private.coffee resolve to one machine. Measured 2026-09-12
+ * from one network, both refused every query — overpass-api.de answered 406 to
+ * this proxy's exact User-Agent (reproducible 7/7; a blocklist entry rather
+ * than a heuristic, most plausibly load-shedding after the project's August
+ * traffic spike), while the shared host answered 504 only after ~60 s, far past
+ * OVERPASS_TIMEOUT_MS. With no mirror reachable, every Overpass-backed layer
+ * was permanently empty. If that is your network too, run your own instance and
+ * point GEV_OVERPASS_UPSTREAMS at it (see overpassUpstreams below); these stay
+ * as fallbacks because they do work from many networks, and an unreachable
+ * upstream fails in milliseconds once DNS is warm.
+ */
+export const OVERPASS_PUBLIC_UPSTREAMS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://lz4.overpass-api.de/api/interpreter',
@@ -198,6 +212,73 @@ const OVERPASS_UPSTREAMS = [
   // Verified: planet coverage (Texas query), CORS *, ~5-20 s cold latency.
   'https://overpass.private.coffee/api/interpreter',
 ];
+
+/**
+ * True for a host whose traffic cannot leave the local network.
+ * @param {string} hostname
+ * @returns {boolean}
+ */
+export function isPrivateOverpassHost(hostname) {
+  if (hostname === 'localhost') return true;
+  const quad = String(hostname).split('.').map(Number);
+  if (quad.length !== 4 || quad.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) return false;
+  const [a, b] = quad;
+  return a === 127 || a === 10 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31);
+}
+
+/**
+ * Parse GEV_OVERPASS_UPSTREAMS into extra endpoints tried BEFORE the public
+ * mirrors. Comma-separated absolute URLs.
+ *
+ * Kept out of source because a self-hosted endpoint is deployment config, not
+ * code: this repository is public, and a hard-coded `http://192.168.x.y` would
+ * publish the operator's internal network layout to everyone who clones it.
+ *
+ * Plaintext is admitted only for a private address, where the request never
+ * leaves the LAN. An Overpass query carries the operator's viewport, so
+ * http:// to a routable host would put that on the wire in clear text — such an
+ * entry is dropped rather than honoured, and the caller is told why.
+ * @param {string|undefined} raw Comma-separated URLs.
+ * @param {(message: string) => void} [warn] Sink for rejection notices.
+ * @returns {string[]} Accepted endpoints, in the given order.
+ */
+export function parseOverpassUpstreamsEnv(raw, warn = () => {}) {
+  if (!raw || typeof raw !== 'string') return [];
+  const accepted = [];
+  for (const candidate of raw.split(',').map((s) => s.trim()).filter(Boolean)) {
+    let parsed;
+    try {
+      parsed = new URL(candidate);
+    } catch {
+      warn(`GEV_OVERPASS_UPSTREAMS: ignoring unparseable URL "${candidate}"`);
+      continue;
+    }
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+      warn(`GEV_OVERPASS_UPSTREAMS: ignoring non-HTTP URL "${candidate}"`);
+      continue;
+    }
+    if (parsed.protocol === 'http:' && !isPrivateOverpassHost(parsed.hostname)) {
+      warn(`GEV_OVERPASS_UPSTREAMS: refusing plaintext to routable host "${parsed.hostname}"`);
+      continue;
+    }
+    accepted.push(candidate);
+  }
+  return accepted;
+}
+
+/**
+ * Endpoints for this launch: env-configured instances first, then the public
+ * mirrors. Read lazily — Vite's config hook copies dotenv files into
+ * process.env AFTER this module is imported, so a module-level constant would
+ * always miss a .env-supplied value.
+ * @returns {string[]}
+ */
+export function overpassUpstreams() {
+  return [
+    ...parseOverpassUpstreamsEnv(process.env.GEV_OVERPASS_UPSTREAMS, (m) => console.warn(`[overpass] ${m}`)),
+    ...OVERPASS_PUBLIC_UPSTREAMS,
+  ];
+}
 /**
  * TTL for FRESH cached Overpass responses (ms). Road geometry is static for
  * months — the original 45 s TTL forced a public-mirror round-trip on nearly
@@ -2574,6 +2655,70 @@ export function overpassPayloadIsData(payload) {
 }
 
 /**
+ * Element count of an Overpass payload, or null when the body is not countable.
+ *
+ * Cheap and total: a body that does not parse, or that carries no `elements`
+ * array, returns null rather than throwing — callers treat null as "unknown",
+ * never as zero, so an unparseable body can never be mistaken for an empty one.
+ * @param {{body?: string}} payload
+ * @returns {number|null} element count, or null if it cannot be determined
+ */
+export function overpassElementCount(payload) {
+  const body = payload?.body;
+  if (typeof body !== 'string' || !body) return null;
+  try {
+    const parsed = JSON.parse(body);
+    return Array.isArray(parsed?.elements) ? parsed.elements.length : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether a payload that IS data may also be written to the cache.
+ *
+ * Separate from overpassPayloadIsData on purpose. A mirror whose database does
+ * not cover the queried region answers 200 with `elements: []` — syntactically
+ * perfect data that is semantically a lie about the world. Because the disk
+ * layer holds 7 days (30 for boundary queries), one such answer outlives the
+ * mirror that produced it and blanks the layer long after a healthy mirror is
+ * back. A refusal is strictly safer: it rotates to the next mirror and is never
+ * cached at all.
+ *
+ * This cannot be folded into overpassPayloadIsData: that predicate also decides
+ * stale fallback, and an empty result must stay serveable to the client (a
+ * viewport genuinely holding no military sites is a correct empty answer) even
+ * when it is not trustworthy enough to keep.
+ *
+ * Policy: an empty result is returned to the caller but never kept. The fan-out
+ * deliberately does NOT rotate on empty. Rotating would walk the whole mirror
+ * list on every legitimately-empty query, and measured against the public
+ * mirrors from a real network that is ~45 s (406 at 850 ms, then a 22 s
+ * timeout, then 580 ms, then another 22 s) to return the empty answer that was
+ * correct to begin with — and empty answers are common and usually right, e.g.
+ * a viewport genuinely holding no military sites. The asymmetry favours this:
+ * keeping a wrong empty blanks a layer for 7-30 days, while discarding a right
+ * one costs a single re-query.
+ *
+ * @param {{status: number, body?: string}} payload upstream payload, already data
+ * @param {string} cacheKey normalized query — isOverpassBoundaryQuery(cacheKey)
+ *   reports whether this is a boundary-class query holding the 30-day TTL
+ * @returns {boolean} true to write through to memory and disk
+ */
+export function overpassPayloadIsCacheable(payload, cacheKey) {
+  const count = overpassElementCount(payload);
+  // Unknown shape (non-JSON body, e.g. an XML `out` format) — the old
+  // behaviour, cache it; emptiness was never claimed.
+  if (count === null) return true;
+  // `cacheKey` is unused by this policy. It stays in the signature as the
+  // documented extension point: isOverpassBoundaryQuery(cacheKey) separates
+  // is_in / admin-relation pivots, whose empty answer is almost always a
+  // coverage failure rather than the truth, from bbox tag queries, whose empty
+  // answer usually is the truth.
+  return count > 0;
+}
+
+/**
  * Try each mirror once, retaining response-size and per-mirror timeout caps.
  * Refusals and body-level failures rotate; total failure returns the last
  * rate-limit payload, otherwise the first refusal, or throws a network error.
@@ -2583,7 +2728,7 @@ export function overpassPayloadIsData(payload) {
  * @returns {Promise<{status:number,body:string,contentType:string,endpoint:string,rateLimited:boolean}>}
  */
 export async function fetchOverpassPayload(body, maxResponseBytes = OVERPASS_MAX_RESPONSE_BYTES, {
-  endpoints = OVERPASS_UPSTREAMS,
+  endpoints = overpassUpstreams(),
   fetchImpl = fetch,
   readBody = readResponseTextCapped,
   simplify = simplifyOverpassPayloadBody,
@@ -2763,7 +2908,10 @@ function overpassProxy() {
               // refusal was written to memory AND disk — and boundary-class
               // queries hold a month-long TTL, so a single 406 outlived the
               // outage that caused it.
-              if (overpassPayloadIsData(payload)) {
+              // Data is returned to the caller either way; only a payload that
+              // is ALSO trustworthy is kept. A region-less mirror's empty 200
+              // would otherwise hold the layer blank for the full disk TTL.
+              if (overpassPayloadIsData(payload) && overpassPayloadIsCacheable(payload, cacheKey)) {
                 const entry = { ...payload, cachedAt: Date.now() };
                 _overpassCache.set(cacheKey, entry);
                 trimOverpassCache();
