@@ -1,5 +1,6 @@
 import * as Cesium from 'cesium';
 import { CITY_POIS, findPoiByName, flyToGlobeView, flyToLandmark, flyToPOI, flyToPresetLocation, GLOBE_VIEW, searchAndFlyTo } from '../locations.js';
+import { geocodeWithFallback } from '../geocodeOsm.js';
 import {
   getContextStore,
   getSelectedEntityContext,
@@ -1264,19 +1265,19 @@ async function resolveRadioLocation(args = {}, coordinates = radioCoordinatePair
   const known = knownRadioLocation(query, args.locationId);
   if (known) return known;
   if (!query) return null;
+  // Google Geocoding first; OpenStreetMap when Google cannot answer (a key without
+  // the API enabled answers REQUEST_DENIED, or there is no key). The 6 s timeout
+  // and turn cancellation abort both providers and surface as an AbortError.
   const apiKey = window.__GOOGLE_MAPS_API_KEY__ || import.meta.env.GOOGLE_MAPS_API_KEY;
-  if (!apiKey) throw new Error('No Google Maps API key available for Radio location search');
   const controller = new AbortController();
   const cancelFromTurn = () => controller.abort();
   if (options.signal?.aborted) throw radioAbortError();
   options.signal?.addEventListener('abort', cancelFromTurn, { once: true });
   const timer = setTimeout(() => controller.abort(), 6000);
   try {
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
-    const response = await fetch(url, { signal: controller.signal });
-    const body = await response.json();
+    const geocode = await geocodeWithFallback(query, { apiKey, signal: controller.signal });
     if (!radioActionIsCurrent(options)) throw radioAbortError();
-    const result = body.status === 'OK' ? body.results?.[0] : null;
+    const result = geocode.status === 'OK' ? geocode.result : null;
     if (!result?.geometry?.location) return null;
     return {
       lat: result.geometry.location.lat,

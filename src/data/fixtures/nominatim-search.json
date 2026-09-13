@@ -1,0 +1,232 @@
+{
+  "japan": [
+    {
+      "place_id": 263621913,
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+      "osm_type": "relation",
+      "osm_id": 382313,
+      "lat": "36.5748441",
+      "lon": "139.2394179",
+      "category": "boundary",
+      "type": "administrative",
+      "place_rank": 4,
+      "importance": 0.9383765725984483,
+      "addresstype": "country",
+      "name": "Japan",
+      "display_name": "Japan",
+      "boundingbox": [
+        "20.2145811",
+        "45.7112046",
+        "122.7141754",
+        "154.2055410"
+      ]
+    }
+  ],
+  "texas": [
+    {
+      "place_id": 312488230,
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+      "osm_type": "relation",
+      "osm_id": 114690,
+      "lat": "31.2638905",
+      "lon": "-98.5456116",
+      "category": "boundary",
+      "type": "administrative",
+      "place_rank": 8,
+      "importance": 0.8152474184553479,
+      "addresstype": "state",
+      "name": "Texas",
+      "display_name": "Texas, United States",
+      "boundingbox": [
+        "25.8370600",
+        "36.5004529",
+        "-106.6458459",
+        "-93.5078217"
+      ]
+    }
+  ],
+  "dubai": [
+    {
+      "place_id": 45681950,
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+      "osm_type": "relation",
+      "osm_id": 4479752,
+      "lat": "25.0742823",
+      "lon": "55.1885624",
+      "category": "boundary",
+      "type": "administrative",
+      "place_rank": 25,
+      "importance": 0.7025259019274822,
+      "addresstype": "administrative",
+      "name": "Dubai",
+      "display_name": "Dubai, Dubai Emirate, United Arab Emirates",
+      "boundingbox": [
+        "24.6230801",
+        "25.5250676",
+        "54.7153981",
+        "56.2052980"
+      ]
+    }
+  ],
+  "hyde_park_london_suburb": [
+    {
+      "place_id": 281253858,
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+      "osm_type": "node",
+      "osm_id": 26745366,
+      "lat": "51.5110872",
+      "lon": "-0.1470580",
+      "category": "place",
+      "type": "suburb",
+      "place_rank": 19,
+      "importance": 0.5580308740824717,
+      "addresstype": "suburb",
+      "name": "Mayfair",
+      "display_name": "Mayfair, City of Westminster, Greater London, England, W1K 3DN, United Kingdom",
+      "boundingbox": [
+        "51.4910872",
+        "51.5310872",
+        "-0.1670580",
+        "-0.1270580"
+      ]
+    }
+  ],
+  "sixth_street_nobias": [
+    {
+      "place_id": 316006399,
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+      "osm_type": "way",
+      "osm_id": 20691537,
+      "lat": "29.7774295",
+      "lon": "-96.1588406",
+      "category": "highway",
+      "type": "residential",
+      "place_rank": 26,
+      "importance": 0.053387097734035216,
+      "addresstype": "road",
+      "name": "6th Street",
+      "display_name": "6th Street, Sealy, Austin County, Texas, 77474, United States",
+      "boundingbox": [
+        "29.7767146",
+        "29.7780900",
+        "-96.1621417",
+        "-96.1555200"
+      ]
+    }
+  ],
+  "sixth_street_austin_bias": [
+    {
+      "place_id": 315494712,
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+      "osm_type": "way",
+      "osm_id": 240179605,
+      "lat": "30.2624495",
+      "lon": "-97.7248173",
+      "category": "highway",
+      "type": "tertiary",
+      "place_rank": 26,
+      "importance": 0.05340827725642783,
+      "addresstype": "road",
+      "name": "East 6th Street",
+      "display_name": "East 6th Street, East Cesar Chavez, Austin, Travis County, Texas, 78702, United States",
+      "boundingbox": [
+        "30.2618728",
+        "30.2630507",
+        "-97.7265508",
+        "-97.7230775"
+      ]
+    }
+  ],
+  "zilker_park": [
+    {
+      "place_id": 315860488,
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+      "osm_type": "way",
+      "osm_id": 946120954,
+      "lat": "30.2676852",
+      "lon": "-97.7668919",
+      "category": "leisure",
+      "type": "park",
+      "place_rank": 24,
+      "importance": 0.41264182722604775,
+      "addresstype": "park",
+      "name": "Zilker Park",
+      "display_name": "Zilker Park, Austin, Travis County, Texas, 78746, United States",
+      "boundingbox": [
+        "30.2660419",
+        "30.2693219",
+        "-97.7707530",
+        "-97.7624639"
+      ]
+    }
+  ],
+  "rocky_mountains": [
+    {
+      "place_id": 329066571,
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+      "osm_type": "node",
+      "osm_id": 3791973299,
+      "lat": "43.3578532",
+      "lon": "-110.9175060",
+      "category": "natural",
+      "type": "mountain_range",
+      "place_rank": 18,
+      "importance": 0.6450044924002287,
+      "addresstype": "mountain_range",
+      "name": "Rocky Mountains",
+      "display_name": "Rocky Mountains, Teton County, Wyoming, United States",
+      "boundingbox": [
+        "43.3578032",
+        "43.3579032",
+        "-110.9175560",
+        "-110.9174560"
+      ]
+    }
+  ],
+  "eiffel_tower": [
+    {
+      "place_id": 97838275,
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+      "osm_type": "way",
+      "osm_id": 5013364,
+      "lat": "48.8582599",
+      "lon": "2.2945006",
+      "category": "man_made",
+      "type": "tower",
+      "place_rank": 30,
+      "importance": 0.6205937724353116,
+      "addresstype": "man_made",
+      "name": "Eiffel Tower",
+      "display_name": "Eiffel Tower, 5, Avenue Anatole France, Quartier du Gros-Caillou, 7th Arrondissement, Paris, Ile-de-France, Metropolitan France, 75007, France",
+      "boundingbox": [
+        "48.8574753",
+        "48.8590453",
+        "2.2933119",
+        "2.2956897"
+      ]
+    }
+  ],
+  "austin": [
+    {
+      "place_id": 313478768,
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+      "osm_type": "relation",
+      "osm_id": 113314,
+      "lat": "30.2711286",
+      "lon": "-97.7436995",
+      "category": "boundary",
+      "type": "administrative",
+      "place_rank": 16,
+      "importance": 0.7061144221148422,
+      "addresstype": "city",
+      "name": "Austin",
+      "display_name": "Austin, Travis County, Texas, United States",
+      "boundingbox": [
+        "30.0985133",
+        "30.5166255",
+        "-97.9367663",
+        "-97.5605288"
+      ]
+    }
+  ]
+}
