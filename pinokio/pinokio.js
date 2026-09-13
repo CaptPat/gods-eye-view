@@ -1,7 +1,9 @@
 module.exports = {
   version: '3.6',
-  title: "God's Eye View",
-  description: 'A live 3D intelligence console for planet Earth.',
+  // Retitled so this fork is distinguishable from an upstream install in the
+  // same Pinokio library — both otherwise present as "God's Eye View".
+  title: 'Cyclops View',
+  description: "A live 3D intelligence console for planet Earth (CaptPat fork of God's Eye View).",
   menu: async (kernel, info) => {
     const installed = await kernel.exists(__dirname, '.installed');
     const installing = info.running('install.js');
