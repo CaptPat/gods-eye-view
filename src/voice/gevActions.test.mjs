@@ -1,3 +1,4 @@
+import { createStandalonePlaceSearch } from '../standalone/placeSearch.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as Cesium from 'cesium';
@@ -6,18 +7,19 @@ import { getContextStore, registerEntityContext } from '../data/contextStore.js'
 import { DataLayerManager } from '../data/manager.js';
 import { getActiveCameraMotion, interruptCameraMotion, moveCamera } from '../cameraVerbs.js';
 import { reassertNavigationHandoff, runExplicitNavigation } from '../navigationPolicy.js';
+import { normalizeRadioCountryInput } from '../data/radioCountry.js';
 import { TR3B_CLASS } from '../data/tr3bRegistry.js';
 import {
   controlCctv,
-  controlRadio,
-  createGevActionRunner,
+  controlRadio as runControlRadio,
+  createGevActionRunner as createActionRunner,
   cctvVoiceFocusOutcome,
   formatTrackedEntityLabel,
   knownRadioLocation,
   normalizeStackId,
 } from './gevActions.js';
 import { MAP_STACKS } from '../mapStackController.js';
-import { readFileSync } from 'node:fs';
+import { GEV_REALTIME_TOOLS } from '../../server/providers/openai/tools.js';
 
 test('every live basemap is reachable by its own id — no enum value without a voice alias', () => {
   // B1 regression: a stack added to MAP_STACKS (and the set_map_stack enum)
@@ -35,10 +37,7 @@ test('every live basemap is reachable by its own id — no enum value without a 
   assert.equal(normalizeStackId('Esri'), 'esri-imagery');
   assert.equal(normalizeStackId('esri imagery'), 'esri-imagery');
   // And the voice tool's enum must equal the set of live ids — no drift either way.
-  const config = readFileSync(new URL('../../vite.config.js', import.meta.url), 'utf8');
-  const enumMatch = config.match(/enum: \[('photoreal'[^\]]*)\],\s*\n\s*description: 'photoreal = Google 3D/);
-  assert.ok(enumMatch, 'set_map_stack enum literal must still be findable');
-  const enumIds = enumMatch[1].split(',').map((s) => s.trim().replace(/^'|'$/g, ''));
+  const enumIds = GEV_REALTIME_TOOLS.find(tool => tool.name === 'set_map_stack').parameters.properties.stack.enum;
   assert.deepEqual(
     [...enumIds].sort(),
     MAP_STACKS.map((s) => s.id).sort(),
@@ -3021,76 +3020,116 @@ test('front5: 0.99 km due EAST is the subject, though a degree box rejects it', 
   });
 });
 
-// ── Voice Radio: a place Google refuses resolves through OpenStreetMap ─────
-// A key whose Cloud project lacks the Geocoding API answers REQUEST_DENIED
-// (observed 2026-09-13), so "play news radio near Muscat" failed with "Could not
-// resolve Radio location" for any place outside the built-in city list.
-// Muscat, not Dubai: Dubai is a built-in city (CITY_POIS), so a Dubai request is
-// answered by knownRadioLocation and never reaches geocoding at all.
-test('voice Radio anchors a place Google refuses at the OpenStreetMap result', async () => {
-  const hadWindow = Object.hasOwn(globalThis, 'window');
-  const priorWindow = globalThis.window;
-  const priorFetch = globalThis.fetch;
-  const requested = [];
-  const reply = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
-  globalThis.window = { ...(priorWindow || {}), __GOOGLE_MAPS_API_KEY__: 'unit-test-key' };
-  globalThis.fetch = async (url) => {
-    const href = String(url);
-    requested.push(href);
-    if (href.startsWith('https://maps.googleapis.com/maps/api/geocode/json')) {
-      return reply(200, { error_message: 'This API is not activated on your API project.', results: [], status: 'REQUEST_DENIED' });
-    }
-    if (href.startsWith('/api/geocode/search?')) {
-      return reply(200, {
-        status: 'OK',
-        source: 'openstreetmap',
-        results: [{
-          formatted_address: 'Muscat, Muscat Governorate, Oman',
-          geometry: {
-            location: { lat: 23.5882019, lng: 58.3829448 },
-            viewport: { southwest: { lat: 23.4561, lng: 58.1893 }, northeast: { lat: 23.7112, lng: 58.6421 } },
-          },
-          types: ['locality', 'political'],
-          place_id: 'osm:relation/3395839',
-          source: 'openstreetmap',
-        }],
-      });
-    }
-    throw new Error(`unexpected request ${href}`);
-  };
+// ── Keyless Radio location ───────────────────────────────────────────────────
+//
+// `resolveRadioLocation` used to be Google-only: no key threw, and a key that
+// geocoded to nothing returned null, which the caller reports as "Could not
+// resolve Radio location". Both now fall through to Nominatim, through the
+// local /api/geocode/search route. These drive the
+// second case, because it reaches the SAME fallback through a running Google
+// branch — the no-key branch cannot be driven here, since the key expression
+// reads `import.meta.env`, which only Vite defines.
 
+/** What /api/geocode/search answers: a Nominatim hit in Google's result shape. */
+function osmRouteAnswer({ label, lat, lng }) {
+  return {
+    ok: true,
+    json: async () => ({
+      status: 'OK',
+      source: 'openstreetmap',
+      results: [{ formatted_address: label, geometry: { location: { lat, lng }, viewport: null }, types: ['locality', 'political'] }],
+    }),
+  };
+}
+
+/** A Radio layer that records what it was asked to select. */
+function radioSelectionHarness() {
   let enabled = false;
   const calls = [];
-  const state = { stationCount: 4, filter: 'news', selected: null, audioState: 'stopped', volume: 0.8, voiceDucked: false };
+  const state = {
+    stationCount: 4, filter: 'all', selected: null,
+    audioState: 'stopped', volume: 0.8, voiceDucked: false,
+  };
   const radio = {
     getUIState: () => ({ ...state }),
-    setVolume(value) { state.volume = value; },
     selectRequestedStation(criteria, options) {
-      calls.push(['select', criteria, options]);
-      state.selected = { id: 'mct-news', name: 'Muscat News' };
+      calls.push({ criteria, options });
+      state.selected = { id: 'kl-1', name: 'Keyless FM' };
       return state.selected;
     },
-    cycleStation() { return true; },
-    pause() { state.audioState = 'paused'; return true; },
-    stopPlayback() { state.audioState = 'stopped'; return true; },
   };
-  const dataManager = {
-    layers: new Map([['radio', { module: radio }]]),
-    isEnabled: () => enabled,
-    async setEnabled(id, value) { enabled = value; },
+  return {
+    calls,
+    dataManager: {
+      layers: new Map([['radio', { module: radio }]]),
+      isEnabled: () => enabled,
+      async setEnabled(_id, value) { enabled = value; },
+    },
   };
+}
 
-  try {
-    const result = await controlRadio({}, dataManager, { action: 'play', category: 'news', locationQuery: 'Muscat' });
-    assert.equal(result.ok, true, result.error);
-    const select = calls.find(([kind]) => kind === 'select');
-    assert.ok(select, 'a station must be selected near the resolved place');
-    assert.ok(Math.abs(select[1].anchor.lat - 23.5882019) < 1e-6, `anchor lat ${select[1].anchor.lat}`);
-    assert.ok(Math.abs(select[1].anchor.lon - 58.3829448) < 1e-6, `anchor lon ${select[1].anchor.lon}`);
-    assert.ok(requested.some((href) => href.startsWith('/api/geocode/search?')), 'OpenStreetMap must be asked');
-  } finally {
+/** Install a Google key plus a fetch stub, restoring both afterwards. */
+function installKeyedFetch(t, handler) {
+  globalThis.window = globalThis.window || { clearTimeout, setTimeout, requestIdleCallback: null };
+  const priorKey = globalThis.window.__GOOGLE_MAPS_API_KEY__;
+  const priorFetch = globalThis.fetch;
+  globalThis.window.__GOOGLE_MAPS_API_KEY__ = 'unit-test-key';
+  globalThis.fetch = handler;
+  t.after(() => {
     globalThis.fetch = priorFetch;
-    if (hadWindow) globalThis.window = priorWindow;
-    else delete globalThis.window;
-  }
+    if (priorKey === undefined) delete globalThis.window.__GOOGLE_MAPS_API_KEY__;
+    else globalThis.window.__GOOGLE_MAPS_API_KEY__ = priorKey;
+  });
+}
+
+test('voice Radio: a key that geocodes to nothing still places the station, keylessly', async (t) => {
+  const { calls, dataManager } = radioSelectionHarness();
+  const requests = [];
+  installKeyedFetch(t, async (url) => {
+    requests.push(String(url));
+    if (String(url).startsWith('https://maps.googleapis.com/')) {
+      return { ok: true, json: async () => ({ status: 'ZERO_RESULTS', results: [] }) };
+    }
+    assert.match(String(url), /^\/api\/geocode\/search\?/);
+    return osmRouteAnswer({ label: 'Muscat, Oman', lat: 23.5882, lng: 58.3829 });
+  });
+
+  const result = await controlRadio({}, dataManager, {
+    action: 'select', locationQuery: 'Muscat',
+  });
+
+  // Before the fallback existed this was `ok: false, "Could not resolve Radio location"`.
+  assert.equal(result.ok, true);
+  assert.equal(result.requestedLocation, 'Muscat, Oman');
+  assert.equal(calls.length, 1);
+  assert.ok(Math.abs(calls[0].criteria.anchor.lat - 23.5882) < 1e-9);
+  assert.ok(Math.abs(calls[0].criteria.anchor.lon - 58.3829) < 1e-9);
+  // Google is asked first and exactly once; the route answers unbiased, in one call.
+  assert.equal(requests.filter((url) => url.includes('maps.googleapis.com')).length, 1);
+  assert.equal(requests.filter((url) => url.startsWith('/api/geocode/search')).length, 1);
+  assert.match(requests.at(-1), /[?&]q=Muscat(&|$)/);
+  assert.doesNotMatch(requests.at(-1), /[?&]viewbox=/, 'a named radio location is not viewport-biased');
 });
+
+test('voice Radio: the keyless path applies no country filter the keyed path would not', async (t) => {
+  // An OpenStreetMap result carries no address_components, so no structured
+  // country reaches `rankRadioStationsForRequest` — which fails CLOSED on a
+  // country it cannot map, returning NO stations. Guessing one from the label
+  // would risk exactly that ("Polska" matches nothing). The label may name the
+  // country; the filter may not.
+  const { calls, dataManager } = radioSelectionHarness();
+  installKeyedFetch(t, async (url) => (String(url).startsWith('https://maps.googleapis.com/')
+    ? { ok: true, json: async () => ({ status: 'ZERO_RESULTS', results: [] }) }
+    : osmRouteAnswer({ label: 'Kraków, Lesser Poland Voivodeship, Poland', lat: 50.0614, lng: 19.9366 })));
+
+  const result = await controlRadio({}, dataManager, { action: 'select', locationQuery: 'Kraków' });
+
+  assert.equal(result.ok, true);
+  assert.equal(calls[0].criteria.country, '', 'a label-derived country must never reach the station filter');
+  assert.equal(normalizeRadioCountryInput('Polska').valid, false, 'and this is why: a guess can match nothing');
+  assert.equal(result.requestedLocation, 'Kraków, Lesser Poland Voivodeship, Poland', 'the label still names the country honestly');
+});
+
+const testPlaceSearch = () => createStandalonePlaceSearch({ resolveApiKey: () => globalThis.window?.__GOOGLE_MAPS_API_KEY__ });
+function createGevActionRunner(options) { return createActionRunner({ placeSearch: testPlaceSearch(), ...options }); }
+function controlRadio(viewer, manager, args, options) { return runControlRadio(viewer, manager, args, { placeSearch: testPlaceSearch(), ...options }); }

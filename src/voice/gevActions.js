@@ -1,6 +1,5 @@
 import * as Cesium from 'cesium';
 import { CITY_POIS, findPoiByName, flyToGlobeView, flyToLandmark, flyToPOI, flyToPresetLocation, GLOBE_VIEW, searchAndFlyTo } from '../locations.js';
-import { geocodeWithFallback } from '../geocodeOsm.js';
 import {
   getContextStore,
   getSelectedEntityContext,
@@ -18,6 +17,7 @@ import militaryAwarenessLayer, {
 import { initCameraVerbs, moveCamera, flyRoute, interruptCameraMotion, adjustOrbitRange } from '../cameraVerbs.js';
 import { cachedGroundFloor, warmGroundFloor } from '../data/groundFloor.js';
 import { isPickedWorldPosition } from '../data/scenePick.js';
+import { unavailablePlaceSearch } from '../search/placeSearch.js';
 import { resolveRegionRingForQuery } from '../annotations/annotationResolver.js';
 import { normalizeRadioCountryInput } from '../data/radioCountry.js';
 import { TR3B_CLASS } from '../data/tr3bRegistry.js';
@@ -288,7 +288,7 @@ export function readLayerLifecycleSummary(dataManager, layerId, { fallbackEnable
   };
 }
 
-export function createGevActionRunner({ viewer, styleManager, dataManager, sceneDirector = null, annotations = null }) {
+export function createGevActionRunner({ viewer, styleManager, dataManager, sceneDirector = null, annotations = null, placeSearch = unavailablePlaceSearch }) {
   installViewTargetPrewarm(viewer);
   initCameraVerbs(viewer, getViewTargetCartesian);
   return async function runGevAction(name, rawArgs = {}, runOptions = {}) {
@@ -511,7 +511,7 @@ export function createGevActionRunner({ viewer, styleManager, dataManager, scene
       };
 
       const nearest = await createAnalystEngine(analystProviders(viewer, dataManager, {
-        recordLimitByLayer: { [layerId]: Number.MAX_SAFE_INTEGER },
+        recordLimitByLayer: { [layerId]: Number.MAX_SAFE_INTEGER }, placeSearch,
       })).query({
         layers: [layerId],
         scope: { kind: 'view' },
@@ -770,6 +770,7 @@ export function createGevActionRunner({ viewer, styleManager, dataManager, scene
 
     if (name === 'fly_to_location') {
       return flyToRequestedLocation(viewer, args, {
+        placeSearch, signal: runOptions.signal,
         runImmediate: typeof styleManager?.runImmediateLocationNavigation === 'function'
           ? (navigate) => styleManager.runImmediateLocationNavigation(navigate)
           : null,
@@ -815,7 +816,7 @@ export function createGevActionRunner({ viewer, styleManager, dataManager, scene
     }
 
     if (name === 'analyst_query') {
-      return runAnalystQuery(viewer, dataManager, args);
+      return runAnalystQuery(viewer, dataManager, args, placeSearch);
     }
 
     if (name === 'move_camera') {
@@ -900,7 +901,7 @@ export function createGevActionRunner({ viewer, styleManager, dataManager, scene
     }
 
     if (name === 'control_radio') {
-      return controlRadio(viewer, dataManager, args, runOptions);
+      return controlRadio(viewer, dataManager, args, { ...runOptions, placeSearch });
     }
 
     if (name === 'track_entity') {
@@ -1265,30 +1266,12 @@ async function resolveRadioLocation(args = {}, coordinates = radioCoordinatePair
   const known = knownRadioLocation(query, args.locationId);
   if (known) return known;
   if (!query) return null;
-  // Google Geocoding first; OpenStreetMap when Google cannot answer (a key without
-  // the API enabled answers REQUEST_DENIED, or there is no key). The 6 s timeout
-  // and turn cancellation abort both providers and surface as an AbortError.
-  const apiKey = window.__GOOGLE_MAPS_API_KEY__ || import.meta.env.GOOGLE_MAPS_API_KEY;
-  const controller = new AbortController();
-  const cancelFromTurn = () => controller.abort();
-  if (options.signal?.aborted) throw radioAbortError();
-  options.signal?.addEventListener('abort', cancelFromTurn, { once: true });
-  const timer = setTimeout(() => controller.abort(), 6000);
-  try {
-    const geocode = await geocodeWithFallback(query, { apiKey, signal: controller.signal });
-    if (!radioActionIsCurrent(options)) throw radioAbortError();
-    const result = geocode.status === 'OK' ? geocode.result : null;
-    if (!result?.geometry?.location) return null;
-    return {
-      lat: result.geometry.location.lat,
-      lon: result.geometry.location.lng,
-      label: result.formatted_address || query,
-      country: '',
-    };
-  } finally {
-    clearTimeout(timer);
-    options.signal?.removeEventListener('abort', cancelFromTurn);
-  }
+  const { placeSearch = unavailablePlaceSearch, signal } = options;
+  const { place } = await placeSearch.geocode(query, { signal });
+  if (!radioActionIsCurrent(options)) throw radioAbortError();
+  if (!place) return null;
+  // Localized provider country labels must not become station country filters.
+  return { lat: place.lat, lon: place.lng, label: place.label || query, country: '' };
 }
 
 /** Voice Radio controls over the Radio layer's public player surface. */
@@ -2207,6 +2190,7 @@ function normalizeStyle(value) {
 }
 
 async function flyToRequestedLocation(viewer, args, {
+  placeSearch = unavailablePlaceSearch, signal,
   onStart = null,
   runImmediate = null,
   beginDeferred = null,
@@ -2322,6 +2306,7 @@ async function flyToRequestedLocation(viewer, args, {
     if (generation === false) return cancelled(query);
     const managedDeferred = typeof reassertDeferred === 'function';
     const destination = await searchAndFlyTo(viewer, query, {
+      placeSearch, signal,
       ...(rangeM ? { range: rangeM } : {}),
       forceClose: args.viewMode === 'close',
       // 'overview' frames the geocode viewport even for precise-place results —
@@ -3311,7 +3296,7 @@ function activeContactsWindow() {
   }
 }
 
-function analystProviders(viewer, dataManager, { recordLimitByLayer = null } = {}) {
+function analystProviders(viewer, dataManager, { recordLimitByLayer = null, placeSearch = unavailablePlaceSearch } = {}) {
   return {
     getRecords(layerKey) {
       const layer = dataManager.layers.get(layerKey);
@@ -3323,7 +3308,7 @@ function analystProviders(viewer, dataManager, { recordLimitByLayer = null } = {
         ? (mod.getAnalystRecords(requestedLimit) || [])
         : (mod.getAnalystRecords() || []);
     },
-    resolveRegionRing: (name) => resolveRegionRingForQuery(name),
+    resolveRegionRing: (name) => resolveRegionRingForQuery(name, undefined, placeSearch),
     /**
      * The active Contacts subject, when there is one — the centre the operator
      * is reasoning about while Contacts is up. Null whenever Contacts is off,
@@ -3357,8 +3342,8 @@ function analystProviders(viewer, dataManager, { recordLimitByLayer = null } = {
   };
 }
 
-async function runAnalystQuery(viewer, dataManager, args = {}) {
-  if (!_analystEngine) _analystEngine = createAnalystEngine(analystProviders(viewer, dataManager));
+async function runAnalystQuery(viewer, dataManager, args = {}, placeSearch = unavailablePlaceSearch) {
+  if (!_analystEngine) _analystEngine = createAnalystEngine(analystProviders(viewer, dataManager, { placeSearch }));
   const result = await _analystEngine.query({
     layers: Array.isArray(args.layers) ? args.layers : undefined,
     scope: args.scope,

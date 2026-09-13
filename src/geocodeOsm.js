@@ -1,18 +1,14 @@
-// OpenStreetMap fallback for forward geocoding — the search box, voice
-// annotations and voice radio.
+// OpenStreetMap (Nominatim) geocoding shapes shared by the server route and the
+// browser provider.
 //
-// Google Geocoding stays first: its matcher is better and the callers were tuned
-// against its output. When it refuses (REQUEST_DENIED — the API is not enabled on
-// the key's Cloud project, or quota), finds nothing, fails, or there is no key,
-// the place is looked up through /api/geocode/search, which asks Nominatim from
-// the server. Nominatim hits are reshaped into Google's result structure so each
-// caller keeps its own framing and labelling logic unchanged.
+// server/providers/geocode.js converts Nominatim hits with osmHitToGoogleResult
+// before answering /api/geocode/search, and src/search/nominatim.js turns the
+// app's Google-style view bias into a Nominatim viewbox with boundsToViewbox.
+// Results take Google's geocode structure so normalizeGooglePlace and the camera
+// framing downstream read them unchanged.
 //
-// This module runs in the browser and in the Vite server (the route converts
-// hits with osmHitToGoogleResult), so it must stay free of Cesium and `window`.
-
-const GOOGLE_GEOCODE_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
-const OSM_SEARCH_ROUTE = '/api/geocode/search';
+// This module runs in the browser and in the Vite server, so it must stay free
+// of Cesium and `window`.
 
 /**
  * Google's view bias "swLat,swLng|neLat,neLng" (as emitted by viewportBias) as a
@@ -164,64 +160,4 @@ export function osmHitToGoogleResult(hit) {
     place_id: hit.osm_type && hit.osm_id != null ? `osm:${hit.osm_type}/${hit.osm_id}` : `osm:${hit.place_id}`,
     source: 'openstreetmap',
   };
-}
-
-function isAbort(error, signal) {
-  return error?.name === 'AbortError' || signal?.aborted === true;
-}
-
-async function searchOpenStreetMap(query, biasRect, signal, fetchFn) {
-  const params = new URLSearchParams({ q: query });
-  const viewbox = boundsToViewbox(biasRect);
-  if (viewbox) params.set('viewbox', viewbox);
-  try {
-    const response = await fetchFn(`${OSM_SEARCH_ROUTE}?${params}`, { signal });
-    const data = await response.json().catch(() => null);
-    if (response.ok && data?.status === 'OK' && data.results?.length) {
-      return { status: 'OK', result: data.results[0], source: 'openstreetmap' };
-    }
-    if (response.ok && data?.status === 'ZERO_RESULTS') {
-      return { status: 'ZERO_RESULTS', result: null, source: 'openstreetmap' };
-    }
-    return { status: 'UNAVAILABLE', result: null, source: 'openstreetmap' };
-  } catch (error) {
-    if (isAbort(error, signal)) throw error;
-    return { status: 'UNAVAILABLE', result: null, source: 'openstreetmap' };
-  }
-}
-
-/**
- * Forward-geocode a place name: Google first, OpenStreetMap when Google cannot
- * answer. Rejects with the AbortError when `signal` aborts, and never falls back
- * after an abort, so a superseded lookup cannot move the camera later.
- *
- * status: 'OK' with a Google-shaped `result`; 'ZERO_RESULTS' when a provider that
- * actually answered found nothing; 'UNAVAILABLE' when no provider could answer —
- * a transient state callers must not cache as not-found.
- *
- * @param {string} query
- * @param {{apiKey?: string, biasRect?: string|null, signal?: AbortSignal, fetchImpl?: typeof fetch}} [options]
- * @returns {Promise<{status: 'OK'|'ZERO_RESULTS'|'UNAVAILABLE', result: object|null, source: 'google'|'openstreetmap'|null}>}
- */
-export async function geocodeWithFallback(query, { apiKey = '', biasRect = null, signal, fetchImpl } = {}) {
-  const fetchFn = fetchImpl || globalThis.fetch;
-  let googleFoundNothing = false;
-  if (apiKey) {
-    try {
-      let url = `${GOOGLE_GEOCODE_URL}?address=${encodeURIComponent(query)}&key=${apiKey}`;
-      if (biasRect) url += `&bounds=${biasRect}`;
-      const response = await fetchFn(url, { signal });
-      const data = await response.json();
-      if (data?.status === 'OK' && data.results?.length) {
-        return { status: 'OK', result: data.results[0], source: 'google' };
-      }
-      googleFoundNothing = data?.status === 'ZERO_RESULTS';
-    } catch (error) {
-      if (isAbort(error, signal)) throw error;
-    }
-  }
-  const osm = await searchOpenStreetMap(query, biasRect, signal, fetchFn);
-  if (osm.status !== 'UNAVAILABLE') return osm;
-  if (googleFoundNothing) return { status: 'ZERO_RESULTS', result: null, source: 'google' };
-  return { status: 'UNAVAILABLE', result: null, source: null };
 }

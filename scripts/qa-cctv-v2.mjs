@@ -94,7 +94,9 @@ const getOpt = (name, dflt) => {
 const getFlag = (name) => argv.includes(name);
 
 const BASE_URL = process.env.QA_BASE_URL || 'http://localhost:4173';
-const APP_URL = getOpt('--url', BASE_URL);
+const CCTV_URL = new URL(getOpt('--url', BASE_URL));
+CCTV_URL.searchParams.set('welcome', '0');
+const APP_URL = CCTV_URL.href;
 const HEADFUL = getFlag('--headful');
 const SHOTS_DIR = path.join(REPO_ROOT, 'qa-shots', 'cctv-v2');
 
@@ -106,7 +108,7 @@ const CHROME_EXECUTABLE_CANDIDATES = [
   // tile-gated drain budget under SwiftShader on 2026-07-30 — six
   // false-negative qa-cctv-v2 runs against a healthy build). A deterministic
   // pinned browser beats the newest one for regression harnesses.
-  (() => { try { return puppeteer.executablePath(); } catch { return null; } })(),
+  await puppeteer.executablePath().catch(() => null),
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
   '/Applications/Chromium.app/Contents/MacOS/Chromium',

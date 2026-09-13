@@ -12,7 +12,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 import createViteConfig, {
-  OVERPASS_PUBLIC_UPSTREAMS,
+  OVERPASS_UPSTREAMS,
   fetchOverpassPayload,
   isPrivateOverpassHost,
   overpassUpstreams,
@@ -272,7 +272,7 @@ function overpassOperators(upstreams) {
 test('the public list alone cannot survive both its operators failing', async () => {
   // Not a defect to fix by adding public mirrors — it is why the override
   // exists. Asserted so the limitation stays visible rather than assumed away.
-  assert.equal(overpassOperators(OVERPASS_PUBLIC_UPSTREAMS).size, 2);
+  assert.equal(overpassOperators(OVERPASS_UPSTREAMS).size, 2);
 });
 
 test('a self-hosted endpoint is tried before the public mirrors', async () => {
@@ -281,7 +281,7 @@ test('a self-hosted endpoint is tried before the public mirrors', async () => {
   try {
     const list = overpassUpstreams();
     assert.equal(list[0], 'http://10.0.0.5:12345/api/interpreter', 'override leads');
-    assert.deepEqual(list.slice(1), OVERPASS_PUBLIC_UPSTREAMS, 'public mirrors remain as fallback');
+    assert.deepEqual(list.slice(1), OVERPASS_UPSTREAMS, 'public mirrors remain as fallback');
     assert.equal(overpassOperators(list).size, 3, 'a third independent operator');
   } finally {
     if (previous === undefined) delete process.env.GEV_OVERPASS_UPSTREAMS;
@@ -321,12 +321,12 @@ test('an absent or empty override changes nothing', async () => {
 });
 
 test('every public mirror is a distinct https interpreter endpoint', async () => {
-  for (const url of OVERPASS_PUBLIC_UPSTREAMS) {
+  for (const url of OVERPASS_UPSTREAMS) {
     const parsed = new URL(url);
     assert.equal(parsed.protocol, 'https:', `${url} must be https`);
     assert.ok(parsed.pathname.endsWith('/interpreter'), `${url} must target /interpreter`);
   }
-  assert.equal(new Set(OVERPASS_PUBLIC_UPSTREAMS).size, OVERPASS_PUBLIC_UPSTREAMS.length);
+  assert.equal(new Set(OVERPASS_UPSTREAMS).size, OVERPASS_UPSTREAMS.length);
 });
 
 // EMPTY-RESULT POISONING — a 200 that is not an answer about the world.

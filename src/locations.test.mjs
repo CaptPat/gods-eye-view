@@ -1,3 +1,4 @@
+import { createStandalonePlaceSearch } from './standalone/placeSearch.js';
 // Camera-framing mode contract for fly_to_location (field test 8 + rootcause doc §3):
 // parks/lakes/campuses and streets are NOT precise POIs — flying to "Zilker Park" at
 // building range (250 m) lands on a random rooftop. Pure mapping tests, no network.
@@ -62,7 +63,7 @@ async function runSearch(viewer, options, { result = AUSTIN_RESULT, query = 'aus
     json: async () => ({ status: 'OK', results: [result] }),
   });
   try {
-    return await searchAndFlyTo(viewer, query, options);
+    return await searchAndFlyTo(viewer, query, { placeSearch: createStandalonePlaceSearch({ resolveApiKey: () => globalThis.window?.__GOOGLE_MAPS_API_KEY__ }), ...options });
   } finally {
     globalThis.fetch = priorFetch;
     if (hadWindow) globalThis.window = priorWindow;
@@ -636,7 +637,8 @@ test('a search Google refuses still flies, using the OpenStreetMap result', asyn
     throw new Error(`unexpected request ${href}`);
   };
   try {
-    const result = await searchAndFlyTo(viewer, 'Dubai');
+    const placeSearch = createStandalonePlaceSearch({ resolveApiKey: () => globalThis.window?.__GOOGLE_MAPS_API_KEY__ });
+    const result = await searchAndFlyTo(viewer, 'Dubai', { placeSearch });
     assert.ok(result, 'returning null here is the "Location not found" regression');
     assert.equal(result.label, 'Dubai, Dubai Emirate, United Arab Emirates');
     assert.equal(result.navigationMode, 'city-overview');
