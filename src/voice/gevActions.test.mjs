@@ -3020,3 +3020,77 @@ test('front5: 0.99 km due EAST is the subject, though a degree box rejects it', 
     assert.equal(result.window.centeredOn, 'N546PC');
   });
 });
+
+// ── Voice Radio: a place Google refuses resolves through OpenStreetMap ─────
+// A key whose Cloud project lacks the Geocoding API answers REQUEST_DENIED
+// (observed 2026-09-13), so "play news radio near Muscat" failed with "Could not
+// resolve Radio location" for any place outside the built-in city list.
+// Muscat, not Dubai: Dubai is a built-in city (CITY_POIS), so a Dubai request is
+// answered by knownRadioLocation and never reaches geocoding at all.
+test('voice Radio anchors a place Google refuses at the OpenStreetMap result', async () => {
+  const hadWindow = Object.hasOwn(globalThis, 'window');
+  const priorWindow = globalThis.window;
+  const priorFetch = globalThis.fetch;
+  const requested = [];
+  const reply = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+  globalThis.window = { ...(priorWindow || {}), __GOOGLE_MAPS_API_KEY__: 'unit-test-key' };
+  globalThis.fetch = async (url) => {
+    const href = String(url);
+    requested.push(href);
+    if (href.startsWith('https://maps.googleapis.com/maps/api/geocode/json')) {
+      return reply(200, { error_message: 'This API is not activated on your API project.', results: [], status: 'REQUEST_DENIED' });
+    }
+    if (href.startsWith('/api/geocode/search?')) {
+      return reply(200, {
+        status: 'OK',
+        source: 'openstreetmap',
+        results: [{
+          formatted_address: 'Muscat, Muscat Governorate, Oman',
+          geometry: {
+            location: { lat: 23.5882019, lng: 58.3829448 },
+            viewport: { southwest: { lat: 23.4561, lng: 58.1893 }, northeast: { lat: 23.7112, lng: 58.6421 } },
+          },
+          types: ['locality', 'political'],
+          place_id: 'osm:relation/3395839',
+          source: 'openstreetmap',
+        }],
+      });
+    }
+    throw new Error(`unexpected request ${href}`);
+  };
+
+  let enabled = false;
+  const calls = [];
+  const state = { stationCount: 4, filter: 'news', selected: null, audioState: 'stopped', volume: 0.8, voiceDucked: false };
+  const radio = {
+    getUIState: () => ({ ...state }),
+    setVolume(value) { state.volume = value; },
+    selectRequestedStation(criteria, options) {
+      calls.push(['select', criteria, options]);
+      state.selected = { id: 'mct-news', name: 'Muscat News' };
+      return state.selected;
+    },
+    cycleStation() { return true; },
+    pause() { state.audioState = 'paused'; return true; },
+    stopPlayback() { state.audioState = 'stopped'; return true; },
+  };
+  const dataManager = {
+    layers: new Map([['radio', { module: radio }]]),
+    isEnabled: () => enabled,
+    async setEnabled(id, value) { enabled = value; },
+  };
+
+  try {
+    const result = await controlRadio({}, dataManager, { action: 'play', category: 'news', locationQuery: 'Muscat' });
+    assert.equal(result.ok, true, result.error);
+    const select = calls.find(([kind]) => kind === 'select');
+    assert.ok(select, 'a station must be selected near the resolved place');
+    assert.ok(Math.abs(select[1].anchor.lat - 23.5882019) < 1e-6, `anchor lat ${select[1].anchor.lat}`);
+    assert.ok(Math.abs(select[1].anchor.lon - 58.3829448) < 1e-6, `anchor lon ${select[1].anchor.lon}`);
+    assert.ok(requested.some((href) => href.startsWith('/api/geocode/search?')), 'OpenStreetMap must be asked');
+  } finally {
+    globalThis.fetch = priorFetch;
+    if (hadWindow) globalThis.window = priorWindow;
+    else delete globalThis.window;
+  }
+});

@@ -3,6 +3,7 @@ import { lookupNeighborhoodRing } from '../data/neighborhoodPolygons.js';
 import { lookupNaturalRegionOutline, findNaturalRegion } from '../data/naturalEarthRegions.js';
 import { registerDynamicCredit, NATURAL_EARTH_CREDIT } from '../data/dataCredits.js';
 import { isPickedWorldPosition } from '../data/scenePick.js';
+import { geocodeWithFallback } from '../geocodeOsm.js';
 
 /**
  * Annotation target resolver.
@@ -599,30 +600,27 @@ function ringAreaM2(ring) {
 }
 
 /**
- * Forward-geocode a place name via Google Geocoding, biased to the current
- * viewport so "the marina" resolves near where the user is looking.
+ * Forward-geocode a place name, biased to the current viewport so "the marina"
+ * resolves near where the user is looking. Google Geocoding answers first; when
+ * it cannot (REQUEST_DENIED from a key without the API enabled, or no key at all)
+ * geocodeWithFallback asks OpenStreetMap with the same bias.
  */
 async function geocodePlace(query, biasRect, signal) {
   const apiKey = window.__GOOGLE_MAPS_API_KEY__ || import.meta.env.GOOGLE_MAPS_API_KEY;
-  if (!apiKey) return null;
 
   const cacheKey = `${query.toLowerCase()}|${biasRect || ''}`;
   const cached = cacheRead(geocodeCache, cacheKey);
   if (cached !== undefined) return cached;
 
-  let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
-  if (biasRect) url += `&bounds=${biasRect}`;
-
   try {
-    const response = await fetch(url, { signal });
-    const data = await response.json();
-    if (data.status !== 'OK' || !data.results?.length) {
-      // ZERO_RESULTS is a definitive not-found (cacheable); OVER_QUERY_LIMIT /
-      // REQUEST_DENIED / UNKNOWN_ERROR are transient → don't poison the cache.
-      negCache(geocodeCache, cacheKey, signal, data?.status === 'ZERO_RESULTS');
+    const geocode = await geocodeWithFallback(query, { apiKey, biasRect, signal });
+    if (geocode.status !== 'OK') {
+      // ZERO_RESULTS is a definitive not-found (cacheable); UNAVAILABLE — every
+      // provider refused, failed or timed out — is transient → don't poison the cache.
+      negCache(geocodeCache, cacheKey, signal, geocode.status === 'ZERO_RESULTS');
       return null;
     }
-    const result = data.results[0];
+    const result = geocode.result;
     const place = {
       lat: result.geometry.location.lat,
       lon: result.geometry.location.lng,

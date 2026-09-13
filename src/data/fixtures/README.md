@@ -7,3 +7,12 @@
   (22,980 bytes). Used ONLY by `src/data/flowTiles.test.mjs` to pin MVT
   decoding offline — it is a point-in-time congestion snapshot, not a bundled
   data layer, and is never served to the app. © TomTom.
+- `nominatim-search.json` — real Nominatim search responses
+  (`nominatim.openstreetmap.org/search`, `format=jsonv2`, `limit=1`,
+  `accept-language=en`), captured 2026-09-13 for ten queries covering every
+  camera-framing category: a country, a state, a city, an emirate, a suburb, a
+  street with and without an Austin view bias, a park, a mountain range and a
+  landmark. Used ONLY by `src/geocodeOsm.test.mjs` and
+  `src/geocodeSearchProxy.test.mjs` to pin the OpenStreetMap geocode fallback
+  offline — it is never served to the app. © OpenStreetMap contributors,
+  ODbL 1.0.

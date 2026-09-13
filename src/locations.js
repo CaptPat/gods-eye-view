@@ -1,5 +1,6 @@
 import * as Cesium from 'cesium';
 import { viewportBias, placesNearViewRecovery } from './annotations/annotationResolver.js';
+import { geocodeWithFallback } from './geocodeOsm.js';
 
 /**
  * Points of Interest per city.
@@ -342,13 +343,14 @@ export function findPoiByName(query) {
 export const CANCELLED_SEARCH = Object.freeze({ cancelled: true });
 
 /**
- * Geocode a place name using Google Geocoding API, then fly there at a scale
- * appropriate to the request. Countries and cities use their viewport by
- * default; precise landmarks/buildings use close landmark framing.
+ * Geocode a place name, then fly there at a scale appropriate to the request.
+ * Google Geocoding answers first; when it cannot (a key without the API enabled
+ * answers REQUEST_DENIED, or there is no key at all) the lookup falls back to
+ * OpenStreetMap via geocodeWithFallback. Countries and cities use their viewport
+ * by default; precise landmarks/buildings use close landmark framing.
  */
 export async function searchAndFlyTo(viewer, query, options = {}) {
   const apiKey = window.__GOOGLE_MAPS_API_KEY__ || import.meta.env.GOOGLE_MAPS_API_KEY;
-  if (!apiKey) throw new Error('No Google Maps API key available for geocoding');
 
   const beforeFly = typeof options.beforeFly === 'function' ? options.beforeFly : null;
   const mayFly = () => beforeFly === null || beforeFly() !== false;
@@ -356,13 +358,10 @@ export async function searchAndFlyTo(viewer, query, options = {}) {
   // Viewport-biased geocode — the same bias annotationResolver's geocodePlace uses:
   // "Sixth Street" spoken over Austin must prefer the Sixth Street on screen, not a
   // same-named road in another city (or the wrong end of town — the W 6th vs E 6th bug).
-  let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
-  const bias = viewportBias(viewer);
-  if (bias) url += `&bounds=${bias}`;
-  const response = await fetch(url);
-  const data = await response.json();
+  // The OpenStreetMap fallback receives the same bias as a Nominatim viewbox.
+  const geocode = await geocodeWithFallback(query, { apiKey, biasRect: viewportBias(viewer) });
 
-  const result = (data.status === 'OK' && data.results?.length) ? data.results[0] : null;
+  const result = geocode.status === 'OK' ? geocode.result : null;
   let lat = result?.geometry.location.lat;
   let lng = result?.geometry.location.lng;
   let label = result ? result.formatted_address : null;

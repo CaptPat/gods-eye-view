@@ -362,3 +362,47 @@ test('ask-side admin bypass: admin level 2/3 result types never grant a township
     'both township-level admin result types stay guarded',
   );
 });
+
+// ── Google refuses: the annotation target falls back to OpenStreetMap ───────
+// A key whose Cloud project lacks the Geocoding API answers REQUEST_DENIED
+// (observed 2026-09-13), which left every name-resolved annotation unanchored.
+// "state of Colorado" rather than Texas: geocodePlace's cache is module-level,
+// and the Texas test above has already cached a Google answer for its query.
+test('a Google REQUEST_DENIED geocode falls back to OpenStreetMap for the target', async (t) => {
+  const calls = [];
+  const reply = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+  installGoogleMocks(t, async (url) => {
+    const href = String(url);
+    calls.push(href);
+    if (href.startsWith('https://maps.googleapis.com/maps/api/geocode')) {
+      return reply(200, { error_message: 'This API is not activated on your API project.', results: [], status: 'REQUEST_DENIED' });
+    }
+    if (href.startsWith('/api/geocode/search?')) {
+      return reply(200, {
+        status: 'OK',
+        source: 'openstreetmap',
+        results: [{
+          formatted_address: 'Colorado, United States',
+          geometry: {
+            location: { lat: 38.7251776, lng: -105.6077167 },
+            viewport: { southwest: { lat: 36.992424, lng: -109.060253 }, northeast: { lat: 41.0034439, lng: -102.041524 } },
+          },
+          types: ['administrative_area_level_1', 'political'],
+          place_id: 'osm:relation/161961',
+          source: 'openstreetmap',
+        }],
+      });
+    }
+    throw new Error(`unexpected request ${href}`);
+  });
+
+  const resolved = await resolveAnnotationTarget({
+    viewer: closeViewportViewer(),
+    target: 'state of Colorado',
+  });
+
+  assert.ok(resolved, 'a refused Google geocode must not leave the annotation unanchored');
+  assert.equal(resolved.source, 'geocode');
+  assert.deepEqual([resolved.lat, resolved.lon], [38.7251776, -105.6077167]);
+  assert.equal(calls.filter((href) => href.startsWith('/api/geocode/search?')).length, 1);
+});
