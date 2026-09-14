@@ -119,6 +119,19 @@ async function waitFor(handler, predicate, { timeoutMs = 5000 } = {}) {
   }
 }
 
+/**
+ * Poll a plain in-test signal (not the handler's response) until `predicate`
+ * holds or `timeoutMs` elapses — for waiting on an internal event, such as a
+ * mock fetch actually having been called, instead of a fixed sleep.
+ */
+async function until(predicate, { timeoutMs = 2000, intervalMs = 5 } = {}) {
+  const deadline = Date.now() + timeoutMs;
+  while (!predicate()) {
+    if (Date.now() >= deadline) return;
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+}
+
 test('one request merges NWS alerts with resolved zone shapes and GDACS events with cyclone shapes', async (t) => {
   const cacheDir = await tempDir(t);
   const net = upstream();
@@ -356,10 +369,13 @@ test('a slow or unreachable source does not delay one that already answered', as
     },
   });
   const clock = { now: Date.now() };
-  // A generous budget: NWS still has to resolve 9 zones over real disk I/O
-  // on a cold build, which can take a while under a loaded test run. GDACS
-  // never resolves at all, so any bounded completion proves the fix — the
-  // pre-fix behaviour was an unbounded wait on GDACS.
+  // NWS's alerts and zone upstreams resolve immediately (in-memory
+  // fixtures); its zone disk I/O still goes through the injected temp dir,
+  // exactly as a real cold build would. GDACS is gated forever. With the
+  // response-budget rule (budget elapses with nothing servable ->  keep
+  // awaiting the first still-pending source), the response now waits for
+  // NWS to actually finish rather than racing a tiny budget against disk
+  // I/O, so this holds regardless of how loaded the test run is.
   const handler = makeHandler(net, cacheDir, clock, {
     responseBudgetMs: 300,
   });
@@ -370,8 +386,114 @@ test('a slow or unreachable source does not delay one that already answered', as
   assert.equal(body.nws.alerts.length, 6);
   assert.equal(body.gdacs.status, 'unavailable');
   assert.ok(
-    elapsed < 3000,
-    `a cold response must be capped near the budget, not wait on GDACS forever (took ${elapsed}ms)`,
+    elapsed < 10_000,
+    `a cold response must wait for NWS, not GDACS which never resolves (took ${elapsed}ms)`,
+  );
+});
+
+test('when the budget elapses with nothing servable, the response waits for the first source to settle instead of failing', async (t) => {
+  const cacheDir = await tempDir(t);
+  let releaseGdacs = () => {};
+  const gate = new Promise((resolve) => {
+    releaseGdacs = resolve;
+  });
+  t.after(releaseGdacs);
+  const NWS_DELAY_MS = 400;
+  const net = upstream({
+    '/alerts/active': async () => {
+      await new Promise((resolve) => setTimeout(resolve, NWS_DELAY_MS));
+      return Response.json(ALERTS);
+    },
+    '/EVENTS4APP': async () => {
+      await gate;
+      return Response.json(EVENTS);
+    },
+  });
+  const clock = { now: Date.now() };
+  // A budget (100ms) much smaller than NWS's real completion time (400ms),
+  // with GDACS gated forever. Pre-fix, the budget elapsing with nothing
+  // servable yet produced a 502 (or a TypeError from the old test reading
+  // body.nws). Post-fix, the response keeps awaiting the first still-pending
+  // source (NWS) rather than giving up at the budget or waiting on GDACS.
+  const handler = makeHandler(net, cacheDir, clock, {
+    responseBudgetMs: 100,
+  });
+  const started = Date.now();
+  const response = await invoke(handler);
+  const elapsed = Date.now() - started;
+  assert.equal(response.status, 200);
+  const body = response.json();
+  assert.equal(body.nws.status, 'ok');
+  assert.equal(body.nws.alerts.length, 6);
+  assert.equal(body.gdacs.status, 'unavailable');
+  assert.ok(
+    elapsed >= NWS_DELAY_MS - 20,
+    `must wait for NWS to actually settle, not just the 100ms budget (took ${elapsed}ms)`,
+  );
+  assert.ok(
+    elapsed < 5000,
+    `must not wait on GDACS, which never resolves (took ${elapsed}ms)`,
+  );
+});
+
+test('when every awaited source settles without servable data, the response is 502 even past the budget', async (t) => {
+  const cacheDir = await tempDir(t);
+  const net = upstream({
+    '/alerts/active': () => new Response('down', { status: 503 }),
+    '/EVENTS4APP': () => new Response('down', { status: 500 }),
+  });
+  const clock = { now: Date.now() };
+  const handler = makeHandler(net, cacheDir, clock, {
+    responseBudgetMs: 10,
+  });
+  const response = await invoke(handler);
+  assert.equal(response.status, 502);
+  assert.deepEqual(response.json(), {
+    error: 'Severe weather sources unavailable',
+  });
+});
+
+test('the response budget timer is cleared once the race settles, leaving nothing pending', async (t) => {
+  const cacheDir = await tempDir(t);
+  const net = upstream();
+  const clock = { now: Date.now() };
+  const pendingTimers = new Set();
+  const realHandles = new Map();
+  let nextId = 1;
+  const setTimeoutImpl = (fn, ms) => {
+    const id = nextId++;
+    pendingTimers.add(id);
+    realHandles.set(
+      id,
+      setTimeout(() => {
+        pendingTimers.delete(id);
+        fn();
+      }, ms),
+    );
+    return id;
+  };
+  const clearTimeoutImpl = (id) => {
+    pendingTimers.delete(id);
+    const real = realHandles.get(id);
+    if (real) clearTimeout(real);
+  };
+  const handler = createSevereWeatherHandler({
+    fetchImpl: net.fetchImpl,
+    cacheDir,
+    now: () => clock.now,
+    limiter: () => true,
+    log: () => {},
+    // Large budget: the cold build settling well inside it is what ends the
+    // race, not the timer firing on its own.
+    responseBudgetMs: 5000,
+    setTimeoutImpl,
+    clearTimeoutImpl,
+  });
+  await invoke(handler);
+  assert.equal(
+    pendingTimers.size,
+    0,
+    'the budget timer must be cleared once the awaited sources settle',
   );
 });
 
@@ -470,12 +592,14 @@ test('the zone deadline aborts in-flight zone fetches instead of waiting out the
 test('no duplicate upstream refresh is started while a background refresh is already in flight', async (t) => {
   const cacheDir = await tempDir(t);
   let gdacsCalls = 0;
+  let gdacsSettledCalls = 0;
   let gdacsGate = null; // null: answer immediately; a pending promise: hang until released
   let releaseGdacs = () => {};
   const net = upstream({
     '/EVENTS4APP': async () => {
       gdacsCalls += 1;
       if (gdacsGate) await gdacsGate;
+      gdacsSettledCalls += 1;
       return Response.json(EVENTS);
     },
   });
@@ -492,11 +616,16 @@ test('no duplicate upstream refresh is started while a background refresh is alr
     releaseGdacs = resolve;
   });
   const first = invoke(handler); // NWS answers immediately; GDACS's refresh starts in the background
-  await new Promise((resolve) => setTimeout(resolve, 15));
+  // Wait for that background refresh to have actually reached the upstream
+  // fetch (gdacsCalls incremented) before sending the second request, so it
+  // is deterministically in flight rather than timing-dependent.
+  await until(() => gdacsCalls === 2);
   const second = invoke(handler); // arrives while that refresh is still in flight
   await Promise.all([first, second]);
   releaseGdacs();
-  await new Promise((resolve) => setTimeout(resolve, 50));
+  // Wait for the unblocked fetch to actually resume and resolve before the
+  // final assertion, instead of a fixed sleep.
+  await until(() => gdacsSettledCalls === 1);
   assert.equal(
     gdacsCalls,
     2,
