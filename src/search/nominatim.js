@@ -10,6 +10,7 @@ import { normalizeGooglePlace } from './google.js';
  */
 export function createNominatimGeocoder({
   fetchImpl = (...args) => fetch(...args),
+  endpoint = '/api/geocode/search',
 } = {}) {
   return {
     async geocode(query, { bias = null, signal } = {}) {
@@ -18,7 +19,7 @@ export function createNominatimGeocoder({
         const params = new URLSearchParams({ q: query });
         const viewbox = boundsToViewbox(bias);
         if (viewbox) params.set('viewbox', viewbox);
-        const response = await fetchImpl(`/api/geocode/search?${params}`, {
+        const response = await fetchImpl(`${endpoint}?${params}`, {
           signal,
         });
         signal?.throwIfAborted();

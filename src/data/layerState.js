@@ -295,6 +295,7 @@ export const SHARE_TRACKING_RESTORE_POLICIES = Object.freeze({
  */
 export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'ais-live-vessels', token: 'a', disposition: 'enabled-only' }),
+  Object.freeze({ id: 'alpr-cameras', token: 'p', disposition: 'enabled-only' }),
   Object.freeze({ id: 'bikeshare', token: 'b', disposition: 'enabled-only' }),
   Object.freeze({ id: 'cctv', token: 'c', disposition: 'enabled+options', optionOwner: 'cctv' }),
   Object.freeze({ id: 'earthquakes', token: 'e', disposition: 'enabled-only' }),
@@ -310,7 +311,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'satellites', token: 's', disposition: 'enabled+options', optionOwner: 'satellites' }),
   Object.freeze({ id: 'telegeography-submarine-cables', token: 'u', disposition: 'enabled-only' }),
   Object.freeze({ id: 'traffic', token: 't', disposition: 'enabled-only' }),
-  Object.freeze({ id: 'weather-radar', token: 'p', disposition: 'enabled+options', optionOwner: 'weather-radar' }),
+  Object.freeze({ id: 'weather-radar', token: 'n', disposition: 'enabled+options', optionOwner: 'weather-radar' }),
 ]);
 
 export const REGISTERED_LAYER_IDS = Object.freeze(LAYER_STATE_REGISTRY.map((entry) => entry.id));

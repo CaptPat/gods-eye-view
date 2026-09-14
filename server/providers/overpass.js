@@ -60,7 +60,7 @@ function sendOverpassResponse(res, payload, cacheStatus = 'MISS') {
  *
  * @returns {import('vite').Plugin}
  */
-function overpassProxy() {
+function overpassProxy({ routing = {} } = {}) {
   const installMiddleware = (server) => {
     server.middlewares.use('/api/overpass', async (req, res) => {
       // Hoisted out of the try so the catch's serve-stale lookup can see it
@@ -205,7 +205,7 @@ function overpassProxy() {
       }
     });
 
-    installRouteMiddleware(server.middlewares);
+    installRouteMiddleware(server.middlewares, routing);
   };
   return {
     name: 'overpass-proxy',

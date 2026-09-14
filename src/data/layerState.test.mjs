@@ -1,3 +1,4 @@
+import { expandApplicationHtml } from '../../build/application-html.js';
 import { readLayerSource } from '../testSupport/readLayerSource.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -156,8 +157,8 @@ function encode(state) {
 
 test('production registry is exact, canonical, and rejects incomplete contracts', async () => {
   assert.equal(validateLayerStateRegistry(), true);
-  assert.equal(REGISTERED_LAYER_IDS.length, 17);
-  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 17);
+  assert.equal(REGISTERED_LAYER_IDS.length, 18);
+  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 18);
   assert.deepEqual(REGISTERED_LAYER_IDS, [...REGISTERED_LAYER_IDS].sort());
   assert.throws(
     () => validateLayerStateRegistry([...LAYER_STATE_REGISTRY, LAYER_STATE_REGISTRY[0]]),
@@ -377,7 +378,7 @@ test('a fresh boot starts 3D aircraft ON in proximity — codec, both layers, an
     'ui.js: the DISPLAY rail believes 3D is on before any layer-state sync arrives');
   assert.match(ui, /this\.(?:flightState\.)?_models3dMode = 'proximity';/,
     'ui.js: and believes the mode is proximity');
-  const html = await readFile(new URL('../../index.html', import.meta.url), 'utf8');
+  const html = expandApplicationHtml(await readFile(new URL('../../index.html', import.meta.url), 'utf8'));
   assert.match(html, /class="pp-toggle-btn active" id="models3d-toggle" aria-pressed="true"/,
     'index.html: the 3D button paints lit on first paint, before ui.js runs — and says so');
   assert.match(ui, /this\._models3dBtn\?\.setAttribute\(\s*'aria-pressed',\s*String\(this\.(?:flightState\.)?_models3dEnabled\),?\s*\)/,
@@ -1603,18 +1604,18 @@ test('weather radar options round-trip through the compact URL and normalize str
   state.enabledLayerIds = ['weather-radar'];
   state.options['weather-radar'] = { usDetail: true, opacity: 0.4 };
   const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(params.get('l'), 'p');
+  assert.equal(params.get('l'), 'n');
   const assignments = String(params.get('lo') || '').split('_');
-  assert.ok(assignments.includes('p.u.1'), assignments.join('_'));
-  assert.ok(assignments.includes('p.o.40'), assignments.join('_'));
+  assert.ok(assignments.includes('n.u.1'), assignments.join('_'));
+  assert.ok(assignments.includes('n.o.40'), assignments.join('_'));
   assert.deepEqual(decodeLayerStateParams(params).options['weather-radar'], { usDetail: true, opacity: 0.4 });
 
   state.options['weather-radar'] = { usDetail: false, opacity: 0.7 };
   const defaults = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(String(defaults.get('lo') || '').split('_').some((entry) => entry.startsWith('p.')), false);
+  assert.equal(String(defaults.get('lo') || '').split('_').some((entry) => entry.startsWith('n.')), false);
 
   assert.deepEqual(
-    decodeLayerStateParams(new URLSearchParams('v=2&l=p&lo=p.o.55')).options['weather-radar'],
+    decodeLayerStateParams(new URLSearchParams('v=2&l=n&lo=n.o.55')).options['weather-radar'],
     { usDetail: false, opacity: 0.7 },
     'an unknown opacity token falls back to the default',
   );
