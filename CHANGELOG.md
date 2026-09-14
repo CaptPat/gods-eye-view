@@ -10,6 +10,18 @@
 - Do not cache an empty Overpass element list, so a partial-coverage mirror cannot pin a
   layer empty for days.
 
+## Release disabled infrastructure rendering
+
+- Remove built Data Center, Dam and Submarine Cable entities when their layers
+  are disabled, avoiding retained visualizer work and entity memory.
+- Keep parsed datasets cached for re-enable; rebuild entities without refetching.
+
+## Camera layer components
+
+- Separate camera source requests, placement, frames, projection, cards and calibration.
+- Own visibility listeners and pending initialization within each layer lifetime.
+- Preserve existing camera catalogs, URL families, geometry and playback behavior.
+
 ## Traffic and bikeshare components
 
 - Separate traffic loading, animation, styling and lifecycle into factory-owned components.
@@ -56,6 +68,18 @@ This changelog records public product changes. For the authoritative description
 of current runtime behavior, see [`docs/CURRENT-STATE.md`](docs/CURRENT-STATE.md).
 
 ## [Unreleased]
+
+### Fixed
+
+- Traffic now retries a failed destination after city navigation without a layer
+  toggle. Camera departure cancels pending work, arrival checks the final view,
+  and superseded requests cannot keep a newer view loading.
+
+### Added
+
+- Press backtick (`) to toggle a rendered-frame-rate readout beneath the logo.
+  Typing fields retain the key; monitoring stops when hidden.
+
 
 - Extract vessel feed, store, rendering, selection, trail and card components with explicit source and scene services.
 - Bound contact retention for incomplete vessel observations, preserve source freshness and refresh history references in place.

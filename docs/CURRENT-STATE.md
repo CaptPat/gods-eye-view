@@ -1,5 +1,20 @@
 # God's Eye View Current State
 
+Data Centers, Dams and Submarine Cables release their built Cesium data sources
+and record references when disabled. Parsed datasets remain cached for the layer
+lifetime, so re-enable rebuilds entities without downloading or parsing again;
+this can take longer than simply revealing hidden entities. Destruction clears
+the parsed cache as well. A disable during loading cannot leave a completed
+build hidden in the scene.
+
+CCTV exposes a factory through `./layers/cctv`. Catalog and health requests,
+frame/media URLs, camera records, ground placement, geometry queues, playback,
+projection, cards, calibration and interaction have separate components. The
+standalone entry supplies application-owned scene, ground and activation services.
+Each layer owns its state and visibility listener; destruction cancels source
+reads and pending initialization. Malformed health responses retain prior health.
+Existing catalog fallback, camera poses, frame pacing and coverage controls remain.
+
 Traffic and bikeshare expose factories through `./layers/traffic` and
 `./layers/bikeshare`. Traffic separates road requests, ingestion, animation,
 flow matching, styling, viewport lifecycle and development timing. Each source
@@ -3261,3 +3276,19 @@ nanoid 3.3.19. Cesium remains on 1.138.0. Browser QA uses Puppeteer 25.10.0;
 image-processing tools use Sharp 0.35.4. QA scripts await Puppeteer's asynchronous
 executable-path lookup before testing or passing the path to Chrome. Supported Node versions remain
 24.14.x and 26.x. Use `npm ci` to reproduce the checked-in dependency tree.
+
+### Traffic city navigation
+
+Traffic checks the final camera view on arrival and retries a failed road request
+while the camera is stationary, backing off from 1.5 to 30 seconds. Failed road
+requests report an unavailable source. Leaving the traffic altitude range or
+disabling the layer cancels pending work; superseded road and flow requests cannot
+release the current request or keep its loading indicator active.
+
+### Optional frame-rate readout
+
+Backtick (`) toggles an FPS readout beneath the title logo. It counts actual
+Cesium post-render events over one-second windows and does not request extra
+frames. Typing fields, modified keys and key repeats do not toggle it. The
+readout starts hidden each session and releases its timer and frame listener
+when hidden or when the application is disposed.
