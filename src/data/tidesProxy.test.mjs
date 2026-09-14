@@ -20,13 +20,13 @@ const T0 = Date.UTC(2026, 8, 14, 16, 10);
 const USER_AGENT =
   'CyclopsView/0.1 (+https://github.com/CaptPat/gods-eye-view)';
 
-function invoke(handler, url, method = 'GET') {
+function invoke(handler, url, method = 'GET', remoteAddress = '127.0.0.1') {
   return new Promise((resolve, reject) => {
     const req = {
       method,
       url,
       headers: {},
-      socket: { remoteAddress: '127.0.0.1' },
+      socket: { remoteAddress },
     };
     const res = {
       writeHead(status, headers) {
@@ -113,6 +113,19 @@ test('tide stations are served from one Metadata API fetch cached for 24 hours',
   h.clock.now += STATIONS_TTL_MS;
   await invoke(h.handler, '/stations?kind=tide');
   assert.equal(h.count('stations:waterlevels'), 2);
+});
+
+test('the current station list falls back to UTC zones when the tide list is cold and fails', async () => {
+  const h = harness({}, { 'stations:waterlevels': forbidden });
+  const response = await invoke(h.handler, '/stations?kind=current');
+  assert.equal(response.status, 200);
+  const body = response.json();
+  assert.ok(body.stations.length > 0);
+  assert.equal(
+    body.stations.every((station) => station.timeZone === null),
+    true,
+    'no tide list was available to borrow a zone from',
+  );
 });
 
 test('current stations are grouped by id with zones taken from the tide list', async () => {
@@ -241,6 +254,19 @@ test('a partial tide report is served but not cached; a report with nothing is 5
   assert.deepEqual(failed.json(), { error: 'NOAA CO-OPS unavailable' });
 });
 
+test('a tide report whose matched-prediction leg fails is served with predictedM null but never cached', async () => {
+  const h = harness({}, { 'latest:8454000': forbidden });
+  const body = (await invoke(h.handler, '/tide?id=8454000')).json();
+  assert.deepEqual(body.sources, { predictions: 'ok', observed: 'ok' });
+  assert.equal(body.observed.predictedM, null);
+  await invoke(h.handler, '/tide?id=8454000');
+  assert.equal(
+    h.count('hilo:8454000'),
+    2,
+    'a report with a failed matched-prediction leg is refetched, not cached',
+  );
+});
+
 test('current reports use the lowest bin by default and validate station and bin', async () => {
   const h = harness();
   const body = (await invoke(h.handler, '/current?id=HAI1103')).json();
@@ -319,6 +345,33 @@ test('rate limits, methods and unknown routes', async () => {
     405,
   );
   assert.equal((await invoke(h.handler, '/nope')).status, 404);
+});
+
+test('the default limiter caps the global request budget at 150 per minute', async () => {
+  const handler = createTidesHandler({
+    fetchImpl: async () => Response.json(fixture('mdapi-waterlevels.json')),
+    log: () => {},
+  });
+  for (let i = 0; i < 150; i += 1) {
+    const response = await invoke(
+      handler,
+      '/stations?kind=tide',
+      'GET',
+      `10.0.0.${i}`,
+    );
+    assert.equal(response.status, 200, `request ${i} should be allowed`);
+  }
+  const blocked = await invoke(
+    handler,
+    '/stations?kind=tide',
+    'GET',
+    '10.0.1.0',
+  );
+  assert.equal(
+    blocked.status,
+    429,
+    'the 151st request within the window is rate limited',
+  );
 });
 
 test('the plugin is registered in the Vite config at /api/tides', () => {

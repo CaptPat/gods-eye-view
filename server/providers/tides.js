@@ -39,7 +39,7 @@ function sendJson(res, status, body, headers = {}) {
 export function createTidesHandler({
   fetchImpl = (...args) => fetch(...args),
   now = Date.now,
-  limiter = makeRateLimiter({ windowMs: 60_000, max: 60, globalMax: 240 }),
+  limiter = makeRateLimiter({ windowMs: 60_000, max: 60, globalMax: 150 }),
   log = (message) => console.warn(message),
   reportCacheLimit = REPORT_CACHE_LIMIT,
 } = {}) {
@@ -85,7 +85,11 @@ export function createTidesHandler({
               ? normalizeTideStations(json)
               : normalizeCurrentStations(
                   json,
-                  (await loadList('tide')).stations,
+                  await loadList('tide')
+                    .then((entry) => entry.stations)
+                    // A cold tide-list failure must not fail the current list:
+                    // current stations fall back to formatting in UTC.
+                    .catch(() => []),
                 );
           if (!stations?.length) throw new Error(`empty ${kind} station list`);
           return stations;
@@ -154,16 +158,19 @@ export function createTidesHandler({
     if (station.greatLakes) {
       const level = await observe('IGLD');
       return {
-        id: station.id,
-        kind: 'tide',
-        datum: 'IGLD',
-        generatedAt,
-        sources: {
-          predictions: 'none',
-          observed: level.ok ? 'ok' : 'unavailable',
+        body: {
+          id: station.id,
+          kind: 'tide',
+          datum: 'IGLD',
+          generatedAt,
+          sources: {
+            predictions: 'none',
+            observed: level.ok ? 'ok' : 'unavailable',
+          },
+          predictions: null,
+          observed: level.ok ? { ...level.value, predictedM: null } : null,
         },
-        predictions: null,
-        observed: level.ok ? { ...level.value, predictedM: null } : null,
+        cacheable: true,
       };
     }
     const [hilo, level, latest] = await Promise.all([
@@ -180,23 +187,29 @@ export function createTidesHandler({
       ),
     ]);
     return {
-      id: station.id,
-      kind: 'tide',
-      datum: 'MLLW',
-      generatedAt,
-      sources: {
-        predictions: hilo.ok ? 'ok' : 'unavailable',
-        observed: level.ok ? 'ok' : 'unavailable',
+      body: {
+        id: station.id,
+        kind: 'tide',
+        datum: 'MLLW',
+        generatedAt,
+        sources: {
+          predictions: hilo.ok ? 'ok' : 'unavailable',
+          observed: level.ok ? 'ok' : 'unavailable',
+        },
+        predictions: hilo.ok ? hilo.value : null,
+        observed: level.ok
+          ? {
+              ...level.value,
+              predictedM: latest.ok
+                ? predictionAt(latest.value, level.value.time)
+                : null,
+            }
+          : null,
       },
-      predictions: hilo.ok ? hilo.value : null,
-      observed: level.ok
-        ? {
-            ...level.value,
-            predictedM: latest.ok
-              ? predictionAt(latest.value, level.value.time)
-              : null,
-          }
-        : null,
+      // sources has no slot for the matched-prediction leg, so a failure there
+      // (observed ok, predictedM forced to null) must be flagged separately:
+      // otherwise it reads as a complete report and gets cached for 10 minutes.
+      cacheable: !(level.ok && !latest.ok),
     };
   }
 
@@ -216,15 +229,18 @@ export function createTidesHandler({
       },
     );
     return {
-      id: station.id,
-      kind: 'current',
-      bin,
-      generatedAt,
-      sources: { predictions: result.ok ? 'ok' : 'unavailable' },
-      depthM: result.value?.depthM ?? null,
-      floodDirDeg: result.value?.floodDirDeg ?? null,
-      ebbDirDeg: result.value?.ebbDirDeg ?? null,
-      events: result.value?.events ?? null,
+      body: {
+        id: station.id,
+        kind: 'current',
+        bin,
+        generatedAt,
+        sources: { predictions: result.ok ? 'ok' : 'unavailable' },
+        depthM: result.value?.depthM ?? null,
+        floodDirDeg: result.value?.floodDirDeg ?? null,
+        ebbDirDeg: result.value?.ebbDirDeg ?? null,
+        events: result.value?.events ?? null,
+      },
+      cacheable: true,
     };
   }
 
@@ -232,12 +248,13 @@ export function createTidesHandler({
     const cached = readReport(key);
     if (cached) return sendJson(res, 200, cached);
     const { promise } = coalesceProxyRequest(inFlight, key, build);
-    const body = await promise;
+    const { body, cacheable } = await promise;
     const states = Object.values(body.sources);
     if (!states.includes('ok'))
       return sendJson(res, 502, { error: UNAVAILABLE });
-    // Partial reports are served but never cached, so a transient failure is retried next click.
-    if (!states.includes('unavailable')) storeReport(key, body);
+    // Partial or incomplete reports are served but never cached, so a
+    // transient failure is retried next click.
+    if (cacheable && !states.includes('unavailable')) storeReport(key, body);
     return sendJson(res, 200, body);
   }
 
