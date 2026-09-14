@@ -37,6 +37,7 @@ export const ZONE_BACKOFF_MS = 60_000;
 export const ZONE_MISSING_TTL_MS = 60 * 60_000;
 export const ZONE_CONCURRENCY = 4;
 export const ZONE_DEADLINE_MS = 30_000;
+export const RESPONSE_BUDGET_MS = 25_000;
 export const UPSTREAM_TIMEOUT_MS = 20_000;
 export const MAX_ALERTS_BYTES = 8 * 1024 * 1024;
 export const MAX_ZONE_BYTES = 4 * 1024 * 1024;
@@ -62,6 +63,7 @@ export function createSevereWeatherHandler({
   log = (message) => console.warn(message),
   zoneConcurrency = ZONE_CONCURRENCY,
   zoneDeadlineMs = ZONE_DEADLINE_MS,
+  responseBudgetMs = RESPONSE_BUDGET_MS,
 } = {}) {
   const inFlight = new Map();
   /** zone key → { polygons, fetchedAt } */
@@ -84,10 +86,13 @@ export function createSevereWeatherHandler({
     },
   };
 
-  async function fetchJson(url, maxBytes, accept) {
+  async function fetchJson(url, maxBytes, accept, extraSignal) {
+    const signal = extraSignal
+      ? AbortSignal.any([AbortSignal.timeout(UPSTREAM_TIMEOUT_MS), extraSignal])
+      : AbortSignal.timeout(UPSTREAM_TIMEOUT_MS);
     const response = await fetchImpl(url, {
       headers: { 'User-Agent': USER_AGENT, Accept: accept },
-      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+      signal,
     });
     if (!response.ok) {
       void response.body?.cancel?.().catch(() => {});
@@ -111,16 +116,22 @@ export function createSevereWeatherHandler({
         ? { polygons, fetchedAt: info.mtimeMs }
         : null;
     } catch (error) {
-      if (error.code === 'ENOENT' || error instanceof SyntaxError) return null;
-      throw error;
+      // A missing or malformed shape is an ordinary cache miss. Anything else
+      // (EPERM, EISDIR, a bad mount) is one bad disk entry, not a reason to
+      // fail the whole NWS refresh: log it and refetch instead.
+      if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) {
+        log(`[severe-weather] zone ${key} disk read failed: ${error.name}`);
+      }
+      return null;
     }
   }
 
-  async function fetchZone(key) {
+  async function fetchZone(key, deadlineSignal) {
     const zone = await fetchJson(
       zoneUrl(key),
       MAX_ZONE_BYTES,
       'application/geo+json',
+      deadlineSignal,
     );
     const polygons = simplifyGeometry(zone?.geometry);
     await mkdir(zoneDir(), { recursive: true });
@@ -131,33 +142,60 @@ export function createSevereWeatherHandler({
   /** Memory, then disk, then api.weather.gov at `zoneConcurrency`, until the deadline or a 429/503. */
   async function resolveZones(keys) {
     const deadline = now() + zoneDeadlineMs;
-    const queue = [];
-    for (const key of keys) {
-      const cached = zoneMemory.get(key);
-      if (cached && now() - cached.fetchedAt <= ZONE_TTL_MS) continue;
-      if ((zoneMissingUntil.get(key) ?? 0) > now()) continue;
-      const fromDisk = await readZoneFromDisk(key);
-      if (fromDisk) zoneMemory.set(key, fromDisk);
-      else queue.push(key);
-    }
-    const worker = async () => {
-      while (queue.length) {
-        if (now() >= deadline || zoneBackoffUntil > now()) return;
-        const key = queue.shift();
-        try {
-          zoneMemory.set(key, await fetchZone(key));
-        } catch (error) {
-          if (error.status === 404)
-            zoneMissingUntil.set(key, now() + ZONE_MISSING_TTL_MS);
-          if (error.status === 429 || error.status === 503)
-            zoneBackoffUntil = now() + ZONE_BACKOFF_MS;
-          log(`[severe-weather] zone ${key} failed: ${error.message}`);
-        }
-      }
-    };
-    await Promise.all(
-      Array.from({ length: Math.max(1, zoneConcurrency) }, worker),
+    // Loop-start checks above use the injected clock (deterministic in
+    // tests); this real timer is what actually aborts fetches already in
+    // flight when wall-clock time runs out, since `now()` alone never
+    // advances on its own while an upstream request is pending.
+    const deadlineController = new AbortController();
+    const deadlineTimer = setTimeout(
+      () => deadlineController.abort(),
+      zoneDeadlineMs,
     );
+    try {
+      const queue = [];
+      for (const key of keys) {
+        const cached = zoneMemory.get(key);
+        if (cached && now() - cached.fetchedAt <= ZONE_TTL_MS) continue;
+        if ((zoneMissingUntil.get(key) ?? 0) > now()) continue;
+        const fromDisk = await readZoneFromDisk(key);
+        if (fromDisk) zoneMemory.set(key, fromDisk);
+        else queue.push(key);
+      }
+      const worker = async () => {
+        while (queue.length) {
+          if (
+            now() >= deadline ||
+            zoneBackoffUntil > now() ||
+            deadlineController.signal.aborted
+          )
+            return;
+          const key = queue.shift();
+          try {
+            zoneMemory.set(
+              key,
+              await fetchZone(key, deadlineController.signal),
+            );
+          } catch (error) {
+            if (error.name === 'AbortError') {
+              // The deadline aborted this fetch: not a 404, not cached, and
+              // it stays unmapped for this round.
+              log(`[severe-weather] zone ${key} aborted at the deadline`);
+              continue;
+            }
+            if (error.status === 404)
+              zoneMissingUntil.set(key, now() + ZONE_MISSING_TTL_MS);
+            if (error.status === 429 || error.status === 503)
+              zoneBackoffUntil = now() + ZONE_BACKOFF_MS;
+            log(`[severe-weather] zone ${key} failed: ${error.message}`);
+          }
+        }
+      };
+      await Promise.all(
+        Array.from({ length: Math.max(1, zoneConcurrency) }, worker),
+      );
+    } finally {
+      clearTimeout(deadlineTimer);
+    }
   }
 
   /** At most hourly: forget and delete zone shapes older than ZONE_TTL_MS. */
@@ -171,8 +209,11 @@ export function createSevereWeatherHandler({
     try {
       names = await readdir(zoneDir());
     } catch (error) {
-      if (error.code === 'ENOENT') return;
-      throw error;
+      // A prune failure never fails the build; ENOENT just means no cache yet.
+      if (error.code !== 'ENOENT') {
+        log(`[severe-weather] zone prune readdir failed: ${error.name}`);
+      }
+      return;
     }
     await Promise.all(
       names.map(async (name) => {
@@ -181,8 +222,14 @@ export function createSevereWeatherHandler({
           const info = await stat(file);
           if (now() - info.mtimeMs > ZONE_TTL_MS)
             await rm(file, { force: true });
-        } catch {
-          // Another prune removed it first.
+        } catch (error) {
+          // ENOENT: another prune removed it first. Anything else is logged,
+          // never thrown: a prune failure never fails the build.
+          if (error.code !== 'ENOENT') {
+            log(
+              `[severe-weather] zone prune failed for ${name}: ${error.name}`,
+            );
+          }
         }
       }),
     );
@@ -239,30 +286,65 @@ export function createSevereWeatherHandler({
     }
   }
 
-  /** Refresh one source at most once per TTL; keep the last good data as stale for STALE_MAX_MS. */
-  async function refresh(name, ttlMs, build) {
+  /** name → promise that resolves once that source's in-flight refresh has settled into `sources`. */
+  const refreshing = new Map();
+
+  /**
+   * Start a refresh at most once per TTL, and never a second concurrent one
+   * for the same source. Returns null when no refresh is due right now
+   * (nothing to wait for); otherwise the settle promise, which callers may
+   * await or leave running in the background — either way it updates
+   * `sources[name]` exactly once when the build resolves or rejects.
+   */
+  function ensureRefresh(name, ttlMs, build) {
     const state = sources[name];
-    if (now() - state.checkedAt < ttlMs) return;
-    try {
-      const { promise } = coalesceProxyRequest(inFlight, name, build);
-      state.data = await promise;
-      state.fetchedAt = now();
-      state.stale = false;
-    } catch (error) {
-      log(`[severe-weather] ${name} refresh failed: ${error.message}`);
-      if (state.data && now() - state.fetchedAt <= STALE_MAX_MS) {
-        state.stale = true;
-      } else {
-        state.data = null;
-        state.fetchedAt = null;
-        state.stale = false;
-      }
-    }
-    state.checkedAt = now();
+    if (now() - state.checkedAt < ttlMs) return null;
+    const existing = refreshing.get(name);
+    if (existing) return existing;
+    const { promise } = coalesceProxyRequest(inFlight, name, build);
+    const settle = promise
+      .then(
+        (data) => {
+          state.data = data;
+          state.fetchedAt = now();
+          state.stale = false;
+        },
+        (error) => {
+          log(`[severe-weather] ${name} refresh failed: ${error.message}`);
+          if (state.data && now() - state.fetchedAt <= STALE_MAX_MS) {
+            state.stale = true;
+          } else {
+            state.data = null;
+            state.fetchedAt = null;
+            state.stale = false;
+          }
+        },
+      )
+      .finally(() => {
+        state.checkedAt = now();
+        refreshing.delete(name);
+      });
+    refreshing.set(name, settle);
+    return settle;
   }
 
-  const statusOf = (state) =>
-    !state.data ? 'unavailable' : state.stale ? 'stale' : 'ok';
+  /** Data younger than STALE_MAX_MS since its last success can be served (fresh or stale). */
+  const isServable = (state) =>
+    Boolean(state.data) && now() - state.fetchedAt <= STALE_MAX_MS;
+
+  const statusOf = (state) => {
+    if (!isServable(state)) return 'unavailable';
+    return state.stale ? 'stale' : 'ok';
+  };
+
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  function sourceView(state, emptyShape) {
+    const status = statusOf(state);
+    return status === 'unavailable'
+      ? { status, ...emptyShape }
+      : { status, ...state.data };
+  }
 
   return async function handle(req, res) {
     try {
@@ -279,22 +361,28 @@ export function createSevereWeatherHandler({
           { 'Retry-After': '10' },
         );
       }
-      await Promise.all([
-        refresh('nws', NWS_TTL_MS, buildNws),
-        refresh('gdacs', GDACS_TTL_MS, buildGdacs),
-      ]);
-      const nws = sources.nws.data
-        ? { status: statusOf(sources.nws), ...sources.nws.data }
-        : {
-            status: 'unavailable',
-            updatedAt: null,
-            alerts: [],
-            zones: {},
-            unmappedAlerts: 0,
-          };
-      const gdacs = sources.gdacs.data
-        ? { status: statusOf(sources.gdacs), ...sources.gdacs.data }
-        : { status: 'unavailable', updatedAt: null, events: [] };
+      // A source that already has servable data answers immediately; its due
+      // refresh (if any) keeps running in the background. A source with
+      // nothing servable is awaited, capped by the response budget so one
+      // slow or unreachable source never delays the other.
+      const nwsRefresh = ensureRefresh('nws', NWS_TTL_MS, buildNws);
+      const gdacsRefresh = ensureRefresh('gdacs', GDACS_TTL_MS, buildGdacs);
+      const awaits = [];
+      if (!isServable(sources.nws) && nwsRefresh) awaits.push(nwsRefresh);
+      if (!isServable(sources.gdacs) && gdacsRefresh) awaits.push(gdacsRefresh);
+      if (awaits.length) {
+        await Promise.race([Promise.all(awaits), delay(responseBudgetMs)]);
+      }
+      const nws = sourceView(sources.nws, {
+        updatedAt: null,
+        alerts: [],
+        zones: {},
+        unmappedAlerts: 0,
+      });
+      const gdacs = sourceView(sources.gdacs, {
+        updatedAt: null,
+        events: [],
+      });
       if (nws.status === 'unavailable' && gdacs.status === 'unavailable') {
         return sendJson(res, 502, { error: UNAVAILABLE_ERROR });
       }

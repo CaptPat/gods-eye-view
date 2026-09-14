@@ -16,6 +16,7 @@ import createViteConfig from '../../vite.config.js';
 import {
   GDACS_TTL_MS,
   NWS_TTL_MS,
+  RESPONSE_BUDGET_MS,
   STALE_MAX_MS,
   ZONE_BACKOFF_MS,
   ZONE_TTL_MS,
@@ -100,6 +101,22 @@ function makeHandler(net, cacheDir, clock, extra = {}) {
     log: () => {},
     ...extra,
   });
+}
+
+/**
+ * Poll the handler until `predicate(body)` holds or `timeoutMs` elapses
+ * (generous, since a background refresh's completion is real wall-clock
+ * work — disk I/O for zones, an upstream fetch settling — and must not be
+ * pinned to a fixed sleep that flakes under a loaded test run).
+ */
+async function waitFor(handler, predicate, { timeoutMs = 5000 } = {}) {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const body = (await invoke(handler)).json();
+    if (predicate(body)) return body;
+    if (Date.now() >= deadline) return body;
+    await new Promise((resolve) => setTimeout(resolve, 15));
+  }
 }
 
 test('one request merges NWS alerts with resolved zone shapes and GDACS events with cyclone shapes', async (t) => {
@@ -241,7 +258,10 @@ test('a 429 on a zone backs off the remaining zones and reports unmapped alerts 
 
   throttled = false;
   clock.now += NWS_TTL_MS;
-  const later = (await invoke(handler)).json();
+  // NWS data is still servable, so this call returns immediately and the
+  // retry runs in the background (real disk I/O for the remaining zones);
+  // poll until it settles rather than pinning a fixed sleep.
+  const later = await waitFor(handler, (body) => body.nws.unmappedAlerts === 0);
   assert.equal(later.nws.unmappedAlerts, 0);
   assert.equal(Object.keys(later.nws.zones).length, 9);
 });
@@ -282,7 +302,10 @@ test('a failed source is served stale for an hour, then unavailable; both unavai
 
   nwsUp = false;
   clock.now += NWS_TTL_MS;
-  const stale = (await invoke(handler)).json();
+  // Data is still servable at this instant, so this response is immediate
+  // and reflects the pre-refresh state; the failing refresh runs in the
+  // background. Poll until it settles rather than pinning a fixed sleep.
+  const stale = await waitFor(handler, (body) => body.nws.status === 'stale');
   assert.equal(stale.nws.status, 'stale');
   assert.equal(stale.nws.alerts.length, 6);
   assert.equal(stale.gdacs.status, 'ok');
@@ -316,6 +339,235 @@ test('GDACS events survive a cyclone-map failure without shapes', async (t) => {
   assert.equal(body.gdacs.status, 'ok');
   assert.equal(body.gdacs.events.length, 6);
   assert.deepEqual(body.gdacs.events[1].track, []);
+});
+
+test('a slow or unreachable source does not delay one that already answered', async (t) => {
+  assert.equal(RESPONSE_BUDGET_MS, 25_000);
+  const cacheDir = await tempDir(t);
+  let releaseGdacs = () => {};
+  const gate = new Promise((resolve) => {
+    releaseGdacs = resolve;
+  });
+  t.after(releaseGdacs);
+  const net = upstream({
+    '/EVENTS4APP': async () => {
+      await gate;
+      return Response.json(EVENTS);
+    },
+  });
+  const clock = { now: Date.now() };
+  // A generous budget: NWS still has to resolve 9 zones over real disk I/O
+  // on a cold build, which can take a while under a loaded test run. GDACS
+  // never resolves at all, so any bounded completion proves the fix — the
+  // pre-fix behaviour was an unbounded wait on GDACS.
+  const handler = makeHandler(net, cacheDir, clock, {
+    responseBudgetMs: 300,
+  });
+  const started = Date.now();
+  const body = (await invoke(handler)).json();
+  const elapsed = Date.now() - started;
+  assert.equal(body.nws.status, 'ok');
+  assert.equal(body.nws.alerts.length, 6);
+  assert.equal(body.gdacs.status, 'unavailable');
+  assert.ok(
+    elapsed < 3000,
+    `a cold response must be capped near the budget, not wait on GDACS forever (took ${elapsed}ms)`,
+  );
+});
+
+test('with cached data present, a slow refresh does not delay the response at all', async (t) => {
+  const cacheDir = await tempDir(t);
+  let gdacsUp = true;
+  let gdacsHang = false;
+  const net = upstream({
+    '/EVENTS4APP': async () => {
+      if (gdacsHang) return new Promise(() => {});
+      return gdacsUp
+        ? Response.json(EVENTS)
+        : new Response('down', { status: 500 });
+    },
+  });
+  const clock = { now: Date.now() };
+  const handler = makeHandler(net, cacheDir, clock);
+  await invoke(handler);
+
+  // First, let GDACS genuinely become stale (a settled failed refresh).
+  gdacsUp = false;
+  clock.now += GDACS_TTL_MS;
+  const settled = await waitFor(
+    handler,
+    (body) => body.gdacs.status === 'stale',
+  );
+  assert.equal(settled.gdacs.status, 'stale', 'sanity: now genuinely stale');
+
+  // Now hang the next refresh indefinitely: the already-stale data must
+  // still answer immediately, without waiting on it.
+  gdacsHang = true;
+  clock.now += GDACS_TTL_MS;
+  const started = Date.now();
+  const body = (await invoke(handler)).json();
+  const elapsed = Date.now() - started;
+  assert.equal(body.gdacs.status, 'stale');
+  assert.equal(body.gdacs.events.length, 6);
+  assert.ok(
+    elapsed < 1000,
+    `stale cached data must be served immediately, took ${elapsed}ms`,
+  );
+});
+
+test('the zone deadline aborts in-flight zone fetches instead of waiting out their duration', async (t) => {
+  const cacheDir = await tempDir(t);
+  const zoneDeadlineMs = 40;
+  const fetchImpl = async (url, init) => {
+    const href = String(url);
+    if (href === 'https://api.weather.gov/alerts/active')
+      return Response.json(ALERTS);
+    if (href.startsWith(ZONE_PREFIX)) {
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+          const zone = ZONES[href.slice(ZONE_PREFIX.length)];
+          resolve(
+            zone ? Response.json(zone) : new Response('{}', { status: 404 }),
+          );
+        }, 500);
+        init.signal?.addEventListener('abort', () => {
+          clearTimeout(timer);
+          reject(new DOMException('aborted', 'AbortError'));
+        });
+      });
+    }
+    if (href.endsWith('/EVENTS4APP')) return Response.json(EVENTS);
+    if (href.endsWith('/MAP?eventtype=TC')) return Response.json(CYCLONES);
+    throw new Error(`unexpected upstream ${href}`);
+  };
+  const handler = createSevereWeatherHandler({
+    fetchImpl,
+    cacheDir,
+    now: () => Date.now(),
+    limiter: () => true,
+    log: () => {},
+    zoneDeadlineMs,
+  });
+  const started = Date.now();
+  const body = (await invoke(handler)).json();
+  const elapsed = Date.now() - started;
+  assert.deepEqual(
+    body.nws.zones,
+    {},
+    'zones aborted at the deadline are not remembered or cached',
+  );
+  assert.equal(
+    body.nws.unmappedAlerts,
+    5,
+    'only the Special Weather Statement carries its own polygon',
+  );
+  assert.ok(
+    elapsed < 300,
+    `the build must finish near the ${zoneDeadlineMs}ms deadline, not the 500ms fetch duration (took ${elapsed}ms)`,
+  );
+});
+
+test('no duplicate upstream refresh is started while a background refresh is already in flight', async (t) => {
+  const cacheDir = await tempDir(t);
+  let gdacsCalls = 0;
+  let gdacsGate = null; // null: answer immediately; a pending promise: hang until released
+  let releaseGdacs = () => {};
+  const net = upstream({
+    '/EVENTS4APP': async () => {
+      gdacsCalls += 1;
+      if (gdacsGate) await gdacsGate;
+      return Response.json(EVENTS);
+    },
+  });
+  const clock = { now: Date.now() };
+  const handler = makeHandler(net, cacheDir, clock);
+
+  // Prime with a normal, fully-successful request first: NWS then already
+  // has servable data (no zone I/O below) and GDACS answered once.
+  await invoke(handler);
+  assert.equal(gdacsCalls, 1);
+
+  clock.now += GDACS_TTL_MS; // GDACS due again; NWS stays fresh and servable
+  gdacsGate = new Promise((resolve) => {
+    releaseGdacs = resolve;
+  });
+  const first = invoke(handler); // NWS answers immediately; GDACS's refresh starts in the background
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  const second = invoke(handler); // arrives while that refresh is still in flight
+  await Promise.all([first, second]);
+  releaseGdacs();
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  assert.equal(
+    gdacsCalls,
+    2,
+    'the priming call plus exactly one background refresh, even though two requests arrived while it was in flight',
+  );
+});
+
+test('data older than 60 minutes reads as unavailable even when a refresh is not yet due again', async (t) => {
+  const cacheDir = await tempDir(t);
+  let nwsUp = true;
+  const net = upstream({
+    '/alerts/active': () =>
+      nwsUp ? Response.json(ALERTS) : new Response('down', { status: 503 }),
+  });
+  const clock = { now: Date.now() };
+  const handler = makeHandler(net, cacheDir, clock);
+  await invoke(handler);
+
+  nwsUp = false;
+  clock.now += 12 * NWS_TTL_MS; // exactly STALE_MAX_MS (60 min) since the last success
+  // Data is still (barely) servable at this instant, so this call returns
+  // immediately and the failing refresh settles in the background; poll
+  // until it does rather than pinning a fixed sleep.
+  const atBoundary = await waitFor(
+    handler,
+    (body) => body.nws.status === 'stale',
+  );
+  assert.equal(
+    atBoundary.nws.status,
+    'stale',
+    'exactly 60 minutes old is still within the stale window',
+  );
+
+  clock.now += 2 * MINUTE; // past STALE_MAX_MS, but not yet due for another refresh attempt
+  const pastStale = (await invoke(handler)).json();
+  assert.equal(
+    pastStale.nws.status,
+    'unavailable',
+    'data older than 60 minutes must not read as stale, refresh due or not',
+  );
+  assert.deepEqual(pastStale.nws.alerts, []);
+});
+
+test('a non-ENOENT disk error reading one zone is a cache miss, not a failure of the whole NWS refresh', async (t) => {
+  const cacheDir = await tempDir(t);
+  await mkdir(path.join(cacheDir, 'zones'), { recursive: true });
+  // A directory where the zone JSON file is expected: readFile() throws EISDIR, not ENOENT.
+  await mkdir(path.join(cacheDir, 'zones', 'forecast_AKZ844.json'));
+  const body = (
+    await invoke(makeHandler(upstream(), cacheDir, { now: Date.now() }))
+  ).json();
+  assert.equal(
+    body.nws.status,
+    'ok',
+    'one bad disk entry is a cache miss, not a whole-refresh failure',
+  );
+  assert.ok(
+    Object.keys(body.nws.zones).length >= 8,
+    'every other zone still resolves',
+  );
+});
+
+test('a prune readdir failure is logged and does not fail the NWS refresh', async (t) => {
+  const cacheDir = await tempDir(t);
+  await mkdir(cacheDir, { recursive: true });
+  // A file where the zones directory is expected: readdir() throws ENOTDIR, not ENOENT.
+  await writeFile(path.join(cacheDir, 'zones'), 'not a directory');
+  const body = (
+    await invoke(makeHandler(upstream(), cacheDir, { now: Date.now() }))
+  ).json();
+  assert.equal(body.nws.status, 'ok');
 });
 
 test('methods, paths, rate limits and plugin registration', async (t) => {
