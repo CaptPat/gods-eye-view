@@ -156,8 +156,8 @@ function encode(state) {
 
 test('production registry is exact, canonical, and rejects incomplete contracts', async () => {
   assert.equal(validateLayerStateRegistry(), true);
-  assert.equal(REGISTERED_LAYER_IDS.length, 16);
-  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 16);
+  assert.equal(REGISTERED_LAYER_IDS.length, 17);
+  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 17);
   assert.deepEqual(REGISTERED_LAYER_IDS, [...REGISTERED_LAYER_IDS].sort());
   assert.throws(
     () => validateLayerStateRegistry([...LAYER_STATE_REGISTRY, LAYER_STATE_REGISTRY[0]]),
@@ -1594,4 +1594,32 @@ test('the owner layer going away revokes the pending watch at any origin', async
     );
     f.coordinator.destroy();
   }
+});
+
+test('weather radar options round-trip through the compact URL and normalize strictly', () => {
+  const state = createDefaultLayerState();
+  assert.deepEqual(state.options['weather-radar'], { usDetail: false, opacity: 0.7 });
+
+  state.enabledLayerIds = ['weather-radar'];
+  state.options['weather-radar'] = { usDetail: true, opacity: 0.4 };
+  const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
+  assert.equal(params.get('l'), 'p');
+  const assignments = String(params.get('lo') || '').split('_');
+  assert.ok(assignments.includes('p.u.1'), assignments.join('_'));
+  assert.ok(assignments.includes('p.o.40'), assignments.join('_'));
+  assert.deepEqual(decodeLayerStateParams(params).options['weather-radar'], { usDetail: true, opacity: 0.4 });
+
+  state.options['weather-radar'] = { usDetail: false, opacity: 0.7 };
+  const defaults = encodeLayerStateParams(new URLSearchParams('v=2'), state);
+  assert.equal(String(defaults.get('lo') || '').split('_').some((entry) => entry.startsWith('p.')), false);
+
+  assert.deepEqual(
+    decodeLayerStateParams(new URLSearchParams('v=2&l=p&lo=p.o.55')).options['weather-radar'],
+    { usDetail: false, opacity: 0.7 },
+    'an unknown opacity token falls back to the default',
+  );
+  assert.deepEqual(
+    normalizeLayerState({ options: { 'weather-radar': { usDetail: 'yes', opacity: 0.69999 } } }).options['weather-radar'],
+    { usDetail: false, opacity: 0.7 },
+  );
 });

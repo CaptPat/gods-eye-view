@@ -76,6 +76,14 @@ function normalizeVolume(value) {
   return Math.round(Math.max(0, Math.min(1, numeric)) * 100) / 100;
 }
 
+const RADAR_OPACITIES = Object.freeze([0.4, 0.7, 1]);
+
+function normalizeRadarOpacity(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return null;
+  return RADAR_OPACITIES.find((option) => Math.abs(option - numeric) < 0.001) ?? null;
+}
+
 function booleanOption(key, token, defaultValue, { absentValue = defaultValue } = {}) {
   return Object.freeze({
     key,
@@ -241,6 +249,17 @@ const OPTION_GROUPS = Object.freeze({
       decode: (value) => (/^\d{1,3}$/.test(value) ? normalizeVolume(Number(value) / 100) : null),
     }),
   ]),
+  'weather-radar': Object.freeze([
+    booleanOption('usDetail', 'u', false),
+    Object.freeze({
+      key: 'opacity',
+      token: 'o',
+      defaultValue: 0.7,
+      normalize: normalizeRadarOpacity,
+      encode: (value) => String(Math.round(value * 100)),
+      decode: (value) => (/^(40|70|100)$/.test(value) ? Number(value) / 100 : null),
+    }),
+  ]),
 });
 
 const TRACKING_OPTION_KEY_BY_LAYER = Object.freeze({
@@ -291,6 +310,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'satellites', token: 's', disposition: 'enabled+options', optionOwner: 'satellites' }),
   Object.freeze({ id: 'telegeography-submarine-cables', token: 'u', disposition: 'enabled-only' }),
   Object.freeze({ id: 'traffic', token: 't', disposition: 'enabled-only' }),
+  Object.freeze({ id: 'weather-radar', token: 'p', disposition: 'enabled+options', optionOwner: 'weather-radar' }),
 ]);
 
 export const REGISTERED_LAYER_IDS = Object.freeze(LAYER_STATE_REGISTRY.map((entry) => entry.id));
