@@ -31,7 +31,8 @@ const AISSTREAM_DEFAULT_MESSAGE_TYPES = [
 // Watchdog budgets (policy lives in src/data/aisWatchdog.js). Silence is
 // REPORTED quickly and ACTED ON slowly: a dead feed must read as dead within
 // ~2 min, but recycling the socket is throttled so recovery can never become a
-// reconnect cycle against AISStream's one-connection-per-key limit.
+// reconnect cycle against AISStream's per-account connection quota (reported
+// as three concurrent connections; a fourth is refused with HTTP 429).
 const AISSTREAM_SILENCE_REPORT_MS = 120_000;
 /** Recycle threshold as a multiple of the report threshold. */
 const AISSTREAM_RECYCLE_RATIO = 2.5;

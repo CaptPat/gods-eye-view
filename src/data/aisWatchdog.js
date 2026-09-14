@@ -316,8 +316,8 @@ export function createAisWatchdog(options = {}) {
       // data (onMessage) or a key rotation (configure).
       if (status === 'auth-failed') {
         // The probe is still bounded — on the auth cadence, not the silence
-        // budget — so a probe that opens and then says nothing cannot pin the
-        // one-connection-per-key slot indefinitely.
+        // budget — so a probe that opens and then says nothing cannot pin one
+        // of the account's few AISStream connection slots indefinitely.
         if (monoNow - silenceSinceMono >= authProbeMs) {
           const actions = terminateOwned('auth-probe-expired');
           scheduleRetry('auth');
@@ -362,8 +362,8 @@ export function createAisWatchdog(options = {}) {
    * Deliberately touches NEITHER the silence clock nor the ladder: a handshake
    * is not data, and a socket that opens late then goes silent must recycle on
    * its original schedule. An orphan (a socket we already gave up on, opening
-   * late) is told to hang itself up so it cannot hold the one-connection-per-key
-   * slot.
+   * late) is told to hang itself up so it cannot hold one of the account's few
+   * AISStream connection slots.
    */
   function onOpen(eventGeneration) {
     if (!ownsGeneration(eventGeneration)) {
