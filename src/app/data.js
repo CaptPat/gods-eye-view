@@ -3,6 +3,7 @@ import flightsLayer from '../data/flights.js';
 import militaryFlightsLayer from '../data/militaryFlights.js';
 import alprCamerasLayer from '../data/alprCameras.js';
 import earthquakesLayer from '../data/earthquakes.js';
+import severeWeatherLayer from '../data/severeWeather.js';
 import weatherRadarLayer from '../data/weatherRadar.js';
 import weatherOverlaysLayer from '../data/weatherOverlays.js';
 import tideAndCurrentLayers from '../data/tides.js';
@@ -41,6 +42,7 @@ export function createApplicationData({
   dataManager.register(flightsLayer);
   dataManager.register(militaryFlightsLayer);
   dataManager.register(earthquakesLayer);
+  dataManager.register(severeWeatherLayer);
   dataManager.register(weatherRadarLayer);
   weatherRadarLayer.attachMapStack(mapStackController);
   dataManager.register(weatherOverlaysLayer);

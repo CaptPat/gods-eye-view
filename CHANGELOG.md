@@ -32,6 +32,18 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## Severe weather layer (fork)
+
+- Add a Severe Weather layer: National Weather Service active alerts across the US, drawn over
+  their forecast, county and fire zones and coloured as warning, watch, advisory or statement,
+  plus GDACS tropical cyclones (track and forecast cone), floods, droughts, volcanoes and
+  wildfires worldwide. GDACS earthquakes are left to the Earthquakes layer.
+- Click an area or event for a card with its details; click the card to open the weather.gov
+  forecast page for that spot or the GDACS report.
+- Served by a new `/api/severe-weather` proxy: alerts cached 5 minutes, GDACS 15 minutes, zone
+  shapes simplified and kept on disk for 7 days; a failed source's last data is kept for an hour.
+  The layer row reports each source's count and any stale or unavailable source. Share token `v`.
+
 ## Weather overlays layer (fork)
 
 - Add a Weather Overlays layer with four modes, one shown at a time: cloud cover (NOAA GMGSI

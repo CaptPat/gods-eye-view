@@ -615,5 +615,21 @@
   "src/layers/tides/model.js",
   "src/layers/tides/model.test.mjs",
   "src/layers/tides/points.js",
-  "src/layers/tides/points.test.mjs"
+  "src/layers/tides/points.test.mjs",
+  "server/providers/severe-weather.js",
+  "server/providers/severe-weather/gdacs.js",
+  "server/providers/severe-weather/geometry.js",
+  "server/providers/severe-weather/nws.js",
+  "src/data/severeWeather.js",
+  "src/data/severeWeatherGdacs.test.mjs",
+  "src/data/severeWeatherNws.test.mjs",
+  "src/data/severeWeatherProxy.test.mjs",
+  "src/layers/severe-weather/index.js",
+  "src/layers/severe-weather/index.test.mjs",
+  "src/layers/severe-weather/model.js",
+  "src/layers/severe-weather/model.test.mjs",
+  "src/layers/severe-weather/rendering.js",
+  "src/layers/severe-weather/rendering.test.mjs",
+  "src/layers/severe-weather/selection.js",
+  "src/layers/severe-weather/selection.test.mjs"
 ]

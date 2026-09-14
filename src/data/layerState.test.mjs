@@ -172,8 +172,8 @@ test('tide and current stations share only their enabled state, as tokens h and 
 
 test('production registry is exact, canonical, and rejects incomplete contracts', async () => {
   assert.equal(validateLayerStateRegistry(), true);
-  assert.equal(REGISTERED_LAYER_IDS.length, 21);
-  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 21);
+  assert.equal(REGISTERED_LAYER_IDS.length, 22);
+  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 22);
   assert.deepEqual(REGISTERED_LAYER_IDS, [...REGISTERED_LAYER_IDS].sort());
   assert.throws(
     () => validateLayerStateRegistry([...LAYER_STATE_REGISTRY, LAYER_STATE_REGISTRY[0]]),
@@ -1671,4 +1671,14 @@ test('weather overlays options round-trip through the compact URL and normalize 
     normalizeLayerState({ options: { 'weather-overlays': { mode: 'fog', pollenType: 'grass', opacity: 0.4 } } }).options['weather-overlays'],
     { mode: 'clouds', pollenType: 'grass', opacity: 0.4 },
   );
+});
+
+test('severe weather is an enabled-only layer on share token v', () => {
+  const state = createDefaultLayerState();
+  assert.equal(Object.hasOwn(state.options, 'severe-weather'), false, 'no options');
+  state.enabledLayerIds = ['severe-weather'];
+  const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
+  assert.equal(params.get('l'), 'v');
+  assert.equal(String(params.get('lo') || '').split('_').some((entry) => entry.startsWith('v.')), false);
+  assert.deepEqual(decodeLayerStateParams(new URLSearchParams('v=2&l=v')).enabledLayerIds, ['severe-weather']);
 });
