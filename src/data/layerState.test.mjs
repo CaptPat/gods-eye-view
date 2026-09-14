@@ -155,10 +155,25 @@ function encode(state) {
   return params.toString();
 }
 
+test('tide and current stations share only their enabled state, as tokens h and k', () => {
+  const state = createDefaultLayerState();
+  assert.equal(Object.hasOwn(state.options, 'tide-stations'), false);
+  assert.equal(Object.hasOwn(state.options, 'current-stations'), false);
+  state.enabledLayerIds = ['tide-stations', 'current-stations'];
+  const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
+  assert.equal(params.get('l'), 'k.h');
+  const options = String(params.get('lo') || '').split('_');
+  assert.equal(options.some((entry) => entry.startsWith('h.') || entry.startsWith('k.')), false);
+  assert.deepEqual(
+    decodeLayerStateParams(new URLSearchParams('v=2&l=h.k')).enabledLayerIds,
+    ['current-stations', 'tide-stations'],
+  );
+});
+
 test('production registry is exact, canonical, and rejects incomplete contracts', async () => {
   assert.equal(validateLayerStateRegistry(), true);
-  assert.equal(REGISTERED_LAYER_IDS.length, 18);
-  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 18);
+  assert.equal(REGISTERED_LAYER_IDS.length, 20);
+  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 20);
   assert.deepEqual(REGISTERED_LAYER_IDS, [...REGISTERED_LAYER_IDS].sort());
   assert.throws(
     () => validateLayerStateRegistry([...LAYER_STATE_REGISTRY, LAYER_STATE_REGISTRY[0]]),

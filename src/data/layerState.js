@@ -298,6 +298,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'alpr-cameras', token: 'p', disposition: 'enabled-only' }),
   Object.freeze({ id: 'bikeshare', token: 'b', disposition: 'enabled-only' }),
   Object.freeze({ id: 'cctv', token: 'c', disposition: 'enabled+options', optionOwner: 'cctv' }),
+  Object.freeze({ id: 'current-stations', token: 'k', disposition: 'enabled-only' }),
   Object.freeze({ id: 'earthquakes', token: 'e', disposition: 'enabled-only' }),
   Object.freeze({ id: 'flights', token: 'f', disposition: 'enabled+options', optionOwner: 'flights' }),
   Object.freeze({ id: 'local-dams', token: 'q', disposition: 'enabled-only' }),
@@ -310,6 +311,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'rocket-launches', token: 'x', disposition: 'enabled-only' }),
   Object.freeze({ id: 'satellites', token: 's', disposition: 'enabled+options', optionOwner: 'satellites' }),
   Object.freeze({ id: 'telegeography-submarine-cables', token: 'u', disposition: 'enabled-only' }),
+  Object.freeze({ id: 'tide-stations', token: 'h', disposition: 'enabled-only' }),
   Object.freeze({ id: 'traffic', token: 't', disposition: 'enabled-only' }),
   Object.freeze({ id: 'weather-radar', token: 'n', disposition: 'enabled+options', optionOwner: 'weather-radar' }),
 ]);
