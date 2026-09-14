@@ -18,6 +18,25 @@ const hierarchyOf = ([outer, ...holes]) =>
     holes.map((ring) => new Cesium.PolygonHierarchy(positionsOf(ring))),
   );
 
+const FNV_OFFSET_BASIS = 0x811c9dc5;
+const FNV_PRIME = 0x01000193;
+
+/**
+ * FNV-1a rolling hash over every coordinate nested in `value` (rings, lines,
+ * polygons, at any depth), rounded to 4 decimals so a rebuild signature can
+ * detect a moved track or cone even when its point/ring counts stay put,
+ * without building an intermediate flattened array or string.
+ */
+function hashCoordinates(hash, value) {
+  if (Array.isArray(value)) {
+    for (const item of value) hash = hashCoordinates(hash, item);
+    return hash;
+  }
+  if (typeof value !== 'number') return hash;
+  const rounded = Math.round(value * 10000) | 0;
+  return Math.imul(hash ^ rounded, FNV_PRIME) >>> 0;
+}
+
 /**
  * Ground-clamped NWS areas (fill plus outline), GDACS points, cyclone tracks
  * and cones, in one CustomDataSource. Every scene change requests a render:
@@ -195,7 +214,12 @@ export function createSevereWeatherRendering(
     /** Rebuild only when the drawn set changed; returns whether it rebuilt. */
     render({ areas, events }) {
       const next = JSON.stringify([
-        areas.map((area) => [area.key, area.color, countAreaPositions(area)]),
+        areas.map((area) => [
+          area.key,
+          area.color,
+          countAreaPositions(area),
+          hashCoordinates(FNV_OFFSET_BASIS, area.polygons),
+        ]),
         events.map((event) => [
           event.id,
           event.alertLevel,
@@ -203,6 +227,8 @@ export function createSevereWeatherRendering(
           event.lat,
           event.track.length,
           event.cone.length,
+          hashCoordinates(FNV_OFFSET_BASIS, event.track),
+          hashCoordinates(FNV_OFFSET_BASIS, event.cone),
         ]),
       ]);
       if (next === signature) return false;

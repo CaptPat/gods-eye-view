@@ -220,6 +220,77 @@ test('an unchanged drawn set is not rebuilt; a changed one is', () => {
   assert.notEqual(entity('severe-weather:gdacs:DR-1018431'), before);
 });
 
+test('a moved GDACS track with the same point count still rebuilds', () => {
+  const { rendering, entity } = harness();
+  rendering.render({ areas: AREAS, events: EVENTS });
+  const before = entity('severe-weather:gdacs:TC-1001321:track:0');
+  const movedTrack = {
+    ...EVENTS[0],
+    track: [
+      [
+        [-117.3, 17.3],
+        [-118.4, 17.1],
+        [-119.8, 16.4],
+      ],
+    ],
+  };
+  assert.equal(
+    rendering.render({ areas: AREAS, events: [movedTrack, EVENTS[1]] }),
+    true,
+    'a moved track with the same point count rebuilds',
+  );
+  assert.notEqual(entity('severe-weather:gdacs:TC-1001321:track:0'), before);
+});
+
+test('a moved GDACS cone with the same ring count still rebuilds', () => {
+  const { rendering, entity } = harness();
+  rendering.render({ areas: AREAS, events: EVENTS });
+  const before = entity('severe-weather:gdacs:TC-1001321:cone:0');
+  const movedCone = { ...EVENTS[0], cone: [[ring(-124, 15, 4)]] };
+  assert.equal(
+    rendering.render({ areas: AREAS, events: [movedCone, EVENTS[1]] }),
+    true,
+    'a moved cone with the same ring count rebuilds',
+  );
+  assert.notEqual(entity('severe-weather:gdacs:TC-1001321:cone:0'), before);
+});
+
+test('an NWS area with moved ring coordinates and the same position count still rebuilds', () => {
+  const { rendering, entity } = harness();
+  rendering.render({ areas: AREAS, events: EVENTS });
+  const before = entity('severe-weather:nws:zone:forecast/AKZ844:0');
+  const movedArea = { ...AREAS[0], polygons: [[ring(-149, 65)]] };
+  assert.equal(
+    rendering.render({ areas: [movedArea, AREAS[1]], events: EVENTS }),
+    true,
+    'moved ring coordinates with the same position count rebuild',
+  );
+  assert.notEqual(entity('severe-weather:nws:zone:forecast/AKZ844:0'), before);
+});
+
+test('a structurally equal but distinct payload still skips the rebuild', () => {
+  const { rendering, entity } = harness();
+  rendering.render({ areas: AREAS, events: EVENTS });
+  const before = entity('severe-weather:gdacs:DR-1018431');
+  const cloneRing = (points) => points.map((point) => [...point]);
+  const clonePolygon = (polygon) => polygon.map(cloneRing);
+  const sameAreas = AREAS.map((area) => ({
+    ...area,
+    polygons: area.polygons.map(clonePolygon),
+  }));
+  const sameEvents = EVENTS.map((event) => ({
+    ...event,
+    track: event.track.map(cloneRing),
+    cone: event.cone.map(clonePolygon),
+  }));
+  assert.equal(
+    rendering.render({ areas: sameAreas, events: sameEvents }),
+    false,
+    'a structurally equal payload, even as new objects, still skips',
+  );
+  assert.equal(entity('severe-weather:gdacs:DR-1018431'), before);
+});
+
 test('selection turns the chosen outlines, track and point white and requests a render', () => {
   const { rendering, renders, entity } = harness();
   rendering.render({ areas: AREAS, events: EVENTS });
