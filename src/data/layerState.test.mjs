@@ -172,8 +172,8 @@ test('tide and current stations share only their enabled state, as tokens h and 
 
 test('production registry is exact, canonical, and rejects incomplete contracts', async () => {
   assert.equal(validateLayerStateRegistry(), true);
-  assert.equal(REGISTERED_LAYER_IDS.length, 20);
-  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 20);
+  assert.equal(REGISTERED_LAYER_IDS.length, 21);
+  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 21);
   assert.deepEqual(REGISTERED_LAYER_IDS, [...REGISTERED_LAYER_IDS].sort());
   assert.throws(
     () => validateLayerStateRegistry([...LAYER_STATE_REGISTRY, LAYER_STATE_REGISTRY[0]]),
@@ -1637,5 +1637,38 @@ test('weather radar options round-trip through the compact URL and normalize str
   assert.deepEqual(
     normalizeLayerState({ options: { 'weather-radar': { usDetail: 'yes', opacity: 0.69999 } } }).options['weather-radar'],
     { usDetail: false, opacity: 0.7 },
+  );
+});
+
+test('weather overlays options round-trip through the compact URL and normalize strictly', () => {
+  const state = createDefaultLayerState();
+  assert.deepEqual(state.options['weather-overlays'], { mode: 'clouds', pollenType: 'tree', opacity: 0.7 });
+
+  state.enabledLayerIds = ['weather-overlays', 'weather-radar'];
+  state.options['weather-overlays'] = { mode: 'pollen', pollenType: 'weed', opacity: 1 };
+  const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
+  assert.equal(params.get('l'), 'o.n');
+  const assignments = String(params.get('lo') || '').split('_');
+  for (const expected of ['o.m.p', 'o.p.w', 'o.o.100']) {
+    assert.ok(assignments.includes(expected), assignments.join('_'));
+  }
+  assert.deepEqual(decodeLayerStateParams(params).options['weather-overlays'], {
+    mode: 'pollen',
+    pollenType: 'weed',
+    opacity: 1,
+  });
+
+  state.options['weather-overlays'] = { mode: 'clouds', pollenType: 'tree', opacity: 0.7 };
+  const defaults = encodeLayerStateParams(new URLSearchParams('v=2'), state);
+  assert.equal(String(defaults.get('lo') || '').split('_').some((entry) => entry.startsWith('o.')), false);
+
+  assert.deepEqual(
+    decodeLayerStateParams(new URLSearchParams('v=2&l=o&lo=o.m.x_o.p.g_o.o.55')).options['weather-overlays'],
+    { mode: 'clouds', pollenType: 'grass', opacity: 0.7 },
+    'unknown mode and opacity tokens fall back to their defaults',
+  );
+  assert.deepEqual(
+    normalizeLayerState({ options: { 'weather-overlays': { mode: 'fog', pollenType: 'grass', opacity: 0.4 } } }).options['weather-overlays'],
+    { mode: 'clouds', pollenType: 'grass', opacity: 0.4 },
   );
 });

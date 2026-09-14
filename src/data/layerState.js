@@ -84,6 +84,17 @@ function normalizeRadarOpacity(value) {
   return RADAR_OPACITIES.find((option) => Math.abs(option - numeric) < 0.001) ?? null;
 }
 
+function opacityOption(key, token, defaultValue) {
+  return Object.freeze({
+    key,
+    token,
+    defaultValue,
+    normalize: normalizeRadarOpacity,
+    encode: (value) => String(Math.round(value * 100)),
+    decode: (value) => (/^(40|70|100)$/.test(value) ? Number(value) / 100 : null),
+  });
+}
+
 function booleanOption(key, token, defaultValue, { absentValue = defaultValue } = {}) {
   return Object.freeze({
     key,
@@ -249,16 +260,23 @@ const OPTION_GROUPS = Object.freeze({
       decode: (value) => (/^\d{1,3}$/.test(value) ? normalizeVolume(Number(value) / 100) : null),
     }),
   ]),
+  'weather-overlays': Object.freeze([
+    enumOption('mode', 'm', 'clouds', ['clouds', 'temperature', 'air-quality', 'pollen'], {
+      clouds: 'c',
+      temperature: 't',
+      'air-quality': 'a',
+      pollen: 'p',
+    }),
+    enumOption('pollenType', 'p', 'tree', ['tree', 'grass', 'weed'], {
+      tree: 't',
+      grass: 'g',
+      weed: 'w',
+    }),
+    opacityOption('opacity', 'o', 0.7),
+  ]),
   'weather-radar': Object.freeze([
     booleanOption('usDetail', 'u', false),
-    Object.freeze({
-      key: 'opacity',
-      token: 'o',
-      defaultValue: 0.7,
-      normalize: normalizeRadarOpacity,
-      encode: (value) => String(Math.round(value * 100)),
-      decode: (value) => (/^(40|70|100)$/.test(value) ? Number(value) / 100 : null),
-    }),
+    opacityOption('opacity', 'o', 0.7),
   ]),
 });
 
@@ -313,6 +331,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'telegeography-submarine-cables', token: 'u', disposition: 'enabled-only' }),
   Object.freeze({ id: 'tide-stations', token: 'h', disposition: 'enabled-only' }),
   Object.freeze({ id: 'traffic', token: 't', disposition: 'enabled-only' }),
+  Object.freeze({ id: 'weather-overlays', token: 'o', disposition: 'enabled+options', optionOwner: 'weather-overlays' }),
   Object.freeze({ id: 'weather-radar', token: 'n', disposition: 'enabled+options', optionOwner: 'weather-radar' }),
 ]);
 
