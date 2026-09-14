@@ -57,6 +57,10 @@ export function createWeatherOverlaysLayer({
   const notifyRows = () => rowListener?.();
   const onMapStack = (event) => {
     mapStackId = event?.detail?.activeStack?.id ?? mapStackId;
+    if (imagery) {
+      imagery.reseat?.();
+      requestRender(RENDER_REASON);
+    }
     notifyRows();
   };
 

@@ -103,6 +103,67 @@ test('insertIndex places frames directly above the base map and clamps to the co
   );
 });
 
+test('insertIndex may be a function, evaluated fresh on every add', () => {
+  const viewer = fakeViewer([{ radar: true }]);
+  let base = false;
+  const imagery = createFrameImagery(viewer, {
+    ...factories(),
+    insertIndex: () => (base ? 1 : 0),
+  });
+  imagery.setSource('clouds');
+  imagery.show(1000);
+  assert.deepEqual(
+    viewer.layers.map((layer) => (layer.radar ? 'radar' : layer.source)),
+    ['clouds', 'radar'],
+    'no base yet: the function is called at add time and returns 0',
+  );
+});
+
+test('reseat re-derives insertIndex and moves existing frames there', () => {
+  const viewer = fakeViewer([{ radar: true }]);
+  let index = 1; // wrong on purpose: this would land the frame above radar
+  const imagery = createFrameImagery(viewer, {
+    ...factories(),
+    insertIndex: () => index,
+  });
+  imagery.setSource('clouds');
+  imagery.show(1000);
+  assert.deepEqual(
+    viewer.layers.map((layer) => (layer.radar ? 'radar' : layer.source)),
+    ['radar', 'clouds'],
+    'starts above radar, per the stale index',
+  );
+
+  index = 0; // the corrected target once, say, the base map changed
+  imagery.reseat();
+  assert.deepEqual(
+    viewer.layers.map((layer) => (layer.radar ? 'radar' : layer.source)),
+    ['clouds', 'radar'],
+    'reseat moves the frame to the freshly resolved index',
+  );
+});
+
+test('reseat is a no-op when insertIndex was never given (radar keeps appending on top)', () => {
+  const viewer = fakeViewer([{ base: true }, { radar: true }]);
+  const imagery = createFrameImagery(viewer, factories());
+  imagery.setSource('rainviewer');
+  imagery.show(1000);
+  assert.deepEqual(
+    viewer.layers.map((layer) =>
+      layer.base ? 'base' : layer.radar ? 'radar' : layer.source,
+    ),
+    ['base', 'radar', 'rainviewer'],
+  );
+  imagery.reseat();
+  assert.deepEqual(
+    viewer.layers.map((layer) =>
+      layer.base ? 'base' : layer.radar ? 'radar' : layer.source,
+    ),
+    ['base', 'radar', 'rainviewer'],
+    'still on top: reseat never moves a layer with no insertIndex',
+  );
+});
+
 test('swapToFrame shows at once when nothing is shown, and otherwise waits for readiness', () => {
   const viewer = fakeViewer();
   const imagery = createFrameImagery(viewer, factories());

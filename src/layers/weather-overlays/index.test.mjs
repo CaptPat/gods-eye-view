@@ -59,6 +59,9 @@ function fakeImagery() {
       layers.clear();
       shown = null;
     },
+    reseat() {
+      calls.push(['reseat']);
+    },
     destroy() {
       calls.push(['destroy']);
     },
@@ -426,6 +429,20 @@ test('Google 3D is reported from the attached controller and from map-stack even
     }),
   );
   assert.equal(evented.layer.getStats().status, 'idle');
+});
+
+test('a map-stack change re-seats the overlay imagery and requests a render', async () => {
+  const h = harness();
+  await enabled(h);
+  const renders = h.renderRequests.length;
+  h.events.dispatchEvent(
+    new CustomEvent('gev:map-stack-changed', {
+      detail: { activeStack: { id: 'esri-imagery' } },
+    }),
+  );
+  assert.deepEqual(h.imagery.calls.at(-1), ['reseat']);
+  assert.ok(h.renderRequests.length > renders);
+  assert.equal(h.renderRequests.at(-1), 'weather-overlays');
 });
 
 test('row listeners are notified; disable clears imagery with a render; destroy unsubscribes', async () => {

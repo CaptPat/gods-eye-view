@@ -2,8 +2,19 @@ import * as Cesium from 'cesium';
 import { createFrameImagery } from '../weather-imagery/frameImagery.js';
 import { maximumLevelFor, modeOfKey } from './modes.js';
 
-/** Directly above the base map (index 0), so radar added later stays on top. */
-export const OVERLAY_INSERT_INDEX = 1;
+/**
+ * Directly above the base map, so radar (which always appends on top) stays
+ * above the overlay whatever order the layers are enabled in. The map
+ * controller removes the base imagery layer entirely (and sets
+ * `scene.globe.show = false`) on the photoreal 3D-tileset stack, and adds
+ * exactly one base layer at index 0 for every globe stack — so `globe.show`
+ * is a reliable proxy for "is there a base layer below index 0 right now".
+ * Evaluated fresh on every insert (and on `reseat()`), never cached, so it
+ * tracks map-stack changes instead of a constant snapshot from layer setup.
+ */
+export function overlayInsertIndex(viewer) {
+  return viewer?.scene?.globe?.show ? 1 : 0;
+}
 /** GMGSI longwave pixels darker than this (0-1) are warm surface: made clear. */
 export const CLOUD_CLEAR_THRESHOLD = 0.3;
 /** Google's required attribution, shown on screen while its imagery is drawn. */
@@ -39,7 +50,7 @@ export function createOverlayImagery(viewer, options = {}) {
   return createFrameImagery(viewer, {
     createProvider: createOverlayProvider,
     createLayer: createOverlayLayer,
-    insertIndex: OVERLAY_INSERT_INDEX,
+    insertIndex: () => overlayInsertIndex(viewer),
     ...options,
   });
 }

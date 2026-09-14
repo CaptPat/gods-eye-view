@@ -24,7 +24,9 @@ export function swapToFrame(imagery, time) {
  * One Cesium imagery layer per frame time for the current source. A frame is
  * ready once the globe's tile queue first reports 0 after its layer was added.
  * `insertIndex` places new layers at that index (clamped to the collection)
- * instead of on top.
+ * instead of on top. It may be a constant integer or a function evaluated
+ * fresh each time a layer is added (or re-seated), so callers can track a
+ * moving target such as "directly above the base map".
  */
 export function createFrameImagery(
   viewer,
@@ -51,6 +53,12 @@ export function createFrameImagery(
       pending.clear();
     });
 
+  function resolveInsertIndex() {
+    const value =
+      typeof insertIndex === 'function' ? insertIndex() : insertIndex;
+    return Number.isInteger(value) ? value : null;
+  }
+
   function remove(time) {
     const layer = layers.get(time);
     if (!layer) return;
@@ -66,10 +74,11 @@ export function createFrameImagery(
     const layer = createLayer(createProvider(source, time), source);
     layer.alpha = PRELOAD_ALPHA;
     layer.show = true;
-    if (Number.isInteger(insertIndex)) {
+    const index = resolveInsertIndex();
+    if (index !== null) {
       viewer.imageryLayers.add(
         layer,
-        Math.min(insertIndex, viewer.imageryLayers.length),
+        Math.min(index, viewer.imageryLayers.length),
       );
     } else {
       viewer.imageryLayers.add(layer);
@@ -101,6 +110,26 @@ export function createFrameImagery(
     release(keepTimes) {
       const keep = new Set(keepTimes);
       for (const time of [...layers.keys()]) if (!keep.has(time)) remove(time);
+    },
+    /**
+     * Move every current frame back to a freshly resolved `insertIndex`,
+     * for example after the base map is added or removed beneath it. A
+     * no-op when `insertIndex` was never given (the "append on top"
+     * default, e.g. radar).
+     */
+    reseat() {
+      if (insertIndex === null) return;
+      for (const layer of layers.values()) {
+        viewer.imageryLayers.remove(layer, false);
+        const index = resolveInsertIndex();
+        viewer.imageryLayers.add(
+          layer,
+          Math.min(
+            index ?? viewer.imageryLayers.length,
+            viewer.imageryLayers.length,
+          ),
+        );
+      }
     },
     isReady: (time) => ready.has(time),
     readyCount: () =>
