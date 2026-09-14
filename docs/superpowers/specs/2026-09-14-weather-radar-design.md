@@ -10,7 +10,7 @@ moves. Over the contiguous US, an optional high-detail mode switches to NEXRAD.
 
 ## Place in the weather suite
 
-This is the first of four sub-projects. Each has its own spec, plan and build, in this order:
+This is the first of five sub-projects. Each has its own spec, plan and build, in this order:
 
 1. **Weather radar** (this document). It establishes the transparent imagery-overlay pattern.
 2. **Click-for-weather card:** click empty ground for current conditions and short, long and
@@ -19,6 +19,9 @@ This is the first of four sub-projects. Each has its own spec, plan and build, i
 3. **Tide stations and current stations:** two NOAA CO-OPS point layers.
 4. **Gridded overlays:** cloud cover, temperature, and Google Air Quality and Pollen heatmaps.
    These reuse this document's overlay pattern.
+5. **Severe weather:** an on/off data layer like Dams and Fires. Candidate sources are NWS active
+   alerts (US; most alerts reference forecast zones), GDACS (global events) and Google Weather
+   `publicAlerts:lookup` (point lookup).
 
 ## Sources (measured 2026-09-14)
 
