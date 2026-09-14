@@ -73,7 +73,7 @@ Both are served through a caching `/api/tides` proxy.
 - Caches:
   - Station lists: memory, 24 h. A failed refresh serves the last list with `stale: true` and retries after 10 min; a cold failure is 502.
   - Reports: memory, 10 min, only when complete. On every insert, prune by age and cap at 500 (oldest first).
-- Rate limit: `makeRateLimiter({ windowMs: 60_000, max: 60, globalMax: 240 })`.
+- Rate limit: `makeRateLimiter({ windowMs: 60_000, max: 60, globalMax: 150 })`.
 
 **Layer identity, sharing and units**
 - Layer ids and names: `tide-stations` / `Tide Stations` / `🌊` / `#38bdf8`; `current-stations` / `Current Stations` / `🧭` / `#f59e0b`. Source `NOAA CO-OPS`. Share tokens: `h` (tide), `k` (current), `enabled-only`, no options.

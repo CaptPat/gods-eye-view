@@ -142,6 +142,17 @@
     ],
     "external": []
   },
+  "tides-provider": {
+    "runtime": "node",
+    "exports": ["./server/providers/tides"],
+    "modules": [
+      "server/providers/tides.js",
+      "server/providers/tides/normalize.js",
+      "server/providers/common/rate-limit.js",
+      "server/providers/common/http.js"
+    ],
+    "external": []
+  },
   "firms-provider": {
     "runtime": "node",
     "exports": ["./server/providers/firms"],
@@ -884,6 +895,15 @@
     ],
     "external": ["cesium"]
   },
+  "tides-layer": {
+    "exports": ["./layers/tides"],
+    "modules": [
+      "src/layers/tides/index.js",
+      "src/layers/tides/model.js",
+      "src/layers/tides/points.js"
+    ],
+    "external": ["cesium"]
+  },
   "weather-report": {
     "exports": ["./weather-report"],
     "modules": [
@@ -1202,6 +1222,7 @@
       "src/data/spriteOrder.js",
       "src/data/telegeographySubmarineCables.js",
       "src/data/terrainHeights.js",
+      "src/data/tides.js",
       "src/data/tomtomTiles.js",
       "src/data/tr3bRegistry.js",
       "src/data/trackedCamera.js",
@@ -1400,6 +1421,9 @@
       "src/layers/submarineCables/rendering.js",
       "src/layers/submarineCables/state.js",
       "src/layers/submarineCables/surface.js",
+      "src/layers/tides/index.js",
+      "src/layers/tides/model.js",
+      "src/layers/tides/points.js",
       "src/layers/traffic/animation.js",
       "src/layers/traffic/controls.js",
       "src/layers/traffic/flow.js",
