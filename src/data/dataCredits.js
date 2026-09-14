@@ -200,6 +200,16 @@ export const TOMTOM_CREDIT = {
     '<a href="https://www.tomtom.com" target="_blank" rel="noopener">TomTom</a>',
 };
 
+export const RAINVIEWER_CREDIT = Object.freeze({
+  key: 'rainviewer',
+  html: 'Radar: <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>',
+});
+
+export const IEM_NEXRAD_CREDIT = Object.freeze({
+  key: 'iem-nexrad',
+  html: 'US radar: <a href="https://mesonet.agron.iastate.edu/" target="_blank" rel="noopener">Iowa Environmental Mesonet</a> NEXRAD',
+});
+
 /** Registered when the first Natural Earth region outline resolves (public
  * domain — no attribution required; credited as a courtesy). */
 export const NATURAL_EARTH_CREDIT = {
