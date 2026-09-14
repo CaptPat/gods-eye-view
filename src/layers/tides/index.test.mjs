@@ -103,7 +103,62 @@ function fakeOverlay() {
   };
 }
 
-function harness(kind, { answers = {} } = {}) {
+/** A fake pick-ownership registry, the same shape as src/data/pickRegistry.js. */
+function fakePicking() {
+  const owners = new Map();
+  const registerCalls = [];
+  const unregisterCalls = [];
+  return {
+    owners,
+    registerCalls,
+    unregisterCalls,
+    registerPickOwner: (layerId, predicate) => {
+      registerCalls.push(layerId);
+      owners.set(layerId, predicate);
+    },
+    unregisterPickOwner: (layerId) => {
+      unregisterCalls.push(layerId);
+      owners.delete(layerId);
+    },
+    resolvePickId: (picked) => picked?.primitive?.id ?? picked?.id ?? null,
+    isOwnedByOtherLayer: (layerId, pickedId) => {
+      for (const [ownerId, predicate] of owners) {
+        if (ownerId === layerId) continue;
+        if (predicate(pickedId)) return true;
+      }
+      return false;
+    },
+  };
+}
+
+/** A documentTarget that records every add/removeEventListener call. */
+function trackedDocumentTarget() {
+  const target = new EventTarget();
+  const added = [];
+  const removed = [];
+  return {
+    added,
+    removed,
+    addEventListener: (type, fn) => {
+      added.push([type, fn]);
+      target.addEventListener(type, fn);
+    },
+    removeEventListener: (type, fn) => {
+      removed.push([type, fn]);
+      target.removeEventListener(type, fn);
+    },
+    dispatchEvent: (event) => target.dispatchEvent(event),
+  };
+}
+
+function harness(
+  kind,
+  {
+    answers = {},
+    picking = fakePicking(),
+    documentTarget = new EventTarget(),
+  } = {},
+) {
   const overlay = fakeOverlay();
   const requests = [];
   const renders = [];
@@ -115,7 +170,6 @@ function harness(kind, { answers = {} } = {}) {
     getItem: (key) =>
       key === 'gev.weatherReport.units' ? storage.value : null,
   };
-  const documentTarget = new EventTarget();
   const primitives = [];
   const pick = { result: null };
   const viewer = {
@@ -175,6 +229,7 @@ function harness(kind, { answers = {} } = {}) {
     openUrl: (url) => opened.push(url),
     documentTarget,
     now: () => clock.now,
+    picking,
   };
   const layer =
     kind === 'tide'
@@ -199,6 +254,7 @@ function harness(kind, { answers = {} } = {}) {
     clock,
     storage,
     documentTarget,
+    picking,
     viewer,
     primitives,
     click,
@@ -480,4 +536,120 @@ test('a storage failure falls back to imperial units', async () => {
     h.overlay.state.entries.get('tide-stations-selected')[0].details[0],
     'Low 0.4 ft · Mon 16:11 EDT',
   );
+});
+
+test('enabling registers this layer as a pick owner for its station ids; disabling and destroying unregister it', async () => {
+  const h = harness('tide');
+  await enabled(h);
+  assert.deepEqual(h.picking.registerCalls, ['tide-stations']);
+  const predicate = h.picking.owners.get('tide-stations');
+  assert.equal(predicate('tide-stations:8454000'), true);
+  assert.equal(predicate('current-stations:ACT1616'), false);
+  assert.equal(predicate('flight-123'), false);
+
+  h.layer.disable(h.viewer);
+  assert.deepEqual(h.picking.unregisterCalls, ['tide-stations']);
+  assert.equal(h.picking.owners.has('tide-stations'), false);
+
+  h.layer.enable(h.viewer);
+  assert.deepEqual(h.picking.registerCalls, ['tide-stations', 'tide-stations']);
+  h.layer.destroy(h.viewer);
+  assert.deepEqual(h.picking.unregisterCalls, [
+    'tide-stations',
+    'tide-stations',
+  ]);
+  assert.equal(h.picking.owners.has('tide-stations'), false);
+});
+
+test('a pick owned by a sibling layer is left alone instead of clearing the selection', async () => {
+  const h = harness('tide');
+  await enabled(h);
+  h.setPick('tide-stations:8454000');
+  await h.click.handler({ x: 1, y: 1 });
+  assert.equal(h.overlay.state.entries.has('tide-stations-selected'), true);
+
+  // A sibling layer (e.g. flights) claims ownership of a different pick id.
+  h.picking.registerPickOwner('flights', (id) => id === 'flight-123');
+  h.setPick('flight-123');
+  h.click.handler({ x: 2, y: 2 });
+  assert.equal(
+    h.overlay.state.entries.has('tide-stations-selected'),
+    true,
+    'a sibling-owned pick must not clear this layer’s selection',
+  );
+  assert.equal(
+    h.pointFor('tide-stations:8454000').pixelSize,
+    SELECTED_PIXEL_SIZE,
+    'the station stays visually selected',
+  );
+});
+
+test('clicking a failed station again retries the report instead of being ignored', async () => {
+  const state = { down: true };
+  const h = harness('tide', {
+    answers: {
+      '/api/tides/tide?id=8454000': () =>
+        state.down ? new Response('{}', { status: 502 }) : tideReport(),
+    },
+  });
+  await enabled(h);
+  h.setPick('tide-stations:8454000');
+  await h.click.handler({ x: 1, y: 1 });
+  assert.deepEqual(
+    h.overlay.state.entries.get('tide-stations-selected')[0].details,
+    [CARD_FAILED],
+  );
+  const requestsBefore = h.requests.filter(
+    (url) => url === '/api/tides/tide?id=8454000',
+  ).length;
+
+  state.down = false;
+  h.setPick('tide-stations:8454000');
+  await h.click.handler({ x: 1, y: 1 });
+  const requestsAfter = h.requests.filter(
+    (url) => url === '/api/tides/tide?id=8454000',
+  ).length;
+  assert.equal(
+    requestsAfter,
+    requestsBefore + 1,
+    'clicking the same failed station retries the request',
+  );
+  const [card] = h.overlay.state.entries.get('tide-stations-selected');
+  assert.equal(card.details[0], 'Low 0.4 ft · Mon 16:11 EDT');
+});
+
+test('destroying the layer removes the keydown listener installed on enable', async () => {
+  const docTarget = trackedDocumentTarget();
+  const h = harness('tide', { documentTarget: docTarget });
+  await enabled(h);
+  assert.equal(docTarget.added.length, 1);
+  assert.equal(docTarget.added[0][0], 'keydown');
+
+  h.layer.destroy(h.viewer);
+  assert.equal(docTarget.removed.length, 1);
+  assert.equal(docTarget.removed[0][0], 'keydown');
+  assert.equal(docTarget.removed[0][1], docTarget.added[0][1]);
+});
+
+test('a render failure while publishing the selected card is caught and logged, not left as an unhandled rejection', async () => {
+  const h = harness('tide');
+  await enabled(h);
+  const originalWarn = console.warn;
+  const warnings = [];
+  console.warn = (...args) => warnings.push(args);
+  const originalSetEntries = h.overlay.setEntries;
+  h.overlay.setEntries = () => {
+    throw new Error('overlay host exploded');
+  };
+  h.setPick('tide-stations:8454000');
+  try {
+    await assert.doesNotReject(async () => {
+      await h.click.handler({ x: 1, y: 1 });
+    });
+  } finally {
+    console.warn = originalWarn;
+    h.overlay.setEntries = originalSetEntries;
+  }
+  assert.ok(warnings.length >= 1, 'the failure was logged');
+  assert.match(String(warnings[0][0]), /tide-stations/);
 });

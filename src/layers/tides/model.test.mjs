@@ -302,3 +302,17 @@ test('a current card shows the next flood and ebb with direction, the next slack
     ],
   );
 });
+
+test('a missing flow direction omits the parenthetical instead of showing (0°)', () => {
+  const noDirection = {
+    ...currentReport(),
+    floodDirDeg: null,
+    ebbDirDeg: undefined,
+  };
+  const details = buildCurrentCard(POLLOCK_RIP, noDirection, {
+    units: 'imperial',
+    now: T0,
+  }).details;
+  assert.equal(details[1], 'Flood 2.0 kn · Mon 21:45 EDT');
+  assert.equal(details[2], 'Ebb 1.8 kn · Mon 15:12 EDT');
+});

@@ -50,11 +50,19 @@ export function createNoaaStationsLayer({
   openUrl = () => {},
   documentTarget = globalThis.document,
   now = Date.now,
+  picking = {},
 } = {}) {
   const meta = STATION_LAYERS[kind];
   if (!meta) throw new TypeError('kind must be tide or current');
   if (!overlayHost)
     throw new TypeError('NOAA station layers require an overlay host');
+
+  const {
+    registerPickOwner = () => {},
+    unregisterPickOwner = () => {},
+    resolvePickId = () => null,
+    isOwnedByOtherLayer = () => false,
+  } = picking;
 
   let viewer = null;
   let points = null;
@@ -139,9 +147,20 @@ export function createNoaaStationsLayer({
     requestRender(meta.id);
   }
 
+  /** A render failure while publishing the card must not surface as an unhandled rejection. */
+  function renderSelectedSafely() {
+    try {
+      renderSelected();
+    } catch (error) {
+      console.warn(`[Data:${meta.id}] selected card render failed:`, error);
+    }
+  }
+
   async function selectStation(stationId) {
     const station = byId.get(stationId);
-    if (!station || selected?.station.id === stationId) return;
+    if (!station) return;
+    // A failed card can be retried by clicking the same station again.
+    if (selected?.station.id === stationId && !selected.failed) return;
     clearSelection();
     const controller = new AbortController();
     const bin = kind === 'current' ? station.bins[0] : null;
@@ -149,7 +168,7 @@ export function createNoaaStationsLayer({
     points.setSelected(stationId);
     // Point restyling is a scene mutation the idle governor does not see.
     requestRender(meta.id);
-    renderSelected();
+    renderSelectedSafely();
     const query =
       kind === 'tide'
         ? `/api/tides/tide?id=${encodeURIComponent(stationId)}`
@@ -165,7 +184,7 @@ export function createNoaaStationsLayer({
         return;
       selected.failed = true;
     }
-    renderSelected();
+    renderSelectedSafely();
   }
 
   function handleClick(position) {
@@ -179,8 +198,15 @@ export function createNoaaStationsLayer({
       openUrl(noaaStationUrl(kind, selected.station.id, selected.bin));
       return undefined;
     }
-    const stationId = points.stationIdFromPick(viewer.scene.pick(position));
+    const picked = viewer.scene.pick(position);
+    const stationId = points.stationIdFromPick(picked);
     if (stationId) return selectStation(stationId);
+    // A pick that belongs to a sibling layer (e.g. an aircraft) is not
+    // "empty space" — leave the selection alone and let that layer handle it.
+    if (picked) {
+      const pickedId = resolvePickId(picked);
+      if (pickedId && isOwnedByOtherLayer(meta.id, pickedId)) return undefined;
+    }
     clearSelection();
     return undefined;
   }
@@ -214,6 +240,7 @@ export function createNoaaStationsLayer({
       overlayHost.setVisible(meta.selectedSourceId, true);
       clickHandler ??= createClickHandler(nextViewer, handleClick);
       documentTarget?.addEventListener?.('keydown', onKeyDown);
+      registerPickOwner(meta.id, (id) => id.startsWith(`${meta.id}:`));
       requestRender(meta.id);
     },
 
@@ -226,6 +253,7 @@ export function createNoaaStationsLayer({
       clickHandler?.destroy();
       clickHandler = null;
       documentTarget?.removeEventListener?.('keydown', onKeyDown);
+      unregisterPickOwner(meta.id);
       if (points) {
         points.setShow(false);
         points.setStations([]);

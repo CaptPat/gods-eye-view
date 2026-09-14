@@ -5,6 +5,12 @@ import {
 import { NOAA_COOPS_CREDIT, registerDynamicCredit } from './dataCredits.js';
 import { governorRequestRender } from '../renderGovernor.js';
 import {
+  isOwnedByOtherLayer,
+  registerPickOwner,
+  resolvePickId,
+  unregisterPickOwner,
+} from './pickRegistry.js';
+import {
   clearOverlaySource,
   hitTestWorldOverlay,
   setOverlayEntries,
@@ -32,6 +38,12 @@ function applicationServices() {
     credit: NOAA_COOPS_CREDIT,
     storage: browserStorage,
     openUrl: (url) => globalThis.open?.(url, '_blank', 'noopener,noreferrer'),
+    picking: {
+      registerPickOwner,
+      unregisterPickOwner,
+      resolvePickId,
+      isOwnedByOtherLayer,
+    },
   };
 }
 

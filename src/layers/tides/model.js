@@ -203,10 +203,13 @@ export function buildCurrentCard(station, report, { units, now }) {
   } else {
     const upcoming = (report.events ?? []).filter((event) => event.time > now);
     const next = (type) => upcoming.find((event) => event.type === type);
-    const flow = (label, event, deg) =>
-      event
-        ? `${label} ${formatSpeed(event.speedMs, system)} ${cardinal(deg)} (${Math.round(deg)}°) · ${formatStationTime(event.time, zone)}`
-        : `${label} ${DASH}`;
+    const flow = (label, event, deg) => {
+      if (!event) return `${label} ${DASH}`;
+      const direction = isNum(deg)
+        ? ` ${cardinal(deg)} (${Math.round(deg)}°)`
+        : '';
+      return `${label} ${formatSpeed(event.speedMs, system)}${direction} · ${formatStationTime(event.time, zone)}`;
+    };
     details.push(flow('Flood', next('flood'), report.floodDirDeg));
     details.push(flow('Ebb', next('ebb'), report.ebbDirDeg));
     const slack = next('slack');
