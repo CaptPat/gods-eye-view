@@ -301,6 +301,16 @@ export const NOAA_COOPS_CREDIT = Object.freeze({
   html: 'Tides and currents: <a href="https://tidesandcurrents.noaa.gov/" target="_blank" rel="noopener">NOAA CO-OPS</a>',
 });
 
+export const NWS_ALERTS_CREDIT = Object.freeze({
+  key: 'nws-alerts',
+  html: 'US weather alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (NOAA, public domain)',
+});
+
+export const GDACS_CREDIT = Object.freeze({
+  key: 'gdacs',
+  html: 'Global disaster alerts: <a href="https://www.gdacs.org/" target="_blank" rel="noopener">GDACS</a>, European Commission JRC and UN OCHA (indicative, not official warnings)',
+});
+
 /** Registered when the first Natural Earth region outline resolves (public
  * domain — no attribution required; credited as a courtesy). */
 export const NATURAL_EARTH_CREDIT = {

@@ -142,6 +142,19 @@
     ],
     "external": []
   },
+  "severe-weather-provider": {
+    "runtime": "node",
+    "exports": ["./server/providers/severe-weather"],
+    "modules": [
+      "server/providers/severe-weather.js",
+      "server/providers/severe-weather/gdacs.js",
+      "server/providers/severe-weather/geometry.js",
+      "server/providers/severe-weather/nws.js",
+      "server/providers/common/rate-limit.js",
+      "server/providers/common/http.js"
+    ],
+    "external": []
+  },
   "tides-provider": {
     "runtime": "node",
     "exports": ["./server/providers/tides"],
@@ -949,6 +962,16 @@
     ],
     "external": ["cesium"]
   },
+  "severe-weather-layer": {
+    "exports": ["./layers/severe-weather"],
+    "modules": [
+      "src/layers/severe-weather/index.js",
+      "src/layers/severe-weather/model.js",
+      "src/layers/severe-weather/rendering.js",
+      "src/layers/severe-weather/selection.js"
+    ],
+    "external": ["cesium"]
+  },
   "bikeshare-layer": {
     "exports": ["./layers/bikeshare"],
     "modules": [
@@ -1250,6 +1273,7 @@
       "src/data/satelliteClass.js",
       "src/data/satellites.js",
       "src/data/scenePick.js",
+      "src/data/severeWeather.js",
       "src/data/spriteOrder.js",
       "src/data/telegeographySubmarineCables.js",
       "src/data/terrainHeights.js",
@@ -1442,6 +1466,10 @@
       "src/layers/satellites/state.js",
       "src/layers/satellites/testing.js",
       "src/layers/satellites/tracking.js",
+      "src/layers/severe-weather/index.js",
+      "src/layers/severe-weather/model.js",
+      "src/layers/severe-weather/rendering.js",
+      "src/layers/severe-weather/selection.js",
       "src/layers/submarineCables/bundledSource.js",
       "src/layers/submarineCables/geometry.js",
       "src/layers/submarineCables/index.js",

@@ -96,6 +96,9 @@
     "./server/providers/weather-report": {
       "node": "./server/providers/weather-report.js"
     },
+    "./server/providers/severe-weather": {
+      "node": "./server/providers/severe-weather.js"
+    },
     "./server/providers/weather-overlays": {
       "node": "./server/providers/weather-overlays.js"
     },
@@ -170,6 +173,7 @@
     "./layers/weather-overlays": "./src/layers/weather-overlays/index.js",
     "./layers/tides": "./src/layers/tides/index.js",
     "./weather-report": "./src/weatherReport/index.js",
+    "./layers/severe-weather": "./src/layers/severe-weather/index.js",
     "./layers/bikeshare": "./src/layers/bikeshare/index.js",
     "./layers/cctv": "./src/layers/cctv/index.js",
     "./layers/alpr": "./src/layers/alpr/index.js",

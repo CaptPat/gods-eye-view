@@ -11,6 +11,7 @@ import { geocodeSearchProxy } from './geocode.js';
 import { weatherEffectsProxy } from './regional/weather-effects.js';
 import { weatherRadarProxy } from './weather-radar.js';
 import { weatherReportProxy } from './weather-report.js';
+import { severeWeatherProxy } from './severe-weather.js';
 import { weatherOverlaysProxy } from './weather-overlays.js';
 import { tidesProxy } from './tides.js';
 import { cctvProxy } from './cctv.js';
@@ -43,6 +44,7 @@ function localProviderPlugins() {
     weatherOverlaysProxy(),
     tidesProxy(),
     weatherEffectsProxy(),
+    severeWeatherProxy(),
     cctvProxy({ sourceRoot: defaultSourceRoot }),
     radioBrowserProxy(),
     gbfsProxy(),
@@ -73,6 +75,11 @@ export {
 } from './weather-overlays.js';
 
 export { createTidesHandler, tidesProxy } from './tides.js';
+
+export {
+  createSevereWeatherHandler,
+  severeWeatherProxy,
+} from './severe-weather.js';
 
 export {
   CCTV_FRAME_FETCH_TIMEOUT_MS,

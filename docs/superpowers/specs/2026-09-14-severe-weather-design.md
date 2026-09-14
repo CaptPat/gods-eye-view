@@ -79,15 +79,25 @@ This is sub-project 5 of 5. Each sub-project has its own spec, plan and build:
   - The client refreshes every 5 minutes and skips while the tab is hidden.
   - The server keeps NWS for 5 minutes and GDACS for 15.
   - A source whose refresh fails is served stale for up to 60 minutes after its last success,
-    then reported unavailable.
+    then reported unavailable. This is checked at response-build time against the source's own
+    age, not only when a refresh happens to run, so it cannot outlive 60 minutes just because the
+    next refresh isn't due yet.
+  - A source that already has servable data (fresh, or stale within the 60-minute window) answers
+    immediately; a refresh that's due for it starts in the background and is never awaited. A
+    source with nothing servable is awaited, capped by a response budget
+    (`RESPONSE_BUDGET_MS = 25_000`, injectable) so one slow or unreachable source never delays a
+    response from the other. Only one refresh per source is ever in flight; a request that arrives
+    while one is already running joins it rather than starting a second.
 - **Zone cache.**
   - Simplified shapes are stored on disk at `.gev-cache/severe-weather/zones/<type>_<ID>.json`
     and kept for 7 days (file mtime).
   - At most once an hour, a refresh deletes files older than 7 days.
   - A 404 is remembered in memory for 1 hour.
   - A 429 or 503 stops the rest of the round (60 s back-off, shorter than the 5-minute refresh).
-  - Resolution stops after 30 s; the cold fetch was measured at 11.7 s. Unresolved zones wait for
-    the next refresh and are counted as unmapped alerts.
+  - Resolution stops after 30 s; the cold fetch was measured at 11.7 s. At the deadline, zone
+    fetches still in flight are aborted (a combined `AbortSignal.any([timeout, deadline])`), not
+    just left to finish late — an aborted zone is not remembered as a 404 and not cached. Unresolved
+    zones wait for the next refresh and are counted as unmapped alerts.
 - **Politeness and limits.**
   - `User-Agent: CyclopsView/0.1 (+https://github.com/CaptPat/gods-eye-view)`.
   - Zone concurrency 4.
@@ -210,6 +220,10 @@ helpers live in `server/providers/severe-weather/`:
   - Entity ids start `severe-weather:`, which is how the pick owner recognises them.
   - `render()` rebuilds only when the drawn set changes (keys, colours, position counts).
   - `setSelected(key)` turns the chosen lines white and 2 px wider (points 15 px, white outline).
+    It touches only the previous and the newly selected entities, not every drawn outline: with
+    real Cesium, writing a graphics property — even to the same value — raises `definitionChanged`
+    and marks that ground-polyline batch dirty. The full highlight walk happens only inside
+    `render()`, once, for freshly built entities.
   - Render governor: every mutation calls `requestRender(reason)`. After a rebuild or a highlight
     change, a **ready pump** requests a frame every 250 ms, at most 40 times, while
     `viewer.dataSourceDisplay.getBoundingSphere` reports `PENDING` for the first or last entity.
