@@ -89,7 +89,9 @@ Routes:
   `format=image/png`, `transparent=true` and the given values.
   - Rejected with 400 unless:
     - `time` is a 5-minute boundary within the last 6 hours;
-    - the bbox lies within `[-130, 20, -60, 55]` and spans at most 70° × 35°;
+    - the bbox lies within `[-135, 0, -45, 67.5]` and spans at most 70° × 35°. This envelope is
+      the contiguous US widened to Cesium's level-3 geographic tile edges (22.5° grid), so every
+      tile the client requests passes;
     - width and height are integers 1–512.
   - Cached at `.gev-cache/radar/iem/<sha1 of normalized params>.png`: 5 minutes for frames
     younger than 15 minutes, 24 hours otherwise.
@@ -113,7 +115,10 @@ dependencies and the default instance. The layer is registered in `src/standalon
     - RainViewer: `/api/radar/rainviewer/<time>/{z}/{x}/{y}.png`, Web Mercator tiling,
       `maximumLevel: 7`.
     - IEM: `/api/radar/iem?time=<iso>&bbox={westDegrees},{southDegrees},{eastDegrees},{northDegrees}&width={width}&height={height}`
-      with `GeographicTilingScheme`, `tileWidth`/`tileHeight` 256, `maximumLevel: 9`.
+      with `GeographicTilingScheme`, `tileWidth`/`tileHeight` 256, `minimumLevel: 3`,
+      `maximumLevel: 9`, `rectangle` `[-130, 20, -60, 55]` degrees. Level 3 is the coarsest
+      geographic level whose tiles (22.5°) fit the proxy's 70° × 35° span limit; the rectangle
+      keeps requests over the contiguous US.
   - Preloading frames stay `show: true` with `alpha: 0.001`, so Cesium requests their tiles.
     A frame counts as ready once it has been added and `scene.globe.tileLoadProgressEvent`
     has reported 0 pending tiles.
@@ -133,18 +138,24 @@ dependencies and the default instance. The layer is registered in `src/standalon
       Heavy (50) `#c10000`, Extreme (65) `#ffffff`.
     - US detail ("NEXRAD Level III" column, the NWS palette IEM uses): Light `#00ff00`,
       Moderate `#087305`, Heavy `#ff0000`, Extreme `#fe00fe`.
-- **`index.js`**: `createWeatherRadarLayer({ frameSource, imagery, mapStack, timers, now, document })`.
+- **`index.js`**: `createWeatherRadarLayer({ fetchImpl, createImagery, registerCredit, credits,
+  eventTarget, isVisible, timers, now })`; `src/data/weatherRadar.js` supplies the real credits.
   - Returns `{ id: 'weather-radar', name: 'Weather Radar', icon: '🌧️', init, enable, disable,
-    update, destroy, getStats, getParams, setParams, getRowControls, setRowControlsListener }`.
-  - `mapStack` is `{ getActiveId() }` from `MapStackController`. The layer also listens for the
-    window event `gev:map-stack-changed` (`detail.activeStack.id`).
+    update, destroy, getStats, getParams, setParams, getRowControls, setRowControlsListener,
+    attachMapStack }`.
+  - `attachMapStack({ getActiveId })` receives `MapStackController` at registration. The layer
+    also listens for the window event `gev:map-stack-changed` (`detail.activeStack.id`).
+  - `update()` resolves `false` only when the manager's signal aborted: `DataLayerManager`
+    treats `false` as a failed enable or refresh. Skips, superseded requests and handled
+    failures resolve `true`, and failures surface through `getStats().error`.
 
 ## Behaviour
 
-- **Enable:** fetch frames for the current source, retain the last 2 hours, show the newest.
+- **Enable:** fetch frames for the current source, retain the 2 hours back from the newest frame
+  (counting from the clock would drop the 13th frame to upstream latency), show the newest.
 - **Refresh:** every 5 minutes while enabled and `document.visibilityState === 'visible'`. A new
-  newest frame is shown only once ready. Frames older than 2 hours are pruned and their imagery
-  layers removed.
+  newest frame is shown only once ready. Frames more than 2 hours older than the newest are pruned
+  and their imagery layers removed.
 - **Loop:** `setParams({ loop: true })` starts stepping from the oldest ready frame to the
   newest, using `nextLoopStep`. Frames not yet ready are skipped. Pause (`loop: false`) returns
   to the newest frame. While looping, every retained frame is preloaded; otherwise only the
@@ -228,8 +239,10 @@ Colocated `*.test.mjs`, `node:test`, no live network:
   from the event, and every stats shape.
 - Layer-state tests cover token `p` and the option encode/decode round-trip.
 
-`scripts/package-boundaries.json` gains a `weather-radar-layer` group (the layer files and
-`src/data/weatherRadar.js`, external `cesium`) and a `weather-radar-provider` group (the provider
-and the common helpers it imports). `scripts/format-scope.json` includes the new files. The
+`package.json` exports `./layers/weather-radar` and `./server/providers/weather-radar`.
+`scripts/package-boundaries.json` gains a `weather-radar-layer` group (the files under
+`src/layers/weather-radar/`, external `cesium`; like `earthquakes`, the `src/data/` wrapper stays
+outside the export) and a `weather-radar-provider` group (the provider and the common helpers it
+imports). `scripts/format-scope.json` includes the new files. The
 fork's CI-parity sequence must pass: format check, boundaries, `npm test`, build.
 `CHANGELOG.md` gains an entry.
