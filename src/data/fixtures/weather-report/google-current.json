@@ -1,0 +1,96 @@
+{
+  "timeZone": {
+    "id": "America/Chicago",
+    "version": ""
+  },
+  "weatherCondition": {
+    "description": {
+      "text": "Sunny",
+      "languageCode": "en"
+    },
+    "type": "CLEAR"
+  },
+  "temperature": {
+    "unit": "CELSIUS",
+    "degrees": 29.8
+  },
+  "feelsLikeTemperature": {
+    "unit": "CELSIUS",
+    "degrees": 36.8
+  },
+  "dewPoint": {
+    "unit": "CELSIUS",
+    "degrees": 26.1
+  },
+  "heatIndex": {
+    "unit": "CELSIUS",
+    "degrees": 36.8
+  },
+  "windChill": {
+    "unit": "CELSIUS",
+    "degrees": 29.8
+  },
+  "precipitation": {
+    "probability": {
+      "type": "RAIN",
+      "percent": 0
+    },
+    "snowQpf": {
+      "unit": "MILLIMETERS",
+      "quantity": 0
+    },
+    "qpf": {
+      "unit": "MILLIMETERS",
+      "quantity": 0
+    }
+  },
+  "airPressure": {
+    "meanSeaLevelMillibars": 1017.56
+  },
+  "wind": {
+    "direction": {
+      "cardinal": "SOUTH_SOUTHEAST",
+      "degrees": 166
+    },
+    "speed": {
+      "unit": "KILOMETERS_PER_HOUR",
+      "value": 13
+    },
+    "gust": {
+      "unit": "KILOMETERS_PER_HOUR",
+      "value": 14
+    }
+  },
+  "visibility": {
+    "unit": "KILOMETERS",
+    "distance": 16
+  },
+  "currentConditionsHistory": {
+    "temperatureChange": {
+      "unit": "CELSIUS",
+      "degrees": -0.1
+    },
+    "maxTemperature": {
+      "unit": "CELSIUS",
+      "degrees": 31.2
+    },
+    "minTemperature": {
+      "unit": "CELSIUS",
+      "degrees": 27.6
+    },
+    "snowQpf": {
+      "unit": "MILLIMETERS",
+      "quantity": 0
+    },
+    "qpf": {
+      "unit": "MILLIMETERS",
+      "quantity": 4.64
+    }
+  },
+  "currentTime": "2026-09-14T12:07:51.863766446Z",
+  "isDaytime": true,
+  "relativeHumidity": 80,
+  "uvIndex": 0,
+  "thunderstormProbability": 0,
+  "cloudCover": 9
+}

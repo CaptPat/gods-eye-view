@@ -1,0 +1,921 @@
+{
+  "forecastHours": [
+    {
+      "interval": {
+        "startTime": "2026-09-14T12:00:00Z",
+        "endTime": "2026-09-14T13:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.8
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH_SOUTHEAST",
+          "degrees": 166
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 13
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 14
+        }
+      },
+      "isDaytime": false
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-14T13:00:00Z",
+        "endTime": "2026-09-14T14:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Sunny",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.6
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH",
+          "degrees": 171
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 11
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 13
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-14T14:00:00Z",
+        "endTime": "2026-09-14T15:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Mostly sunny",
+          "languageCode": "en"
+        },
+        "type": "MOSTLY_CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 30.3
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH_SOUTHEAST",
+          "degrees": 168
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 11
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 13
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-14T15:00:00Z",
+        "endTime": "2026-09-14T16:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Mostly sunny",
+          "languageCode": "en"
+        },
+        "type": "MOSTLY_CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 30.8
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 15
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH_SOUTHEAST",
+          "degrees": 159
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 13
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 14
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-14T16:00:00Z",
+        "endTime": "2026-09-14T17:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Scattered thunderstorms",
+          "languageCode": "en"
+        },
+        "type": "SCATTERED_THUNDERSTORMS"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 31.1
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 45
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH",
+          "degrees": 169
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 14
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 14
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-14T17:00:00Z",
+        "endTime": "2026-09-14T18:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Scattered thunderstorms",
+          "languageCode": "en"
+        },
+        "type": "SCATTERED_THUNDERSTORMS"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 31.3
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 40
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH_SOUTHEAST",
+          "degrees": 157
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 13
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 32
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-14T18:00:00Z",
+        "endTime": "2026-09-14T19:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Chance of showers",
+          "languageCode": "en"
+        },
+        "type": "CHANCE_OF_SHOWERS"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 31.4
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 25
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH_SOUTHEAST",
+          "degrees": 148
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 11
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 26
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-14T19:00:00Z",
+        "endTime": "2026-09-14T20:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Partly sunny",
+          "languageCode": "en"
+        },
+        "type": "PARTLY_CLOUDY"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 31.3
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTHEAST",
+          "degrees": 144
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 13
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 16
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-14T20:00:00Z",
+        "endTime": "2026-09-14T21:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Sunny",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 31.3
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTHEAST",
+          "degrees": 143
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 16
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 18
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-14T21:00:00Z",
+        "endTime": "2026-09-14T22:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Sunny",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 31.3
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTHEAST",
+          "degrees": 141
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 16
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 19
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-14T22:00:00Z",
+        "endTime": "2026-09-14T23:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Sunny",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 31.1
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTHEAST",
+          "degrees": 142
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 16
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 19
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-14T23:00:00Z",
+        "endTime": "2026-09-15T00:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Sunny",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 30.8
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTHEAST",
+          "degrees": 144
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 16
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 19
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T00:00:00Z",
+        "endTime": "2026-09-15T01:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Sunny",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 30.4
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH_SOUTHEAST",
+          "degrees": 153
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 18
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 19
+        }
+      },
+      "isDaytime": true
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T01:00:00Z",
+        "endTime": "2026-09-15T02:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 30.2
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH_SOUTHEAST",
+          "degrees": 155
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 19
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 21
+        }
+      },
+      "isDaytime": false
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T02:00:00Z",
+        "endTime": "2026-09-15T03:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 30
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH_SOUTHEAST",
+          "degrees": 158
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 19
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 21
+        }
+      },
+      "isDaytime": false
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T03:00:00Z",
+        "endTime": "2026-09-15T04:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.9
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH_SOUTHEAST",
+          "degrees": 158
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 19
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 21
+        }
+      },
+      "isDaytime": false
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T04:00:00Z",
+        "endTime": "2026-09-15T05:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.8
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH_SOUTHEAST",
+          "degrees": 161
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 19
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 21
+        }
+      },
+      "isDaytime": false
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T05:00:00Z",
+        "endTime": "2026-09-15T06:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.7
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH_SOUTHEAST",
+          "degrees": 163
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 19
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 21
+        }
+      },
+      "isDaytime": false
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T06:00:00Z",
+        "endTime": "2026-09-15T07:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.6
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH",
+          "degrees": 170
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 18
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 19
+        }
+      },
+      "isDaytime": false
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T07:00:00Z",
+        "endTime": "2026-09-15T08:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.6
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH",
+          "degrees": 174
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 18
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 19
+        }
+      },
+      "isDaytime": false
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T08:00:00Z",
+        "endTime": "2026-09-15T09:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.6
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 15
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH",
+          "degrees": 179
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 16
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 18
+        }
+      },
+      "isDaytime": false
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T09:00:00Z",
+        "endTime": "2026-09-15T10:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.5
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH",
+          "degrees": 186
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 14
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 18
+        }
+      },
+      "isDaytime": false
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T10:00:00Z",
+        "endTime": "2026-09-15T11:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.4
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH",
+          "degrees": 184
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 13
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 14
+        }
+      },
+      "isDaytime": false
+    },
+    {
+      "interval": {
+        "startTime": "2026-09-15T11:00:00Z",
+        "endTime": "2026-09-15T12:00:00Z"
+      },
+      "weatherCondition": {
+        "description": {
+          "text": "Clear",
+          "languageCode": "en"
+        },
+        "type": "CLEAR"
+      },
+      "temperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.5
+      },
+      "precipitation": {
+        "probability": {
+          "type": "RAIN",
+          "percent": 0
+        }
+      },
+      "wind": {
+        "direction": {
+          "cardinal": "SOUTH",
+          "degrees": 189
+        },
+        "speed": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 11
+        },
+        "gust": {
+          "unit": "KILOMETERS_PER_HOUR",
+          "value": 14
+        }
+      },
+      "isDaytime": false
+    }
+  ],
+  "timeZone": {
+    "id": "America/Chicago",
+    "version": ""
+  },
+  "nextPageToken": "fixture-page-2"
+}

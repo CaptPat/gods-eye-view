@@ -1,0 +1,498 @@
+{
+  "forecastDays": [
+    {
+      "displayDate": {
+        "year": 2026,
+        "month": 9,
+        "day": 14
+      },
+      "daytimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Sunny",
+            "languageCode": "en"
+          },
+          "type": "CLEAR"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 45
+          }
+        }
+      },
+      "nighttimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Clear",
+            "languageCode": "en"
+          },
+          "type": "CLEAR"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 15
+          }
+        }
+      },
+      "maxTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 31.4
+      },
+      "minTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.4
+      },
+      "sunEvents": {
+        "sunriseTime": "2026-09-14T12:03:33.388209522Z",
+        "sunsetTime": "2026-09-15T00:25:23.308142120Z"
+      }
+    },
+    {
+      "displayDate": {
+        "year": 2026,
+        "month": 9,
+        "day": 15
+      },
+      "daytimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Sunny",
+            "languageCode": "en"
+          },
+          "type": "CLEAR"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 0
+          }
+        }
+      },
+      "nighttimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Clear",
+            "languageCode": "en"
+          },
+          "type": "CLEAR"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 15
+          }
+        }
+      },
+      "maxTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 31.7
+      },
+      "minTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 29
+      },
+      "sunEvents": {
+        "sunriseTime": "2026-09-15T12:04:04.095512862Z",
+        "sunsetTime": "2026-09-16T00:24:09.865087703Z"
+      }
+    },
+    {
+      "displayDate": {
+        "year": 2026,
+        "month": 9,
+        "day": 16
+      },
+      "daytimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Partly sunny",
+            "languageCode": "en"
+          },
+          "type": "PARTLY_CLOUDY"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 15
+          }
+        }
+      },
+      "nighttimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Thunderstorm",
+            "languageCode": "en"
+          },
+          "type": "THUNDERSTORM"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 75
+          }
+        }
+      },
+      "maxTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 31.5
+      },
+      "minTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 26.7
+      },
+      "sunEvents": {
+        "sunriseTime": "2026-09-16T12:04:34.834092238Z",
+        "sunsetTime": "2026-09-17T00:22:56.328978114Z"
+      }
+    },
+    {
+      "displayDate": {
+        "year": 2026,
+        "month": 9,
+        "day": 17
+      },
+      "daytimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Heavy thunderstorm",
+            "languageCode": "en"
+          },
+          "type": "HEAVY_THUNDERSTORM"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 85
+          }
+        }
+      },
+      "nighttimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Clear",
+            "languageCode": "en"
+          },
+          "type": "CLEAR"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 10
+          }
+        }
+      },
+      "maxTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.6
+      },
+      "minTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 26.6
+      },
+      "sunEvents": {
+        "sunriseTime": "2026-09-17T12:05:05.616116004Z",
+        "sunsetTime": "2026-09-18T00:21:42.726502066Z"
+      }
+    },
+    {
+      "displayDate": {
+        "year": 2026,
+        "month": 9,
+        "day": 18
+      },
+      "daytimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Sunny",
+            "languageCode": "en"
+          },
+          "type": "CLEAR"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 0
+          }
+        }
+      },
+      "nighttimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Clear",
+            "languageCode": "en"
+          },
+          "type": "CLEAR"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 15
+          }
+        }
+      },
+      "maxTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 30.5
+      },
+      "minTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 28
+      },
+      "sunEvents": {
+        "sunriseTime": "2026-09-18T12:05:36.453945722Z",
+        "sunsetTime": "2026-09-19T00:20:29.084426146Z"
+      }
+    },
+    {
+      "displayDate": {
+        "year": 2026,
+        "month": 9,
+        "day": 19
+      },
+      "daytimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Sunny",
+            "languageCode": "en"
+          },
+          "type": "CLEAR"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 15
+          }
+        }
+      },
+      "nighttimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Clear",
+            "languageCode": "en"
+          },
+          "type": "CLEAR"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 15
+          }
+        }
+      },
+      "maxTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 30.5
+      },
+      "minTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 27.8
+      },
+      "sunEvents": {
+        "sunriseTime": "2026-09-19T12:06:07.360117093Z",
+        "sunsetTime": "2026-09-20T00:19:15.429600578Z"
+      }
+    },
+    {
+      "displayDate": {
+        "year": 2026,
+        "month": 9,
+        "day": 20
+      },
+      "daytimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Sunny",
+            "languageCode": "en"
+          },
+          "type": "CLEAR"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 15
+          }
+        }
+      },
+      "nighttimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Partly cloudy",
+            "languageCode": "en"
+          },
+          "type": "PARTLY_CLOUDY"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 15
+          }
+        }
+      },
+      "maxTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 30.1
+      },
+      "minTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 27.4
+      },
+      "sunEvents": {
+        "sunriseTime": "2026-09-20T12:06:38.347320527Z",
+        "sunsetTime": "2026-09-21T00:18:01.788964953Z"
+      }
+    },
+    {
+      "displayDate": {
+        "year": 2026,
+        "month": 9,
+        "day": 21
+      },
+      "daytimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Partly sunny",
+            "languageCode": "en"
+          },
+          "type": "PARTLY_CLOUDY"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 20
+          }
+        }
+      },
+      "nighttimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Light rain",
+            "languageCode": "en"
+          },
+          "type": "LIGHT_RAIN"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 20
+          }
+        }
+      },
+      "maxTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.8
+      },
+      "minTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 26.4
+      },
+      "sunEvents": {
+        "sunriseTime": "2026-09-21T12:07:09.428381533Z",
+        "sunsetTime": "2026-09-22T00:16:48.189553974Z"
+      }
+    },
+    {
+      "displayDate": {
+        "year": 2026,
+        "month": 9,
+        "day": 22
+      },
+      "daytimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Scattered thunderstorms",
+            "languageCode": "en"
+          },
+          "type": "SCATTERED_THUNDERSTORMS"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 70
+          }
+        }
+      },
+      "nighttimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Thunderstorm",
+            "languageCode": "en"
+          },
+          "type": "THUNDERSTORM"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 70
+          }
+        }
+      },
+      "maxTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 29.2
+      },
+      "minTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 25.8
+      },
+      "sunEvents": {
+        "sunriseTime": "2026-09-22T12:07:40.616240706Z",
+        "sunsetTime": "2026-09-23T00:15:34.658502703Z"
+      }
+    },
+    {
+      "displayDate": {
+        "year": 2026,
+        "month": 9,
+        "day": 23
+      },
+      "daytimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Heavy thunderstorm",
+            "languageCode": "en"
+          },
+          "type": "HEAVY_THUNDERSTORM"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 65
+          }
+        }
+      },
+      "nighttimeForecast": {
+        "weatherCondition": {
+          "description": {
+            "text": "Scattered thunderstorms",
+            "languageCode": "en"
+          },
+          "type": "SCATTERED_THUNDERSTORMS"
+        },
+        "precipitation": {
+          "probability": {
+            "type": "RAIN",
+            "percent": 55
+          }
+        }
+      },
+      "maxTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 28.6
+      },
+      "minTemperature": {
+        "unit": "CELSIUS",
+        "degrees": 25.8
+      },
+      "sunEvents": {
+        "sunriseTime": "2026-09-23T12:08:11.923933289Z",
+        "sunsetTime": "2026-09-24T00:14:21.223052002Z"
+      }
+    }
+  ],
+  "timeZone": {
+    "id": "America/Chicago",
+    "version": ""
+  }
+}

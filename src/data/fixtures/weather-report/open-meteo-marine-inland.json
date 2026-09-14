@@ -1,0 +1,51 @@
+{
+  "latitude": 30.291664,
+  "longitude": -97.79166,
+  "generationtime_ms": 0.31948089599609375,
+  "utc_offset_seconds": 0,
+  "timezone": "GMT",
+  "timezone_abbreviation": "GMT",
+  "elevation": 160,
+  "current_units": {
+    "time": "iso8601",
+    "interval": "seconds",
+    "wave_height": "m",
+    "wave_period": "s",
+    "wave_direction": "°",
+    "swell_wave_height": "m",
+    "sea_surface_temperature": "°C"
+  },
+  "current": {
+    "time": "2026-09-14T12:00",
+    "interval": 900,
+    "wave_height": null,
+    "wave_period": null,
+    "wave_direction": null,
+    "swell_wave_height": null,
+    "sea_surface_temperature": null
+  },
+  "daily_units": {
+    "time": "iso8601",
+    "wave_height_max": "m"
+  },
+  "daily": {
+    "time": [
+      "2026-09-14",
+      "2026-09-15",
+      "2026-09-16",
+      "2026-09-17",
+      "2026-09-18",
+      "2026-09-19",
+      "2026-09-20"
+    ],
+    "wave_height_max": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  }
+}

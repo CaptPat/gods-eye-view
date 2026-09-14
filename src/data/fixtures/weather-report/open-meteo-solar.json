@@ -1,0 +1,33 @@
+{
+  "latitude": 29.300776,
+  "longitude": -94.78618,
+  "generationtime_ms": 0.9870529174804688,
+  "utc_offset_seconds": 0,
+  "timezone": "GMT",
+  "timezone_abbreviation": "GMT",
+  "elevation": 2,
+  "current_units": {
+    "time": "iso8601",
+    "interval": "seconds",
+    "shortwave_radiation": "W/m²",
+    "direct_radiation": "W/m²"
+  },
+  "current": {
+    "time": "2026-09-14T12:00",
+    "interval": 900,
+    "shortwave_radiation": 0,
+    "direct_radiation": 0
+  },
+  "hourly_units": {
+    "time": "iso8601",
+    "soil_temperature_0cm": "°C"
+  },
+  "hourly": {
+    "time": [
+      "2026-09-14T12:00"
+    ],
+    "soil_temperature_0cm": [
+      28.8
+    ]
+  }
+}
