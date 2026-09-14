@@ -4,6 +4,7 @@ import {
   RAINVIEWER_CREDIT,
   registerDynamicCredit,
 } from './dataCredits.js';
+import { governorRequestRender } from '../renderGovernor.js';
 
 export * from '../layers/weather-radar/index.js';
 
@@ -12,6 +13,7 @@ export function createWeatherRadarLayer(options = {}) {
   return createLayer({
     registerCredit: registerDynamicCredit,
     credits: { rainviewer: RAINVIEWER_CREDIT, iem: IEM_NEXRAD_CREDIT },
+    requestRender: governorRequestRender,
     ...options,
   });
 }

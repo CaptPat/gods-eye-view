@@ -30,6 +30,7 @@ export function createWeatherRadarLayer({
     clearTimeout: (timer) => clearTimeout(timer),
   },
   now = Date.now,
+  requestRender = () => {},
 } = {}) {
   let viewer = null;
   let imagery = null;
@@ -86,11 +87,13 @@ export function createWeatherRadarLayer({
     }
     imagery.preload([newest.time]);
     imagery.release([current, newest.time]);
-    if (!swapTimer) {
+    // Do not re-arm while hidden: the next update() re-evaluates via renderLive().
+    if (!swapTimer && isVisible()) {
       swapTimer = timers.setTimeout(() => {
         swapTimer = null;
         if (enabled && !playing) renderLive();
         notifyRows();
+        requestRender('weather-radar');
       }, SWAP_CHECK_MS);
     }
   }
@@ -111,6 +114,7 @@ export function createWeatherRadarLayer({
     imagery.show(loopTime);
     loopTimer = timers.setTimeout(tick, step.delayMs);
     notifyRows();
+    requestRender('weather-radar');
   }
 
   function startLoop() {
@@ -133,6 +137,7 @@ export function createWeatherRadarLayer({
       renderLive();
     }
     notifyRows();
+    requestRender('weather-radar');
   }
 
   const layer = {
@@ -260,7 +265,8 @@ export function createWeatherRadarLayer({
       if (playing && imagery.readyCount() < frames.length) {
         return {
           loading: true,
-          source: `${name} · Loading ${imagery.readyCount()}/${frames.length}`,
+          source: name,
+          loadingLabel: `Loading ${imagery.readyCount()}/${frames.length}`,
         };
       }
       if (shown !== null) {

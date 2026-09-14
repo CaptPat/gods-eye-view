@@ -91,6 +91,7 @@ function harness({ payloads = {}, visible = true } = {}) {
   const timers = fakeTimers();
   const credited = [];
   const requests = [];
+  const renderRequests = [];
   const events = new EventTarget();
   const clock = { now: T + 7 * MIN, visible };
   const answers = {
@@ -118,6 +119,7 @@ function harness({ payloads = {}, visible = true } = {}) {
     isVisible: () => clock.visible,
     timers,
     now: () => clock.now,
+    requestRender: (reason) => renderRequests.push(reason),
   });
   const viewer = {};
   return {
@@ -126,6 +128,7 @@ function harness({ payloads = {}, visible = true } = {}) {
     timers,
     credited,
     requests,
+    renderRequests,
     events,
     clock,
     answers,
@@ -163,6 +166,10 @@ test('enabling credits RainViewer, fetches frames and shows the newest with an h
   assert.deepEqual(h.credited, ['rainviewer']);
   assert.deepEqual(h.requests, ['/api/radar/frames?source=rainviewer']);
   assert.equal(h.imagery.api.shownTime(), T);
+  assert.ok(
+    h.renderRequests.includes('weather-radar'),
+    'a normal refresh requests a render',
+  );
   // count 13, not 12: retention counts back from the newest frame, so the 7-minute lag drops nothing.
   assert.deepEqual(h.layer.getStats(), {
     status: 'ok',
@@ -221,12 +228,39 @@ test('a new newest frame is shown only once its tiles are ready', async () => {
   assert.equal(h.imagery.api.shownTime(), T, 'still showing the old frame');
   assert.ok(h.timers.delays().includes(SWAP_CHECK_MS));
   h.imagery.ready.add(T + 10 * MIN);
+  const before = h.renderRequests.length;
   h.timers.run(SWAP_CHECK_MS);
   assert.equal(h.imagery.api.shownTime(), T + 10 * MIN);
   assert.deepEqual(
     [...h.imagery.layers],
     [T + 10 * MIN],
     'older frames released',
+  );
+  assert.ok(
+    h.renderRequests.length > before,
+    'the delayed swap that shows the new newest frame requests a render',
+  );
+});
+
+test('the swap poll does not re-arm while the tab is hidden', async () => {
+  const h = harness();
+  await enabled(h);
+  h.answers.rainviewer = {
+    source: 'rainviewer',
+    stale: false,
+    frames: frames(13, T + 10 * MIN),
+  };
+  h.clock.now = T + 17 * MIN;
+  await h.layer.update(h.viewer, {});
+  assert.ok(h.timers.delays().includes(SWAP_CHECK_MS));
+  h.clock.visible = false;
+  // The new newest frame is still not ready, so the callback's renderLive()
+  // would normally re-arm the poll — it must not while hidden.
+  h.timers.run(SWAP_CHECK_MS);
+  assert.equal(
+    h.timers.delays().includes(SWAP_CHECK_MS),
+    false,
+    'the swap poll is not re-armed while hidden; update() re-evaluates it next',
   );
 });
 
@@ -244,7 +278,8 @@ test('the loop preloads every frame, steps through ready frames, and pause retur
   );
   assert.deepEqual(h.layer.getStats(), {
     loading: true,
-    source: 'RainViewer · Loading 0/3',
+    source: 'RainViewer',
+    loadingLabel: 'Loading 0/3',
   });
   h.imagery.ready.add(frames(3)[0].time);
   h.imagery.ready.add(frames(3)[2].time);
@@ -254,12 +289,18 @@ test('the loop preloads every frame, steps through ready frames, and pause retur
     frames(3)[0].time,
     'the loop starts at the oldest ready frame',
   );
+  assert.equal(
+    h.renderRequests.at(-1),
+    'weather-radar',
+    'each loop tick that shows a frame requests a render',
+  );
   h.timers.run(500);
   assert.equal(
     h.imagery.api.shownTime(),
     frames(3)[2].time,
     'a frame that is not ready is skipped',
   );
+  assert.equal(h.renderRequests.at(-1), 'weather-radar');
   assert.ok(h.timers.delays().includes(1500), 'the newest frame holds');
   h.imagery.ready.add(frames(3)[1].time);
   h.timers.run(1500);
@@ -268,6 +309,7 @@ test('the loop preloads every frame, steps through ready frames, and pause retur
     frames(3)[0].time,
     'a frame becoming ready mid-loop does not derail the order',
   );
+  assert.equal(h.renderRequests.at(-1), 'weather-radar');
   assert.equal(h.layer.getRowControls().chips[0].label, '❚❚ Pause');
   h.layer.setParams({ loop: false }, { origin: 'user' });
   assert.deepEqual(
@@ -297,11 +339,16 @@ test('US detail switches source, credits Iowa State and refetches; opacity is ap
     'switching refetches at once',
   );
   // A second update supersedes the switch's in-flight request, so this await settles both.
+  const beforeRefetch = h.renderRequests.length;
   assert.equal(await h.layer.update(h.viewer, {}), true);
   assert.equal(h.imagery.source(), 'iem');
   assert.equal(
     h.layer.getStats().source,
     'Iowa State NEXRAD · 04:50 UTC · 7 min old',
+  );
+  assert.ok(
+    h.renderRequests.length > beforeRefetch,
+    'the US-detail refetch requests a render',
   );
   assert.equal(h.layer.getRowControls().legend[0].color, '#00ff00');
 
