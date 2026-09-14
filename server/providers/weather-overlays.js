@@ -49,7 +49,12 @@ function sendJson(res, status, body, headers = {}) {
   res.end(JSON.stringify(body));
 }
 
-function sendPng(res, bytes, cacheStatus, cacheControl = 'private, max-age=600') {
+function sendPng(
+  res,
+  bytes,
+  cacheStatus,
+  cacheControl = 'private, max-age=600',
+) {
   res.writeHead(200, {
     'Content-Type': 'image/png',
     'Cache-Control': cacheControl,
@@ -296,7 +301,9 @@ export function createWeatherOverlaysHandler({
         cacheKey,
         GOOGLE_TILE_TTL_MS,
         async () =>
-          readPngCapped(await fetchUpstream(googleTileUrl(key, coords, secret))),
+          readPngCapped(
+            await fetchUpstream(googleTileUrl(key, coords, secret)),
+          ),
         'no-store',
       );
     }
