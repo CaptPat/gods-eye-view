@@ -1,0 +1,106 @@
+{
+  "count": 9,
+  "units": "feet",
+  "stations": [
+    {
+      "currbin": 1,
+      "type": "S",
+      "depth": 15,
+      "depthType": "S",
+      "timezone_offset": "",
+      "id": "ACT0311",
+      "name": "Turtle Head Pt., ESE of, Penobscot Bay",
+      "lat": 44.37617,
+      "lng": -68.85467
+    },
+    {
+      "currbin": 2,
+      "type": "S",
+      "depth": 40,
+      "depthType": "S",
+      "timezone_offset": "",
+      "id": "ACT0311",
+      "name": "Turtle Head Pt., ESE of, Penobscot Bay",
+      "lat": 44.37617,
+      "lng": -68.85467
+    },
+    {
+      "currbin": 1,
+      "type": "H",
+      "depth": 15,
+      "depthType": "S",
+      "timezone_offset": "-5",
+      "id": "ACT1616",
+      "name": "Pollock Rip Channel (Butler Hole)",
+      "lat": 41.54999923706055,
+      "lng": -69.9832992553711
+    },
+    {
+      "currbin": 1,
+      "type": "W",
+      "depth": null,
+      "depthType": "U",
+      "timezone_offset": "",
+      "id": "ACT5971",
+      "name": "Hills Point, 1.0 mile south of",
+      "lat": 38.55,
+      "lng": -76.31167
+    },
+    {
+      "currbin": 23,
+      "type": "H",
+      "depth": 22,
+      "depthType": "B",
+      "timezone_offset": "-10",
+      "id": "HAI1103",
+      "name": "Barbers Point Entrance",
+      "lat": 21.31235,
+      "lng": -158.13288
+    },
+    {
+      "currbin": 12,
+      "type": "H",
+      "depth": 94,
+      "depthType": "B",
+      "timezone_offset": "-10",
+      "id": "HAI1103",
+      "name": "Barbers Point Entrance",
+      "lat": 21.31235,
+      "lng": -158.13288
+    },
+    {
+      "currbin": 1,
+      "type": "H",
+      "depth": 166,
+      "depthType": "B",
+      "timezone_offset": "-10",
+      "id": "HAI1103",
+      "name": "Barbers Point Entrance",
+      "lat": 21.31235,
+      "lng": -158.13288
+    },
+    {
+      "currbin": 1,
+      "type": "S",
+      "depth": null,
+      "depthType": "U",
+      "timezone_offset": "",
+      "id": "PCT0016",
+      "name": "Magdalena Bay entrance",
+      "lat": 24.53333,
+      "lng": -112.03333
+    },
+    {
+      "currbin": 0,
+      "type": "W",
+      "depth": 10,
+      "depthType": "S",
+      "timezone_offset": "-6",
+      "id": "sn0101",
+      "name": "Sabine Bank Channel LBB 34",
+      "lat": 29.62873,
+      "lng": -93.81617
+    }
+  ],
+  "self": null
+}
