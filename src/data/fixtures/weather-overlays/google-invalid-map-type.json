@@ -1,0 +1,18 @@
+{
+  "error": {
+    "code": 400,
+    "message": "Invalid value at 'map_type' (type.googleapis.com/google.maps.airquality.v1.MapType), \"BOGUS\"",
+    "status": "INVALID_ARGUMENT",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.BadRequest",
+        "fieldViolations": [
+          {
+            "field": "map_type",
+            "description": "Invalid value at 'map_type' (type.googleapis.com/google.maps.airquality.v1.MapType), \"BOGUS\""
+          }
+        ]
+      }
+    ]
+  }
+}
