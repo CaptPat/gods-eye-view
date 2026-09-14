@@ -145,7 +145,8 @@
 }
 #right-context-rail > #pp-toggles,
 #right-context-rail > #cctv-panel,
-#right-context-rail > #global-context-panel {
+#right-context-rail > #global-context-panel,
+#right-context-rail > #weather-report-panel {
   position: relative;
   inset: auto;
   flex: 0 0 auto;
@@ -229,7 +230,8 @@
 }
 #right-context-rail.layout-focus > #pp-toggles:not(.collapsed),
 #right-context-rail.layout-focus > #cctv-panel:not(.collapsed),
-#right-context-rail.layout-focus > #global-context-panel:not(.collapsed) {
+#right-context-rail.layout-focus > #global-context-panel:not(.collapsed),
+#right-context-rail.layout-focus > #weather-report-panel:not(.collapsed) {
   flex: 0 1 var(--right-panel-allocated-height);
   height: var(--right-panel-allocated-height);
   min-height: 0;
