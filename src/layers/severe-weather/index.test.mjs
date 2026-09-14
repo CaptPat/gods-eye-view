@@ -52,7 +52,10 @@ function fixturePayload() {
   };
 }
 
-function harness({ answer = () => Response.json(fixturePayload()) } = {}) {
+function harness({
+  answer = () => Response.json(fixturePayload()),
+  renderImpl,
+} = {}) {
   const calls = [];
   const requests = [];
   const renders = [];
@@ -60,7 +63,7 @@ function harness({ answer = () => Response.json(fixturePayload()) } = {}) {
   let action = null;
   const state = { visible: true, answer };
   const rendering = {
-    render: (data) => renders.push(data),
+    render: renderImpl ?? ((data) => renders.push(data)),
     targetFor: (picked) =>
       picked?.id === 'fairbanks'
         ? { kind: 'nws', key: 'zone:forecast/AKZ844' }
@@ -223,6 +226,49 @@ test('a hidden tab skips refreshes; a failed refresh keeps the drawing and repor
     false,
     'only a manager abort is a failure',
   );
+});
+
+test('a render exception surfaces through getStats().error without committing the failed payload', async () => {
+  let shouldThrow = false;
+  const renders = [];
+  const h = harness({
+    renderImpl: (data) => {
+      if (shouldThrow) throw new Error('boom: broken geometry');
+      renders.push(data);
+    },
+  });
+  assert.equal(await enabled(h), true);
+  const goodStats = h.layer.getStats();
+  assert.equal(goodStats.status, 'ok');
+  assert.equal(goodStats.lastUpdate, T);
+  assert.equal(renders.length, 1);
+
+  // The next fetch answers with a smaller, distinguishable payload; if it
+  // were committed despite the draw throwing, getStats() would change.
+  const quiet = fixturePayload();
+  quiet.nws.alerts = quiet.nws.alerts.slice(0, 1);
+  shouldThrow = true;
+  h.state.answer = () => Response.json(quiet);
+  assert.equal(
+    await h.layer.update(h.viewer, {}),
+    true,
+    'a handled draw failure still resolves true',
+  );
+  assert.equal(renders.length, 1, 'the failed draw did not commit a render');
+  assert.deepEqual(h.layer.getStats(), {
+    ...goodStats,
+    stale: true,
+    error: 'Severe weather refresh failed',
+  });
+
+  // The next, successful update is not skipped: the failure did not poison
+  // future draws, and the smaller payload from the failed round is gone —
+  // this fetch's own (large) payload commits normally.
+  shouldThrow = false;
+  h.state.answer = () => Response.json(fixturePayload());
+  assert.equal(await h.layer.update(h.viewer, {}), true);
+  assert.equal(renders.length, 2);
+  assert.deepEqual(h.layer.getStats(), goodStats);
 });
 
 test('new data refreshes the selected card, and drops it when its alert has ended', async () => {

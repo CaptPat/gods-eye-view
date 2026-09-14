@@ -59,10 +59,18 @@ export function createSevereWeatherLayer({
   let error = null;
   let request = null;
 
-  function draw() {
-    const { areas, dropped } = capAreasToBudget(buildNwsAreas(payload.nws));
-    data = { areas, events: payload.gdacs.events, droppedAreas: dropped };
-    rendering.render(data);
+  function draw(nextPayload) {
+    const { areas, dropped } = capAreasToBudget(buildNwsAreas(nextPayload.nws));
+    const next = {
+      areas,
+      events: nextPayload.gdacs.events,
+      droppedAreas: dropped,
+    };
+    // Render before committing: if it throws, `data` (and payload/lastUpdate,
+    // committed by the caller only after draw() returns) stay at the last
+    // good draw.
+    rendering.render(next);
+    data = next;
     selection.refresh();
   }
 
@@ -139,10 +147,10 @@ export function createSevereWeatherLayer({
         const parsed = parseSevereWeatherPayload(await response.json());
         if (!parsed) throw new Error('malformed severe weather payload');
         if (!enabled || request !== controller) return true;
+        draw(parsed);
         payload = parsed;
         error = null;
         lastUpdate = now();
-        draw();
         return true;
       } catch (failure) {
         if (signal?.aborted) return false;

@@ -336,6 +336,77 @@ test('selection turns the chosen outlines, track and point white and requests a 
   );
 });
 
+test('selecting A then B touches only their own entities, not every outline', () => {
+  const { rendering, entity } = harness();
+  rendering.render({ areas: AREAS, events: EVENTS });
+
+  const watched = [
+    'severe-weather:nws:zone:forecast/AKZ844:0:outline',
+    'severe-weather:nws:alert:urn:x:0:outline',
+    'severe-weather:nws:alert:urn:x:1:outline',
+    'severe-weather:gdacs:TC-1001321:cone:0:outline',
+    'severe-weather:gdacs:TC-1001321',
+    'severe-weather:gdacs:DR-1018431',
+  ];
+  const counts = new Map(watched.map((id) => [id, 0]));
+  for (const id of watched) {
+    const target = entity(id);
+    const graphics = target.polyline ?? target.point;
+    graphics.definitionChanged.addEventListener(() => {
+      counts.set(id, counts.get(id) + 1);
+    });
+  }
+  const reset = () => watched.forEach((id) => counts.set(id, 0));
+  const touched = () => watched.filter((id) => counts.get(id) > 0).sort();
+
+  reset();
+  rendering.setSelected('gdacs:TC-1001321');
+  assert.deepEqual(
+    touched(),
+    [
+      'severe-weather:gdacs:TC-1001321',
+      'severe-weather:gdacs:TC-1001321:cone:0:outline',
+    ].sort(),
+    'only TC-1001321 changed when it was selected',
+  );
+
+  reset();
+  rendering.setSelected('nws:zone:forecast/AKZ844');
+  assert.deepEqual(
+    touched(),
+    [
+      'severe-weather:gdacs:TC-1001321',
+      'severe-weather:gdacs:TC-1001321:cone:0:outline',
+      'severe-weather:nws:zone:forecast/AKZ844:0:outline',
+    ].sort(),
+    'deselecting TC-1001321 and selecting AKZ844 touch only those two groups',
+  );
+});
+
+test('a render exception still resumes entity events, and does not poison the next render', () => {
+  const { rendering, entity } = harness();
+  const entities = rendering.dataSource.entities;
+  let resumeCalls = 0;
+  const originalResume = entities.resumeEvents.bind(entities);
+  entities.resumeEvents = (...args) => {
+    resumeCalls += 1;
+    return originalResume(...args);
+  };
+  // Two areas sharing the same key produce a duplicate entity id on the
+  // second add, which Cesium's EntityCollection rejects.
+  const brokenAreas = [AREAS[0], { ...AREAS[0] }];
+  assert.throws(() => rendering.render({ areas: brokenAreas, events: EVENTS }));
+  assert.equal(
+    resumeCalls,
+    1,
+    'resumeEvents still runs after a render exception',
+  );
+
+  // A later, valid render is not skipped as a duplicate of the failed one.
+  assert.equal(rendering.render({ areas: AREAS, events: EVENTS }), true);
+  assert.ok(entity('severe-weather:nws:zone:forecast/AKZ844:0'));
+});
+
 test('frames are requested while new ground geometry is pending, and the pump is bounded', () => {
   const { viewer, timers, renders, rendering } = harness();
   viewer.state.pending = true;

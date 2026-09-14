@@ -162,6 +162,12 @@ export function createSevereWeatherRendering(
       for (const apply of list) apply(key === selectedKey);
   }
 
+  /** Apply only one selection key's highlighters, not the full walk. */
+  function applyHighlightFor(key, selected) {
+    const list = highlighters.get(key);
+    if (list) for (const apply of list) apply(selected);
+  }
+
   /** Whether Cesium is still building the newest ground geometry (sampled at both ends of the collection). */
   function isPending() {
     const display = viewer.dataSourceDisplay;
@@ -232,15 +238,22 @@ export function createSevereWeatherRendering(
         ]),
       ]);
       if (next === signature) return false;
-      signature = next;
+      // Invalidate until the rebuild actually succeeds: a render exception
+      // must not poison future calls into thinking this broken set is
+      // already drawn.
+      signature = null;
       dataSource.entities.suspendEvents();
-      dataSource.entities.removeAll();
-      targets.clear();
-      highlighters.clear();
-      for (const area of areas) addArea(area);
-      for (const event of events) addEvent(event);
-      applyHighlight();
-      dataSource.entities.resumeEvents();
+      try {
+        dataSource.entities.removeAll();
+        targets.clear();
+        highlighters.clear();
+        for (const area of areas) addArea(area);
+        for (const event of events) addEvent(event);
+        applyHighlight();
+      } finally {
+        dataSource.entities.resumeEvents();
+      }
+      signature = next;
       requestRender('severe-weather-render');
       startReadyPump();
       return true;
@@ -255,8 +268,14 @@ export function createSevereWeatherRendering(
     /** `nws:<area key>`, `gdacs:<event id>` or null. */
     setSelected(key) {
       if (key === selectedKey) return;
+      const previous = selectedKey;
       selectedKey = key;
-      applyHighlight();
+      // Touch only the previous and next selection's own entities, not
+      // every outline: with real Cesium, writing a property — even to the
+      // same value — raises `definitionChanged` and marks the ground
+      // primitive batch dirty for every entity walked.
+      if (previous !== null) applyHighlightFor(previous, false);
+      if (selectedKey !== null) applyHighlightFor(selectedKey, true);
       requestRender('severe-weather-selection');
       startReadyPump();
     },
