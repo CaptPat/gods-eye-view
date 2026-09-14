@@ -1,15 +1,5 @@
 # Changelog
 
-## Tide and current stations (fork)
-
-- Add Tide Stations and Current Stations layers from NOAA CO-OPS (US and territories), served
-  through a caching `/api/tides` proxy.
-- Click a station for a card with the next high and low tides and the latest observation against
-  its prediction, or the next maximum flood, ebb and slack with direction and bin depth, in
-  station-local time. Click the card to open the NOAA station page.
-- Units follow the weather report's °F/°C switch. Share links carry only whether each layer is on
-  (tokens `h` and `k`).
-
 - Let CLI tools, development launchers and the setup doctor use an explicit project directory while retaining their existing default paths.
 
 - Split application scene, controls, catalog, tools and HTML into reusable components; configure application request services and sources without changing global fetch. Preserve standalone markup and voice behavior. Explicit annotation navigation may resolve a distant named target.
@@ -41,6 +31,16 @@
   cached-response and coverage notices, selection cards, share links, and voice toggles.
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
+
+## Tide and current stations (fork)
+
+- Add Tide Stations and Current Stations layers from NOAA CO-OPS (US and territories), served
+  through a caching `/api/tides` proxy.
+- Click a station for a card with the next high and low tides and the latest observation against
+  its prediction, or the next maximum flood, ebb and slack with direction and bin depth, in
+  station-local time. Click the card to open the NOAA station page.
+- Units follow the weather report's °F/°C switch. Share links carry only whether each layer is on
+  (tokens `h` and `k`).
 
 ## Right-click weather report (fork)
 
