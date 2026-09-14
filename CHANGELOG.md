@@ -40,10 +40,17 @@
 - Row controls for mode, pollen type and 40/70/100% opacity, with a legend per mode. Mode, pollen
   type and opacity travel in share links (layer token `o`).
 - Served through a `/api/weather-overlays` proxy with separate manifest and tile rate limits and an
-  in-memory tile cache pruned by age. Google modes report "Google Maps API key not configured"
-  without a key, and every mode reports when the Google 3D map source hides it.
+  in-memory tile cache pruned by age — NOAA tiles only; Google tiles are never cached
+  (`Cache-Control: no-store`), per the Pollen and Air Quality caching policies. Google modes report
+  "Google Maps API key not configured" without a key, and every mode reports when the Google 3D map
+  source hides it.
 - Weather Radar and Weather Overlays now share one frame-imagery helper; overlays sit directly above
-  the base map, so radar draws on top.
+  however many base-map layers exist (none on the photoreal 3D-tileset stack), so radar always
+  draws on top and re-seats correctly across map-stack changes.
+- Cap Google overlay tile spend with a server-wide, in-memory daily budget
+  (`GEV_GOOGLE_OVERLAY_TILES_PER_DAY`, default 25,000, resets at UTC midnight): over budget, tiles
+  answer 429 without an upstream call and Google modes report unavailable. A NOAA source that has
+  never loaded successfully is re-tried at most once every 60 s instead of on every request.
 
 ## Tide and current stations (fork)
 
