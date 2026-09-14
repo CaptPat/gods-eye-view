@@ -184,7 +184,7 @@ export function createWeatherOverlaysLayer({
           unavailableReason =
             payload.reason === 'not-configured'
               ? 'Google Maps API key not configured'
-              : 'Overlay unavailable';
+              : (payload.reason ?? 'Overlay unavailable');
           error = null;
           stale = false;
           targetTime = null;

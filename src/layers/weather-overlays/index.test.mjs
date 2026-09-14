@@ -534,6 +534,31 @@ test('the Layers panel renders every status shape as the spec states', async () 
     'UNAVAILABLE · Google Air Quality · Google Maps API key not configured',
   );
 
+  const budgeted = harness({
+    answers: {
+      'air-quality': {
+        mode: 'air-quality',
+        googleConfigured: true,
+        available: false,
+        reason: 'Google overlay tile budget reached for today',
+        time: null,
+        stale: false,
+      },
+    },
+  });
+  budgeted.layer.setParams({ mode: 'air-quality' }, { origin: 'user' });
+  await enabled(budgeted);
+  assert.deepEqual(budgeted.layer.getStats(), {
+    status: 'unavailable',
+    source: 'Google Air Quality',
+    error: 'Google overlay tile budget reached for today',
+    countLabel: 'AQI',
+  });
+  assert.equal(
+    rowText(budgeted.layer.getStats()),
+    'UNAVAILABLE · Google Air Quality · Google overlay tile budget reached for today',
+  );
+
   const cold = harness({ answers: { clouds: new Error('offline') } });
   await enabled(cold);
   assert.equal(
