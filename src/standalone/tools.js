@@ -51,6 +51,8 @@ export function createStandaloneTools({
       setItem: (key, value) => window.localStorage.setItem(key, value),
     },
     requestRender: governorRequestRender,
+    setPanelCollapsed: (id, collapsed, options) =>
+      styleManager.setPanelCollapsed(id, collapsed, options),
   });
   defer(() => weatherReport.destroy());
   defer(

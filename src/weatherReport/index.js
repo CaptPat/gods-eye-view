@@ -5,10 +5,11 @@ import {
   buildReportView,
   normalizeUnits,
 } from './reportModel.js';
-import { createReportPanel } from './reportPanel.js';
+import { PANEL_ID, createReportPanel } from './reportPanel.js';
 import { createReportPin } from './reportPin.js';
 
 export const REPORT_ENDPOINT = '/api/weather-report';
+const DISCLOSURE = { explicit: true, persist: false, syncShare: false };
 const LOADING_PIN = Object.freeze({
   title: 'Loading weather',
   details: Object.freeze([]),
@@ -30,6 +31,7 @@ export function createWeatherReport({
   createMenu = createContextMenu,
   createPin = createReportPin,
   createPanel = createReportPanel,
+  setPanelCollapsed = null,
 }) {
   let units = readUnits();
   let panel = null;
@@ -37,6 +39,17 @@ export function createWeatherReport({
   let report = null;
   let controller = null;
   let destroyed = false;
+
+  function applyCollapsed(collapsed) {
+    if (typeof setPanelCollapsed === 'function') {
+      setPanelCollapsed(PANEL_ID, collapsed, DISCLOSURE);
+      return;
+    }
+    const element = panel?.element;
+    if (!element) return;
+    element.classList.toggle('collapsed', collapsed);
+    element.classList.remove('layout-auto-collapsed');
+  }
 
   function readUnits() {
     try {
@@ -60,7 +73,11 @@ export function createWeatherReport({
     viewer,
     overlayHost,
     requestRender,
-    onActivate: () => panel?.reveal(),
+    onActivate: () => {
+      if (!panel) return;
+      applyCollapsed(false);
+      panel.reveal();
+    },
   });
   const menu = createMenu({
     viewer,
@@ -81,6 +98,7 @@ export function createWeatherReport({
         if (point) open(point);
       },
       onUnitsChange: (next) => setUnits(next),
+      onToggleCollapsed: (next) => applyCollapsed(next),
     });
     return panel;
   }
@@ -104,7 +122,9 @@ export function createWeatherReport({
       coordinates: coordinates(picked),
     };
     pin.show(picked, LOADING_PIN);
-    ensurePanel()?.showLoading(header);
+    const activePanel = ensurePanel();
+    activePanel?.showLoading(header);
+    if (activePanel) applyCollapsed(false);
     try {
       const params = new URLSearchParams({
         lat: picked.lat.toFixed(4),

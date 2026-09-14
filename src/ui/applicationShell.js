@@ -2789,6 +2789,7 @@ export class StyleManager {
       'pp-toggles',
       'cctv-panel',
       'global-context-panel',
+      'weather-report-panel',
     ].includes(panelEl?.id);
     const collapsed = panelEl.classList.contains('collapsed');
     panelEl

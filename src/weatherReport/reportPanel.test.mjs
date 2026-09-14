@@ -218,6 +218,34 @@ test('units, refresh, close, errors and destroy', (t) => {
   assert.equal(s.rail.children.includes(s.el), false);
 });
 
+test('the collapse button toggles via onToggleCollapsed based on current collapsed state', (t) => {
+  const events = [];
+  const s = setup(t, { onToggleCollapsed: (next) => events.push(next) });
+  const btn = s.el.querySelector('.panel-collapse-btn');
+  assert.ok(btn, 'collapse button is rendered in the header');
+  assert.equal(
+    btn.getAttribute('data-collapse-target'),
+    'weather-report-panel',
+  );
+  btn.click();
+  assert.deepEqual(events, [true]);
+  s.el.classList.add('collapsed');
+  btn.click();
+  assert.deepEqual(events, [true, false]);
+});
+
+test('reveal scrolls the panel into view and focuses the close button', (t) => {
+  const s = setup(t);
+  const scrollCalls = [];
+  s.el.scrollIntoView = (...args) => scrollCalls.push(args);
+  s.panel.reveal();
+  assert.deepEqual(scrollCalls, [[{ block: 'nearest' }]]);
+  assert.equal(
+    s.document.activeElement,
+    s.el.querySelector('.weather-report-close'),
+  );
+});
+
 test('place names are rendered as text, never markup', (t) => {
   const s = setup(t);
   s.panel.render(viewOf({ place: '<img src=x onerror=alert(1)>' }));

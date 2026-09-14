@@ -11,6 +11,7 @@ export function createReportPanel({
   onClose = () => {},
   onRefresh = () => {},
   onUnitsChange = () => {},
+  onToggleCollapsed = () => {},
 }) {
   const el = (tag, className, text) => {
     const node = doc.createElement(tag);
@@ -42,12 +43,16 @@ export function createReportPanel({
     '×',
     'Close weather report',
   );
+  const collapseButton = button('panel-collapse-btn', '▶', 'Collapse WEATHER');
+  collapseButton.setAttribute('data-collapse-target', PANEL_ID);
+  collapseButton.setAttribute('aria-expanded', 'true');
   header.append(
     el('span', 'panel-title', 'WEATHER'),
     el('span', 'panel-divider'),
     unitsButton,
     refreshButton,
     closeButton,
+    collapseButton,
   );
   const place = el('p', 'weather-report-place');
   const updated = el('p', 'weather-report-updated');
@@ -74,6 +79,9 @@ export function createReportPanel({
   );
   refreshButton.addEventListener('click', () => onRefresh());
   closeButton.addEventListener('click', () => onClose());
+  collapseButton.addEventListener('click', () =>
+    onToggleCollapsed(!element.classList.contains('collapsed')),
+  );
 
   const grid = (rows) => {
     const list = el('dl', 'weather-report-grid');

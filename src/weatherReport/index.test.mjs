@@ -43,7 +43,12 @@ const settle = async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 };
 
-function setup(t, { storage = new Map(), rail = true } = {}) {
+const DISCLOSURE = { explicit: true, persist: false, syncShare: false };
+
+function setup(
+  t,
+  { storage = new Map(), rail = true, withCollapseSpy = true } = {},
+) {
   const document = installFakeDocument(t);
   if (rail) {
     const aside = document.createElement('aside');
@@ -53,6 +58,8 @@ function setup(t, { storage = new Map(), rail = true } = {}) {
   const requests = [];
   const pinCalls = [];
   const panels = [];
+  const collapseCalls = [];
+  const order = [];
   let menuOptions = null;
   let pinOptions = null;
   const menu = {
@@ -105,19 +112,31 @@ function setup(t, { storage = new Map(), rail = true } = {}) {
     },
     createPanel: (options) => {
       const calls = [];
+      const element = document.createElement('section');
+      element.classList.add('collapsed', 'layout-auto-collapsed');
       const panel = {
+        element,
         options,
         calls,
         setUnits: (...args) => calls.push(['setUnits', ...args]),
         showLoading: (...args) => calls.push(['showLoading', ...args]),
         showError: (...args) => calls.push(['showError', ...args]),
         render: (view) => calls.push(['render', view]),
-        reveal: () => calls.push(['reveal']),
+        reveal: () => {
+          calls.push(['reveal']);
+          order.push(['reveal']);
+        },
         destroy: () => calls.push(['destroy']),
       };
       panels.push(panel);
       return panel;
     },
+    setPanelCollapsed: withCollapseSpy
+      ? (...args) => {
+          collapseCalls.push(args);
+          order.push(['collapse', ...args]);
+        }
+      : undefined,
   });
   return {
     document,
@@ -128,6 +147,8 @@ function setup(t, { storage = new Map(), rail = true } = {}) {
     panels,
     menu,
     storage,
+    collapseCalls,
+    order,
     menuOptions: () => menuOptions,
     pinOptions: () => pinOptions,
   };
@@ -256,4 +277,44 @@ test('refresh re-requests the same point, pin activation reveals the panel, dest
   assert.deepEqual(s.pinCalls.slice(-2), [['clear'], ['destroy']]);
   s.menuOptions().onPick(POINT);
   assert.equal(s.requests.length, 2, 'no request after destroy');
+});
+
+test('a pick expands the panel through the injected disclosure before it loads', (t) => {
+  const s = setup(t);
+  s.menuOptions().onPick(POINT);
+  assert.deepEqual(s.collapseCalls[0], [
+    'weather-report-panel',
+    false,
+    DISCLOSURE,
+  ]);
+});
+
+test("the panel's onToggleCollapsed routes through the injected disclosure", (t) => {
+  const s = setup(t);
+  s.menuOptions().onPick(POINT);
+  s.collapseCalls.length = 0;
+  s.panels[0].options.onToggleCollapsed(true);
+  assert.deepEqual(s.collapseCalls, [
+    ['weather-report-panel', true, DISCLOSURE],
+  ]);
+});
+
+test("the pin's onActivate expands the panel through the disclosure before revealing it", (t) => {
+  const s = setup(t);
+  s.menuOptions().onPick(POINT);
+  s.collapseCalls.length = 0;
+  s.order.length = 0;
+  s.pinOptions().onActivate();
+  assert.deepEqual(s.order, [
+    ['collapse', 'weather-report-panel', false, DISCLOSURE],
+    ['reveal'],
+  ]);
+});
+
+test('without an injected disclosure, opening the panel clears the collapsed classes directly', (t) => {
+  const s = setup(t, { withCollapseSpy: false });
+  s.menuOptions().onPick(POINT);
+  const { element } = s.panels[0];
+  assert.equal(element.classList.contains('collapsed'), false);
+  assert.equal(element.classList.contains('layout-auto-collapsed'), false);
 });
