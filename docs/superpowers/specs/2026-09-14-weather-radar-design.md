@@ -1,6 +1,6 @@
 # Weather radar layer — design
 
-Status: approved design (2026-09-14), not yet implemented
+Status: implemented (merged to fork main 2026-09-14, c91acea)
 Fork: CaptPat/gods-eye-view (Cyclops View). Fork-only work; nothing is proposed upstream.
 
 ## Purpose

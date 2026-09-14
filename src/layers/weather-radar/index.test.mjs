@@ -281,35 +281,40 @@ test('the loop preloads every frame, steps through ready frames, and pause retur
     source: 'RainViewer',
     loadingLabel: 'Loading 0/3',
   });
+  // Count render requests across each tick: enable's own render() already pushed one,
+  // so only growth proves the tick itself asked the scene to redraw.
+  const runTick = (ms) => {
+    const before = h.renderRequests.length;
+    h.timers.run(ms);
+    assert.equal(
+      h.renderRequests.length,
+      before + 1,
+      'each loop tick that shows a frame requests exactly one render',
+    );
+    assert.equal(h.renderRequests.at(-1), 'weather-radar');
+  };
   h.imagery.ready.add(frames(3)[0].time);
   h.imagery.ready.add(frames(3)[2].time);
-  h.timers.run(500);
+  runTick(500);
   assert.equal(
     h.imagery.api.shownTime(),
     frames(3)[0].time,
     'the loop starts at the oldest ready frame',
   );
-  assert.equal(
-    h.renderRequests.at(-1),
-    'weather-radar',
-    'each loop tick that shows a frame requests a render',
-  );
-  h.timers.run(500);
+  runTick(500);
   assert.equal(
     h.imagery.api.shownTime(),
     frames(3)[2].time,
     'a frame that is not ready is skipped',
   );
-  assert.equal(h.renderRequests.at(-1), 'weather-radar');
   assert.ok(h.timers.delays().includes(1500), 'the newest frame holds');
   h.imagery.ready.add(frames(3)[1].time);
-  h.timers.run(1500);
+  runTick(1500);
   assert.equal(
     h.imagery.api.shownTime(),
     frames(3)[0].time,
     'a frame becoming ready mid-loop does not derail the order',
   );
-  assert.equal(h.renderRequests.at(-1), 'weather-radar');
   assert.equal(h.layer.getRowControls().chips[0].label, '❚❚ Pause');
   h.layer.setParams({ loop: false }, { origin: 'user' });
   assert.deepEqual(
