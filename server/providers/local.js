@@ -9,6 +9,7 @@ import { militaryInstallationsProxy } from './military-installations.js';
 import { regionalBriefProxy } from './regional/briefing.js';
 import { geocodeSearchProxy } from './geocode.js';
 import { weatherEffectsProxy } from './regional/weather-effects.js';
+import { weatherRadarProxy } from './weather-radar.js';
 import { cctvProxy } from './cctv.js';
 import { defaultSourceRoot } from './common/source-root.js';
 import { radioBrowserProxy } from './radio.js';
@@ -34,6 +35,7 @@ function localProviderPlugins() {
     militaryInstallationsProxy(),
     regionalBriefProxy(),
     geocodeSearchProxy(),
+    weatherRadarProxy(),
     weatherEffectsProxy(),
     cctvProxy({ sourceRoot: defaultSourceRoot }),
     radioBrowserProxy(),
@@ -48,6 +50,8 @@ function localProviderPlugins() {
 }
 
 export { localProviderPlugins };
+
+export { createWeatherRadarHandler, weatherRadarProxy } from './weather-radar.js';
 
 export {
   CCTV_FRAME_FETCH_TIMEOUT_MS,

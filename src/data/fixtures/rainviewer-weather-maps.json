@@ -1,0 +1,24 @@
+{
+  "version": "2.0",
+  "generated": 1789361000,
+  "host": "https://tilecache.rainviewer.com",
+  "radar": {
+    "past": [
+      { "time": 1789353600, "path": "/v2/radar/fixture00" },
+      { "time": 1789354200, "path": "/v2/radar/fixture01" },
+      { "time": 1789354800, "path": "/v2/radar/fixture02" },
+      { "time": 1789355400, "path": "/v2/radar/fixture03" },
+      { "time": 1789356000, "path": "/v2/radar/fixture04" },
+      { "time": 1789356600, "path": "/v2/radar/fixture05" },
+      { "time": 1789357200, "path": "/v2/radar/fixture06" },
+      { "time": 1789357800, "path": "/v2/radar/fixture07" },
+      { "time": 1789358400, "path": "/v2/radar/fixture08" },
+      { "time": 1789359000, "path": "/v2/radar/fixture09" },
+      { "time": 1789359600, "path": "/v2/radar/fixture10" },
+      { "time": 1789360200, "path": "/v2/radar/fixture11" },
+      { "time": 1789360800, "path": "/v2/radar/fixture12" }
+    ],
+    "nowcast": []
+  },
+  "satellite": { "infrared": [] }
+}
