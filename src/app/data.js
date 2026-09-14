@@ -4,6 +4,7 @@ import militaryFlightsLayer from '../data/militaryFlights.js';
 import alprCamerasLayer from '../data/alprCameras.js';
 import earthquakesLayer from '../data/earthquakes.js';
 import weatherRadarLayer from '../data/weatherRadar.js';
+import weatherOverlaysLayer from '../data/weatherOverlays.js';
 import tideAndCurrentLayers from '../data/tides.js';
 import satellitesLayer from '../data/satellites.js';
 import rocketLaunchesLayer from '../data/rocketLaunches.js';
@@ -42,6 +43,8 @@ export function createApplicationData({
   dataManager.register(earthquakesLayer);
   dataManager.register(weatherRadarLayer);
   weatherRadarLayer.attachMapStack(mapStackController);
+  dataManager.register(weatherOverlaysLayer);
+  weatherOverlaysLayer.attachMapStack(mapStackController);
   for (const layer of tideAndCurrentLayers) dataManager.register(layer);
   dataManager.register(alprCamerasLayer);
   dataManager.register(satellitesLayer);

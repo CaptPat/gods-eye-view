@@ -23,7 +23,7 @@
   - Air quality: `https://airquality.googleapis.com/v1/mapTypes/US_AQI/heatmapTiles/{z}/{x}/{y}?key=…`. Pollen: `https://pollen.googleapis.com/v1/mapTypes/{TREE_UPI|GRASS_UPI|WEED_UPI}/heatmapTiles/{z}/{x}/{y}?key=…`. The key comes from `googleServerApiKey()` only.
   - Open-Meteo is not used: multi-location requests are weighted per location and would exceed the 10,000 calls/day free tier.
 - Zoom caps (Cesium `maximumLevel` and proxy validation): clouds 7, temperature 6, air quality 12, pollen 10.
-- Proxy: manifest limiter 600/min per client and 2,000 global; a **separate** tile limiter of 6,000/min per client and 20,000 global (Cesium never retries a 429 tile). In-memory tile cache only, never disk: Google 10 min, clouds 3 h, temperature 1 h, 1,500 entries, age prune at most once per minute. GMGSI capabilities 10 min; GFS grid 1 h. Upstream timeout 15 s (grid 30 s), tile cap 2 MB with PNG signature check.
+- Proxy: manifest limiter 600/min per client and 2,000 global; a **separate** tile limiter of 6,000/min per client and 20,000 global (Cesium never retries a 429 tile). In-memory tile cache only, never disk: Google not cached (policy; `Cache-Control: no-store`), clouds 3 h, temperature 1 h, 1,500 entries, age prune at most once per minute. GMGSI capabilities 10 min; GFS grid 1 h. Upstream timeout 15 s (grid 30 s), tile cap 2 MB with PNG signature check.
 - **The Google key is secret.** Never print it, log it, put it in a fixture, commit it or write it into a URL you record. Proxy logs carry a label and an error name only, never an upstream URL.
 - Render governor (`src/renderGovernor.js`): the app idles in `requestRenderMode`. Every scene change not driven by a manager call (a delayed swap, async manifest result, alpha change, imagery add or clear) calls `requestRender('weather-overlays')`. It is injected from `src/data/weatherOverlays.js` as `governorRequestRender`, so `src/layers/*` stays Cesium-only.
 - Manager contract: `update()` resolves `false` only when the manager's own signal aborted. Skips, superseded requests and handled failures resolve `true`, and failures surface through `getStats().error`.
@@ -1598,7 +1598,7 @@ test('without a Google key the Google modes are unavailable and their tiles 404;
   assert.equal(h.net.count('googleapis.com'), 0);
 });
 
-test('Google tiles use the server key, cache for ten minutes, never log the key, and failures are not cached', async () => {
+test('Google tiles use the server key, are never cached, never log the key, and failures are not cached', async () => {
   let failPollen = true;
   const h = harness({
     routes: [
@@ -4026,8 +4026,8 @@ In `DATA_SOURCES.md`, in the live-sources table, directly after the **Iowa Envir
 ```markdown
 | **NOAA nowCOAST GMGSI** (Global Mosaic of Geostationary Satellite Imagery, longwave infrared WMS) | Cloud cover mode of the Weather Overlays layer | NOAA/NESDIS product served by NOAA nowCOAST; U.S. Government work (public domain); courtesy attribution. Tiles are proxied and held in server memory through `/api/weather-overlays` | "Clouds: NOAA nowCOAST GMGSI geostationary satellite mosaic", registered when cloud cover is first shown |
 | **NOAA NCEP GFS** 2 m temperature via **PacIOOS ERDDAP** (`ncep_global`) | Temperature mode of the Weather Overlays layer: a 1° global grid rendered into colour tiles server-side | NOAA model output (U.S. public domain); the PacIOOS dataset licence allows free use and redistribution | "Temperature: NOAA NCEP GFS via PacIOOS ERDDAP", registered when temperature is first shown |
-| **Google Maps Platform Air Quality API** (US_AQI heatmap tiles) | Air quality mode of the Weather Overlays layer | Google Maps Platform Terms and Air Quality API policies (your own key and billing). Tiles are held in server memory for at most 10 minutes, never on disk | "Source: Includes air quality data from Google" on the globe credit line while the overlay is drawn, and in Data attribution |
-| **Google Maps Platform Pollen API** (TREE_UPI, GRASS_UPI, WEED_UPI heatmap tiles) | Pollen mode of the Weather Overlays layer | Google Maps Platform Terms and Pollen API policies (your own key and billing). Tiles are held in server memory for at most 10 minutes, never on disk | "Source: Includes pollen data from Google" on the globe credit line while the overlay is drawn, and in Data attribution |
+| **Google Maps Platform Air Quality API** (US_AQI heatmap tiles) | Air quality mode of the Weather Overlays layer | Google Maps Platform Terms and Air Quality API policies (your own key and billing). Tiles are never cached (server `Cache-Control: no-store`); a server-wide in-memory daily tile budget (`GEV_GOOGLE_OVERLAY_TILES_PER_DAY`, default 25,000, resets at UTC midnight) bounds request volume — also set per-API daily quotas in Google Cloud Console for hard spend protection | "Source: Includes air quality data from Google" on the globe credit line while the overlay is drawn, and in Data attribution |
+| **Google Maps Platform Pollen API** (TREE_UPI, GRASS_UPI, WEED_UPI heatmap tiles) | Pollen mode of the Weather Overlays layer | Google Maps Platform Terms and Pollen API policies (your own key and billing). Tiles are never cached (server `Cache-Control: no-store`; the Pollen API policy prohibits caching/storage); the same daily tile budget as Air Quality above applies — also set per-API daily quotas in Google Cloud Console for hard spend protection | "Source: Includes pollen data from Google" on the globe credit line while the overlay is drawn, and in Data attribution |
 ```
 
 At the top of `CHANGELOG.md`, directly under `# Changelog` and its blank line, add:

@@ -94,10 +94,10 @@ comparing image hashes across times, not by HTTP status.
 | Temperature rendering | The server fetches one 1° grid per step and renders 256 × 256 Web Mercator PNG tiles with bilinear sampling; `maximumLevel` 6 | Uniform tile path for all four modes; a 1° grid holds no more detail past z6. Pure Node (`zlib` plus a 30-line PNG encoder), testable without a browser |
 | Air quality type | `US_AQI` only; no type sub-option | All eight types work, but one index keeps one legend. US AQI's EPA colours match the tiles, and the index renders worldwide |
 | Google zoom caps | Air quality 12, pollen 10 | Google bills per tile. Measured detail falls off after z12 (AQ) and vanishes after z10 (pollen); Cesium upsamples beyond the cap |
-| Tile cache | Memory only, per-entry age limit (Google 10 min, clouds 3 h, temperature 1 h), at most 1,500 entries, oldest evicted first, age prune at most once a minute. Nothing is written to disk | Refines "disk or memory with an age prune" by the Pollen policy, which prohibits caching and storage: Google tiles never touch disk, and the short in-memory window only absorbs Cesium's repeated requests. See Risks |
+| Tile cache | Memory only, per-entry age limit (Google not cached — Pollen policy prohibits caching and storage; clouds 3 h, temperature 1 h), at most 1,500 entries, oldest evicted first, age prune at most once a minute. Nothing is written to disk | Refines "disk or memory with an age prune" by the Pollen policy, which prohibits caching and storage: Google tiles are never cached (`GOOGLE_TILE_TTL_MS = 0`, `Cache-Control: no-store`), and the short in-memory window still absorbs Cesium's repeated NOAA requests. See Risks |
 | Rate limits | Manifest 600/min per client and 2,000 global; tiles 6,000/min per client and 20,000 global, as two limiters | Lessons memory: Cesium never retries a 429 tile |
 | Refresh | Every 10 minutes while the tab is visible | GMGSI updates hourly; a new hour appears within 10 minutes of being advertised |
-| Stacking | Overlay imagery layers are inserted at imagery index 1 (clamped to the collection length) | Directly above the base map (index 0), so radar, which appends, draws on top whatever the enable order |
+| Stacking | Overlay imagery layers are inserted directly above however many base-map imagery layers currently exist (0 with no base layer — e.g. the photoreal 3D-tileset stack — otherwise 1), resolved fresh on every insert from `viewer.scene.globe.show`, and re-seated on every map-stack change | Directly above the base map when there is one, so radar, which always appends on top, draws on top whatever the enable order — including radar-before-overlay and mid-session map-stack switches |
 | Code shared with radar | Extract `src/layers/weather-imagery/frameImagery.js` (`PRELOAD_ALPHA`, `createFrameImagery`, `swapToFrame`) and `opacity.js` (`IMAGERY_OPACITIES`, `normalizeImageryOpacity`). Radar's `imagery.js`, `controls.js` and `index.js` import them; their exports and tests are unchanged | The ready-gated frame swap and the opacity steps are the same logic; copying 90 lines would duplicate them |
 | Google attribution | Each Google provider carries `new Cesium.Credit('Source: Includes … data from Google', true)`, so the globe credit line shows it while that imagery draws; a Data attribution entry is registered too | The policies require the text on or next to the imagery |
 | NOAA attribution | Data attribution entries only | U.S. public domain; courtesy credit, like the IEM radar credit |
@@ -154,7 +154,18 @@ Routes, mounted at `/api/weather-overlays`:
     that step's grid.
   - Upstream bodies are capped at 2 MB and must start with the PNG signature; failures answer 502
     and are never cached. Responses carry `X-Overlay-Cache: HIT|MISS` and
-    `Cache-Control: private, max-age=600`.
+    `Cache-Control: private, max-age=600`, except Google tiles, which are always `MISS` with
+    `Cache-Control: no-store` (never cached, per the Pollen and Air Quality policies).
+  - Google tile fetches count against an in-memory, server-wide daily budget
+    (`GEV_GOOGLE_OVERLAY_TILES_PER_DAY`, default 25,000; resets at the UTC day boundary). Over
+    budget the tile route answers 429 `{ error: 'google tile budget reached' }` with `Retry-After`
+    set to the seconds until UTC midnight, without an upstream call; the manifest for Google modes
+    answers `available: false, reason: 'Google overlay tile budget reached for today'`. This is a
+    soft application-level ceiling, not a substitute for a Google Cloud Console per-API daily quota
+    (recommended alongside it).
+  - A GMGSI-capabilities or GFS-grid source that has never loaded successfully is re-tried at most
+    once every 60 s; in between, the most recent failure is re-thrown without a new upstream call.
+    A source that has already loaded once keeps its existing TTL/stale-if-held behaviour untouched.
 - 405 for non-GET, 404 for other paths, and 429 with `Retry-After: 10` from the matching limiter.
 
 ### Client: `src/layers/weather-overlays/`
@@ -264,16 +275,19 @@ Colocated `*.test.mjs`, `node:test`, no live network; fixtures under
 `src/data/fixtures/weather-overlays/` (see its README).
 
 - `src/layers/weather-imagery/frameImagery.test.mjs`: opacity steps; `createLayer` receives the
-  source; index-1 insertion and clamping; `swapToFrame` show-now versus wait-for-ready.
+  source; insertion and clamping with a constant or a function `insertIndex`, and `reseat()`;
+  `swapToFrame` show-now versus wait-for-ready.
 - `src/data/weatherOverlaysSources.test.mjs`: keys and zoom caps, bounds, all upstream URLs, GMGSI
   times from the recorded capabilities (and ISO ranges), GFS and Google time windows, the recorded
   GFS grid.
 - `src/data/weatherOverlaysRender.test.mjs`: the ramp, a CRC-checked PNG round trip, wraparound
   sampling, rendered pixels against the sampled grid, transparent missing data.
 - `src/data/weatherOverlaysProxy.test.mjs`: every manifest shape, keyless behaviour, Google key use
-  and cache TTL, key-free logs, uncached failures, cloud time validation and stale capabilities,
-  temperature rendering and stale fallback, the split limiters, method and path errors, cache
-  eviction and prune, and plugin registration.
+  and its never-cached responses, the daily Google tile budget (counting, exhaustion, the manifest
+  reason, UTC-midnight reset) and env parsing, key-free logs, the 60 s NOAA failure cooldown (and
+  stale-if-held staying unaffected), cloud time validation and stale capabilities, temperature
+  rendering and stale fallback, the split limiters, method and path errors, cache eviction and
+  prune, and plugin registration.
 - `src/layers/weather-overlays/controls.test.mjs`, `imagery.test.mjs`, `index.test.mjs`: chips,
   legends, providers, credits, colour-to-alpha, stacking, lifecycle, render requests, every stats
   shape, and the row text from `LayerPanel.prototype._buildMetaText`.
@@ -287,11 +301,14 @@ must pass: format check, boundaries, `npm test`, build.
 
 ## Risks
 
-- **Pollen caching policy.** The 10-minute in-memory tile window may still count as caching under
-  the Pollen policy. Setting `GOOGLE_TILE_TTL_MS` to 0 turns it off at the cost of more billed
-  tiles.
-- **Google billing.** Air quality and pollen tiles are billed per request; the zoom caps and the
-  cache bound it, but a long session at z12 can still request many tiles.
+- **Pollen caching policy.** Resolved: `GOOGLE_TILE_TTL_MS` is 0, so Google tiles are never read
+  from or written to the tile cache, and their responses carry `Cache-Control: no-store`. This
+  costs more billed tiles than a short cache would.
+- **Google billing.** Resolved: air quality and pollen tiles are billed per request and are never
+  cached, so nothing but the zoom caps bounded request volume. An in-memory, server-wide daily
+  tile budget (`GEV_GOOGLE_OVERLAY_TILES_PER_DAY`, default 25,000, resets at UTC midnight) now
+  caps it at the application level — set per-API daily quotas in Google Cloud Console too, for hard
+  spend protection the proxy's soft cap can't provide on its own.
 - **GMGSI brightness threshold.** 0.3 was chosen from one tile's histogram; the smoke check in the
   plan's last task looks at it on the globe.
 - **Upstream moves.** CoastWatch already redirects GFS to PacIOOS; if PacIOOS drops `ncep_global`,
