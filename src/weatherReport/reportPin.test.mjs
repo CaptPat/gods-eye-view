@@ -4,7 +4,10 @@ import * as Cesium from 'cesium';
 import { PIN_SOURCE_ID, createReportPin } from './reportPin.js';
 
 const LOADING = { title: 'Loading weather', details: [] };
-const LOADED = { title: '86°F · Sunny', details: ['Wind 8 mph SSE, gusts 9', 'Includes weather data from Google'] };
+const LOADED = {
+  title: '86°F · Sunny',
+  details: ['Wind 8 mph SSE, gusts 9', 'Includes weather data from Google'],
+};
 const GALVESTON = { lat: 29.25, lon: -94.8 };
 
 function setup() {
@@ -15,8 +18,14 @@ function setup() {
     dataSources: {
       added: [],
       removed: [],
-      add(source) { this.added.push(source); return source; },
-      remove(source, destroy) { this.removed.push([source, destroy]); return true; },
+      add(source) {
+        this.added.push(source);
+        return source;
+      },
+      remove(source, destroy) {
+        this.removed.push([source, destroy]);
+        return true;
+      },
     },
   };
   const overlayHost = {
@@ -45,7 +54,13 @@ test('show adds one point marker and publishes a pinned, interactive card', () =
   assert.equal(marker.point.outlineWidth.getValue(), 2);
   assert.ok(Cesium.Color.WHITE.equals(marker.point.outlineColor.getValue()));
   const expected = Cesium.Cartesian3.fromDegrees(-94.8, 29.25);
-  assert.ok(Cesium.Cartesian3.equalsEpsilon(marker.position.getValue(Cesium.JulianDate.now()), expected, 1e-6));
+  assert.ok(
+    Cesium.Cartesian3.equalsEpsilon(
+      marker.position.getValue(Cesium.JulianDate.now()),
+      expected,
+      1e-6,
+    ),
+  );
 
   assert.deepEqual(s.calls[0], ['setVisible', 'weather-report', true]);
   assert.equal(s.calls[1][0], 'setEntries');
@@ -60,7 +75,11 @@ test('show adds one point marker and publishes a pinned, interactive card', () =
   assert.ok(Cesium.Cartesian3.equalsEpsilon(entry.position, expected, 1e-6));
   entry.activate();
   assert.deepEqual(s.activations, ['activate']);
-  assert.deepEqual(s.renders, ['weather-report'], 'the marker change requests a render');
+  assert.deepEqual(
+    s.renders,
+    ['weather-report'],
+    'the marker change requests a render',
+  );
 });
 
 test('update republishes the card without replacing the marker; before show it does nothing', () => {
@@ -85,8 +104,18 @@ test('showing a new point moves the single marker', () => {
   s.pin.show({ lat: 30.25, lon: -97.75 }, LOADING);
   assert.equal(s.entities().length, 1);
   const position = s.entities()[0].position.getValue(Cesium.JulianDate.now());
-  assert.ok(Cesium.Cartesian3.equalsEpsilon(position, Cesium.Cartesian3.fromDegrees(-97.75, 30.25), 1e-6));
-  assert.equal(s.viewer.dataSources.added.length, 1, 'the data source is reused');
+  assert.ok(
+    Cesium.Cartesian3.equalsEpsilon(
+      position,
+      Cesium.Cartesian3.fromDegrees(-97.75, 30.25),
+      1e-6,
+    ),
+  );
+  assert.equal(
+    s.viewer.dataSources.added.length,
+    1,
+    'the data source is reused',
+  );
 });
 
 test('clear removes the marker and the overlay source once; destroy removes the data source', () => {
@@ -95,7 +124,10 @@ test('clear removes the marker and the overlay source once; destroy removes the 
   s.renders.length = 0;
   s.pin.clear();
   assert.equal(s.entities().length, 0);
-  assert.deepEqual(s.calls.slice(-2), [['clearSource', 'weather-report'], ['setVisible', 'weather-report', false]]);
+  assert.deepEqual(s.calls.slice(-2), [
+    ['clearSource', 'weather-report'],
+    ['setVisible', 'weather-report', false],
+  ]);
   assert.deepEqual(s.renders, ['weather-report']);
   const callCount = s.calls.length;
   s.pin.clear();

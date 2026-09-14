@@ -32,9 +32,23 @@ export function createReportPanel({
   const inner = el('div', 'weather-report-panel-inner');
   const header = el('div', 'panel-header');
   const unitsButton = button('weather-report-units', '°F');
-  const refreshButton = button('weather-report-refresh', '↻', 'Refresh weather report');
-  const closeButton = button('weather-report-close', '×', 'Close weather report');
-  header.append(el('span', 'panel-title', 'WEATHER'), el('span', 'panel-divider'), unitsButton, refreshButton, closeButton);
+  const refreshButton = button(
+    'weather-report-refresh',
+    '↻',
+    'Refresh weather report',
+  );
+  const closeButton = button(
+    'weather-report-close',
+    '×',
+    'Close weather report',
+  );
+  header.append(
+    el('span', 'panel-title', 'WEATHER'),
+    el('span', 'panel-divider'),
+    unitsButton,
+    refreshButton,
+    closeButton,
+  );
   const place = el('p', 'weather-report-place');
   const updated = el('p', 'weather-report-updated');
   const status = el('p', 'weather-report-status');
@@ -49,16 +63,22 @@ export function createReportPanel({
   let currentUnits = normalizeUnits(units);
   const syncUnits = () => {
     unitsButton.textContent = currentUnits === 'metric' ? '°C' : '°F';
-    unitsButton.setAttribute('aria-label', currentUnits === 'metric' ? 'Show °F' : 'Show °C');
+    unitsButton.setAttribute(
+      'aria-label',
+      currentUnits === 'metric' ? 'Show °F' : 'Show °C',
+    );
   };
   syncUnits();
-  unitsButton.addEventListener('click', () => onUnitsChange(currentUnits === 'metric' ? 'imperial' : 'metric'));
+  unitsButton.addEventListener('click', () =>
+    onUnitsChange(currentUnits === 'metric' ? 'imperial' : 'metric'),
+  );
   refreshButton.addEventListener('click', () => onRefresh());
   closeButton.addEventListener('click', () => onClose());
 
   const grid = (rows) => {
     const list = el('dl', 'weather-report-grid');
-    for (const row of rows) list.append(el('dt', null, row.label), el('dd', null, row.value));
+    for (const row of rows)
+      list.append(el('dt', null, row.label), el('dd', null, row.value));
     return list;
   };
   const section = (heading, statusText, ...content) => {
@@ -96,7 +116,11 @@ export function createReportPanel({
         ...(view.now
           ? [
               el('div', 'weather-report-now-temp', view.now.temperature),
-              el('div', 'weather-report-now-condition', `${view.now.condition} · ${view.now.feelsLike}`),
+              el(
+                'div',
+                'weather-report-now-condition',
+                `${view.now.condition} · ${view.now.feelsLike}`,
+              ),
               grid(view.now.grid),
             ]
           : []),
@@ -105,14 +129,31 @@ export function createReportPanel({
     if (view.hourly.length) {
       const strip = el('div', 'weather-report-hourly');
       for (const hour of view.hourly) {
-        strip.append(row('weather-report-hour', hour.time, hour.condition, hour.temperature, hour.precip, hour.wind));
+        strip.append(
+          row(
+            'weather-report-hour',
+            hour.time,
+            hour.condition,
+            hour.temperature,
+            hour.precip,
+            hour.wind,
+          ),
+        );
       }
       sections.push(section('Next 48 hours', null, strip));
     }
     if (view.daily.length) {
       const days = el('div', 'weather-report-daily');
       for (const day of view.daily) {
-        days.append(row('weather-report-day', day.day, `${day.dayCondition} / ${day.nightCondition}`, `${day.high} / ${day.low}`, day.precip));
+        days.append(
+          row(
+            'weather-report-day',
+            day.day,
+            `${day.dayCondition} / ${day.nightCondition}`,
+            `${day.high} / ${day.low}`,
+            day.precip,
+          ),
+        );
       }
       sections.push(section('10 days', null, days));
     }
@@ -122,14 +163,23 @@ export function createReportPanel({
         content.push(grid(view.marine.rows));
         if (view.marine.dailyMax.length) {
           const maxima = el('div', 'weather-report-wave-max');
-          for (const entry of view.marine.dailyMax) maxima.append(row('weather-report-wave-day', entry.day, entry.value));
+          for (const entry of view.marine.dailyMax)
+            maxima.append(
+              row('weather-report-wave-day', entry.day, entry.value),
+            );
           content.push(maxima);
         }
       }
       sections.push(section('Marine', view.sections.marine, ...content));
     }
     if (view.solar || view.sections.solar) {
-      sections.push(section('Sun and surface', view.sections.solar, ...(view.solar ? [grid(view.solar.rows)] : [])));
+      sections.push(
+        section(
+          'Sun and surface',
+          view.sections.solar,
+          ...(view.solar ? [grid(view.solar.rows)] : []),
+        ),
+      );
     }
     body.replaceChildren(...sections);
   }

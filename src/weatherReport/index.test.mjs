@@ -12,16 +12,35 @@ const REPORT = {
   timeZone: 'America/Chicago',
   generatedAt: T0,
   stale: false,
-  sources: { google: 'ok', openMeteoMarine: 'ok', openMeteoSolar: 'ok', place: 'ok' },
-  now: { condition: 'Sunny', temperatureC: 29.8, feelsLikeC: 36.8, dewPointC: 26.1, humidityPct: 80, pressureHpa: 1017.56,
-    windSpeedMs: 3.61, windGustMs: 3.89, windFromDeg: 166, cloudCoverPct: 9, visibilityM: 16000, uvIndex: 0, thunderstormPct: 0 },
+  sources: {
+    google: 'ok',
+    openMeteoMarine: 'ok',
+    openMeteoSolar: 'ok',
+    place: 'ok',
+  },
+  now: {
+    condition: 'Sunny',
+    temperatureC: 29.8,
+    feelsLikeC: 36.8,
+    dewPointC: 26.1,
+    humidityPct: 80,
+    pressureHpa: 1017.56,
+    windSpeedMs: 3.61,
+    windGustMs: 3.89,
+    windFromDeg: 166,
+    cloudCoverPct: 9,
+    visibilityM: 16000,
+    uvIndex: 0,
+    thunderstormPct: 0,
+  },
   hourly: [],
   daily: [],
   marine: null,
   solar: { shortwaveWm2: 0, directWm2: 0, surfaceTempC: 28.8 },
 };
 const settle = async () => {
-  for (let i = 0; i < 4; i += 1) await new Promise((resolve) => setTimeout(resolve, 0));
+  for (let i = 0; i < 4; i += 1)
+    await new Promise((resolve) => setTimeout(resolve, 0));
 };
 
 function setup(t, { storage = new Map(), rail = true } = {}) {
@@ -36,17 +55,33 @@ function setup(t, { storage = new Map(), rail = true } = {}) {
   const panels = [];
   let menuOptions = null;
   let pinOptions = null;
-  const menu = { destroyed: false, destroy() { this.destroyed = true; } };
+  const menu = {
+    destroyed: false,
+    destroy() {
+      this.destroyed = true;
+    },
+  };
   const fetchImpl = (url, { signal }) =>
     new Promise((resolve, reject) => {
       requests.push({ url, signal, resolve });
-      signal.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })));
+      signal.addEventListener('abort', () =>
+        reject(Object.assign(new Error('aborted'), { name: 'AbortError' })),
+      );
     });
   const respond = (index, status, body) =>
-    requests[index].resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }));
-  const store = storage instanceof Map
-    ? { getItem: (key) => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) }
-    : storage;
+    requests[index].resolve(
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+  const store =
+    storage instanceof Map
+      ? {
+          getItem: (key) => storage.get(key) ?? null,
+          setItem: (key, value) => storage.set(key, value),
+        }
+      : storage;
   const report = createWeatherReport({
     viewer: { id: 'viewer' },
     overlayHost: { id: 'host' },
@@ -55,7 +90,10 @@ function setup(t, { storage = new Map(), rail = true } = {}) {
     storage: store,
     requestRender: () => {},
     now: () => T0,
-    createMenu: (options) => { menuOptions = options; return menu; },
+    createMenu: (options) => {
+      menuOptions = options;
+      return menu;
+    },
     createPin: (options) => {
       pinOptions = options;
       return {
@@ -81,23 +119,50 @@ function setup(t, { storage = new Map(), rail = true } = {}) {
       return panel;
     },
   });
-  return { document, report, requests, respond, pinCalls, panels, menu, storage, menuOptions: () => menuOptions, pinOptions: () => pinOptions };
+  return {
+    document,
+    report,
+    requests,
+    respond,
+    pinCalls,
+    panels,
+    menu,
+    storage,
+    menuOptions: () => menuOptions,
+    pinOptions: () => pinOptions,
+  };
 }
 
 test('a pick pins the spot, shows loading, fetches the report and renders it', async (t) => {
   const s = setup(t);
   s.menuOptions().onPick(POINT);
-  assert.deepEqual(s.pinCalls[0], ['show', POINT, { title: 'Loading weather', details: [] }]);
+  assert.deepEqual(s.pinCalls[0], [
+    'show',
+    POINT,
+    { title: 'Loading weather', details: [] },
+  ]);
   assert.equal(s.panels.length, 1);
-  assert.deepEqual(s.panels[0].calls[0], ['showLoading', { title: '29.300, -94.800', coordinates: '29.300, -94.800' }]);
+  assert.deepEqual(s.panels[0].calls[0], [
+    'showLoading',
+    { title: '29.300, -94.800', coordinates: '29.300, -94.800' },
+  ]);
   assert.equal(s.panels[0].options.units, 'imperial');
-  assert.equal(s.requests[0].url, `${REPORT_ENDPOINT}?lat=29.3000&lon=-94.8000`);
+  assert.equal(
+    s.requests[0].url,
+    `${REPORT_ENDPOINT}?lat=29.3000&lon=-94.8000`,
+  );
   s.respond(0, 200, REPORT);
   await settle();
   const render = s.panels[0].calls.find(([name]) => name === 'render');
   assert.equal(render[1].title, 'Galveston, Texas');
   assert.equal(render[1].now.temperature, '86°F');
-  assert.deepEqual(s.pinCalls.at(-1), ['update', { title: '86°F · Sunny', details: ['Wind 8 mph SSE, gusts 9', 'Includes weather data from Google'] }]);
+  assert.deepEqual(s.pinCalls.at(-1), [
+    'update',
+    {
+      title: '86°F · Sunny',
+      details: ['Wind 8 mph SSE, gusts 9', 'Includes weather data from Google'],
+    },
+  ]);
 });
 
 test('a second pick aborts the first request and ignores its result', async (t) => {
@@ -119,8 +184,15 @@ test('an error response shows the panel status and an unavailable pin', async (t
   s.menuOptions().onPick(POINT);
   s.respond(0, 502, { error: 'Weather sources unavailable' });
   await settle();
-  assert.deepEqual(s.panels[0].calls.at(-1), ['showError', 'Weather sources unavailable', { title: '29.300, -94.800', coordinates: '29.300, -94.800' }]);
-  assert.deepEqual(s.pinCalls.at(-1), ['update', { title: 'Weather unavailable', details: [] }]);
+  assert.deepEqual(s.panels[0].calls.at(-1), [
+    'showError',
+    'Weather sources unavailable',
+    { title: '29.300, -94.800', coordinates: '29.300, -94.800' },
+  ]);
+  assert.deepEqual(s.pinCalls.at(-1), [
+    'update',
+    { title: 'Weather unavailable', details: [] },
+  ]);
 });
 
 test('closing aborts, clears the pin and destroys the panel; the next pick builds a new panel', async (t) => {
@@ -143,11 +215,27 @@ test('the units preference persists, re-renders, and survives broken storage', a
   await settle();
   s.panels[0].options.onUnitsChange('imperial');
   assert.equal(storage.get('gev.weatherReport.units'), 'imperial');
-  assert.deepEqual(s.panels[0].calls.filter(([name]) => name === 'setUnits'), [['setUnits', 'imperial']]);
-  assert.equal(s.panels[0].calls.filter(([name]) => name === 'render').at(-1)[1].now.temperature, '86°F');
+  assert.deepEqual(
+    s.panels[0].calls.filter(([name]) => name === 'setUnits'),
+    [['setUnits', 'imperial']],
+  );
+  assert.equal(
+    s.panels[0].calls.filter(([name]) => name === 'render').at(-1)[1].now
+      .temperature,
+    '86°F',
+  );
   assert.equal(s.report.getUnits(), 'imperial');
 
-  const broken = setup(t, { storage: { getItem() { throw new Error('denied'); }, setItem() { throw new Error('denied'); } } });
+  const broken = setup(t, {
+    storage: {
+      getItem() {
+        throw new Error('denied');
+      },
+      setItem() {
+        throw new Error('denied');
+      },
+    },
+  });
   assert.equal(broken.report.getUnits(), 'imperial');
   assert.doesNotThrow(() => broken.report.setUnits('metric'));
   assert.equal(broken.report.getUnits(), 'metric');

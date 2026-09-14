@@ -5,9 +5,11 @@ const OPEN_METEO_FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
 const MAX_HOURS = 48;
 const MAX_DAYS = 10;
 
-const finite = (value) => (typeof value === 'number' && Number.isFinite(value) ? value : null);
+const finite = (value) =>
+  typeof value === 'number' && Number.isFinite(value) ? value : null;
 const text = (value) => (typeof value === 'string' && value ? value : null);
-const rounded = (value, digits) => (value === null ? null : Number(value.toFixed(digits)));
+const rounded = (value, digits) =>
+  value === null ? null : Number(value.toFixed(digits));
 const isoToMs = (value) => {
   const ms = typeof value === 'string' ? Date.parse(value) : Number.NaN;
   return Number.isFinite(ms) ? ms : null;
@@ -47,7 +49,8 @@ function googleUrl(method, point, key, extra = {}) {
   return `${GOOGLE_WEATHER_BASE}${method}?${params}`;
 }
 
-export const googleCurrentUrl = (point, key) => googleUrl('currentConditions:lookup', point, key);
+export const googleCurrentUrl = (point, key) =>
+  googleUrl('currentConditions:lookup', point, key);
 export const googleHourlyUrl = (point, key, pageToken = '') =>
   googleUrl('forecast/hours:lookup', point, key, {
     hours: String(MAX_HOURS),
@@ -55,13 +58,17 @@ export const googleHourlyUrl = (point, key, pageToken = '') =>
     ...(pageToken ? { pageToken } : {}),
   });
 export const googleDailyUrl = (point, key) =>
-  googleUrl('forecast/days:lookup', point, key, { days: String(MAX_DAYS), pageSize: String(MAX_DAYS) });
+  googleUrl('forecast/days:lookup', point, key, {
+    days: String(MAX_DAYS),
+    pageSize: String(MAX_DAYS),
+  });
 
 export function marineUrl(point) {
   const params = new URLSearchParams({
     latitude: point.lat.toFixed(2),
     longitude: point.lon.toFixed(2),
-    current: 'wave_height,wave_period,wave_direction,swell_wave_height,sea_surface_temperature',
+    current:
+      'wave_height,wave_period,wave_direction,swell_wave_height,sea_surface_temperature',
     daily: 'wave_height_max',
     forecast_days: '7',
     timezone: 'GMT',
@@ -84,13 +91,18 @@ export function solarUrl(point) {
 function degreesC(temperature) {
   const degrees = finite(temperature?.degrees);
   if (degrees === null) return null;
-  return temperature.unit === 'FAHRENHEIT' ? rounded(((degrees - 32) * 5) / 9, 1) : degrees;
+  return temperature.unit === 'FAHRENHEIT'
+    ? rounded(((degrees - 32) * 5) / 9, 1)
+    : degrees;
 }
 
 function speedMs(speed) {
   const value = finite(speed?.value);
   if (value === null) return null;
-  return rounded(speed.unit === 'MILES_PER_HOUR' ? value * 0.44704 : value / 3.6, 2);
+  return rounded(
+    speed.unit === 'MILES_PER_HOUR' ? value * 0.44704 : value / 3.6,
+    2,
+  );
 }
 
 function distanceM(visibility) {
@@ -126,7 +138,9 @@ export function normalizeGoogleNow(json) {
 
 export function normalizeGoogleHourly(pages) {
   return (Array.isArray(pages) ? pages : [])
-    .flatMap((page) => (Array.isArray(page?.forecastHours) ? page.forecastHours : []))
+    .flatMap((page) =>
+      Array.isArray(page?.forecastHours) ? page.forecastHours : [],
+    )
     .map((hour) => ({
       time: isoToMs(hour?.interval?.startTime),
       condition: text(hour?.weatherCondition?.description?.text),
@@ -156,8 +170,12 @@ export function normalizeGoogleDaily(json) {
       ].filter((value) => value !== null);
       return {
         date: isoDate(day?.displayDate),
-        dayCondition: text(day?.daytimeForecast?.weatherCondition?.description?.text),
-        nightCondition: text(day?.nighttimeForecast?.weatherCondition?.description?.text),
+        dayCondition: text(
+          day?.daytimeForecast?.weatherCondition?.description?.text,
+        ),
+        nightCondition: text(
+          day?.nighttimeForecast?.weatherCondition?.description?.text,
+        ),
         highC: degreesC(day?.maxTemperature),
         lowC: degreesC(day?.minTemperature),
         precipChancePct: chances.length ? Math.max(...chances) : null,
@@ -170,7 +188,12 @@ export function normalizeGoogleDaily(json) {
 }
 
 export function isOpenMeteoPayload(json) {
-  return Boolean(json && typeof json === 'object' && json.current && typeof json.current === 'object');
+  return Boolean(
+    json &&
+    typeof json === 'object' &&
+    json.current &&
+    typeof json.current === 'object',
+  );
 }
 
 export function normalizeMarine(json) {
@@ -185,11 +208,16 @@ export function normalizeMarine(json) {
   };
   if (Object.values(values).every((value) => value === null)) return null;
   const times = Array.isArray(json.daily?.time) ? json.daily.time : [];
-  const maxima = Array.isArray(json.daily?.wave_height_max) ? json.daily.wave_height_max : [];
+  const maxima = Array.isArray(json.daily?.wave_height_max)
+    ? json.daily.wave_height_max
+    : [];
   return {
     ...values,
     dailyMaxWaveM: times
-      .map((date, index) => ({ date: String(date), heightM: finite(maxima[index]) }))
+      .map((date, index) => ({
+        date: String(date),
+        heightM: finite(maxima[index]),
+      }))
       .filter((entry) => entry.heightM !== null),
   };
 }

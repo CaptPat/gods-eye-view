@@ -28,16 +28,31 @@ class FakeElement extends EventTarget {
     };
   }
 
-  get className() { return [...this._classes].join(' '); }
+  get className() {
+    return [...this._classes].join(' ');
+  }
   set className(value) {
     this._classes.clear();
-    String(value).split(/\s+/).filter(Boolean).forEach((name) => this._classes.add(name));
+    String(value)
+      .split(/\s+/)
+      .filter(Boolean)
+      .forEach((name) => this._classes.add(name));
   }
-  get id() { return this.attributes.get('id') ?? ''; }
-  set id(value) { this.attributes.set('id', String(value)); }
-  setAttribute(name, value) { this.attributes.set(name, String(value)); }
-  getAttribute(name) { return this.attributes.has(name) ? this.attributes.get(name) : null; }
-  removeAttribute(name) { this.attributes.delete(name); }
+  get id() {
+    return this.attributes.get('id') ?? '';
+  }
+  set id(value) {
+    this.attributes.set('id', String(value));
+  }
+  setAttribute(name, value) {
+    this.attributes.set(name, String(value));
+  }
+  getAttribute(name) {
+    return this.attributes.has(name) ? this.attributes.get(name) : null;
+  }
+  removeAttribute(name) {
+    this.attributes.delete(name);
+  }
 
   appendChild(node) {
     node.remove();
@@ -47,7 +62,11 @@ class FakeElement extends EventTarget {
   }
   append(...nodes) {
     for (const node of nodes) {
-      this.appendChild(typeof node === 'string' ? this.ownerDocument.createTextNode(node) : node);
+      this.appendChild(
+        typeof node === 'string'
+          ? this.ownerDocument.createTextNode(node)
+          : node,
+      );
     }
   }
   prepend(node) {
@@ -67,19 +86,30 @@ class FakeElement extends EventTarget {
     this.parentNode = null;
   }
   contains(node) {
-    for (let current = node; current; current = current.parentNode) if (current === this) return true;
+    for (let current = node; current; current = current.parentNode)
+      if (current === this) return true;
     return false;
   }
 
-  get textContent() { return this._text + this.children.map((child) => child.textContent).join(''); }
+  get textContent() {
+    return (
+      this._text + this.children.map((child) => child.textContent).join('')
+    );
+  }
   set textContent(value) {
     for (const child of [...this.children]) child.remove();
     this._text = String(value);
   }
 
-  focus() { this.ownerDocument.activeElement = this; }
-  click() { this.dispatchEvent(new Event('click')); }
-  getBoundingClientRect() { return this._rect; }
+  focus() {
+    this.ownerDocument.activeElement = this;
+  }
+  click() {
+    this.dispatchEvent(new Event('click'));
+  }
+  getBoundingClientRect() {
+    return this._rect;
+  }
 
   matches(selector) {
     if (selector.startsWith('#')) return this.id === selector.slice(1);
@@ -99,7 +129,9 @@ class FakeElement extends EventTarget {
     visit(this);
     return found;
   }
-  querySelector(selector) { return this.querySelectorAll(selector)[0] ?? null; }
+  querySelector(selector) {
+    return this.querySelectorAll(selector)[0] ?? null;
+  }
 }
 
 export function createFakeDocument() {

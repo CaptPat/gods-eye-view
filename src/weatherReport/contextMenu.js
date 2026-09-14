@@ -1,6 +1,9 @@
 // src/weatherReport/contextMenu.js
 import * as Cesium from 'cesium';
-import { bindTrackingClickGesture, isTrackingSelectionGesture } from '../data/trackingClickGesture.js';
+import {
+  bindTrackingClickGesture,
+  isTrackingSelectionGesture,
+} from '../data/trackingClickGesture.js';
 import { pickGround } from './groundPick.js';
 
 export const MENU_ITEM_LABEL = 'Weather report here';
@@ -77,7 +80,8 @@ export function createContextMenu({
     doc.body.appendChild(menu);
     doc.addEventListener('pointerdown', onOutsidePointer, true);
     canvas.addEventListener('wheel', onWheel, { passive: true });
-    removeMoveStart = viewer.camera?.moveStart?.addEventListener?.(close) ?? null;
+    removeMoveStart =
+      viewer.camera?.moveStart?.addEventListener?.(close) ?? null;
     item.focus();
   }
 

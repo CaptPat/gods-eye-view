@@ -2,22 +2,46 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import createViteConfig from '../../vite.config.js';
-import { FRESH_MS, STALE_MAX_MS, createWeatherReportHandler } from '../../server/providers/weather-report.js';
+import {
+  FRESH_MS,
+  STALE_MAX_MS,
+  createWeatherReportHandler,
+} from '../../server/providers/weather-report.js';
 
 const fixture = (name) =>
-  JSON.parse(readFileSync(new URL(`./fixtures/weather-report/${name}`, import.meta.url), 'utf8'));
+  JSON.parse(
+    readFileSync(
+      new URL(`./fixtures/weather-report/${name}`, import.meta.url),
+      'utf8',
+    ),
+  );
 const T0 = Date.UTC(2026, 8, 14, 12, 10);
 const MIN = 60_000;
 const fail = () => new Response('busy', { status: 503 });
 
 function invoke(handler, url, method = 'GET') {
   return new Promise((resolve, reject) => {
-    const req = { method, url, headers: {}, socket: { remoteAddress: '127.0.0.1' } };
+    const req = {
+      method,
+      url,
+      headers: {},
+      socket: { remoteAddress: '127.0.0.1' },
+    };
     const res = {
-      writeHead(status, headers) { this.status = status; this.headers = headers || {}; },
+      writeHead(status, headers) {
+        this.status = status;
+        this.headers = headers || {};
+      },
       end(body) {
-        const text = Buffer.isBuffer(body) ? body.toString('utf8') : String(body || '');
-        resolve({ status: this.status, headers: this.headers, text, json: () => JSON.parse(text) });
+        const text = Buffer.isBuffer(body)
+          ? body.toString('utf8')
+          : String(body || '');
+        resolve({
+          status: this.status,
+          headers: this.headers,
+          text,
+          json: () => JSON.parse(text),
+        });
       },
     };
     Promise.resolve(handler(req, res)).catch(reject);
@@ -30,9 +54,14 @@ function harness(overrides = {}, routeOverrides = {}) {
   const routes = {
     'currentConditions:lookup': () => fixture('google-current.json'),
     'forecast/hours:lookup': (href) =>
-      fixture(href.includes('pageToken=fixture-page-2') ? 'google-hourly-page2.json' : 'google-hourly-page1.json'),
+      fixture(
+        href.includes('pageToken=fixture-page-2')
+          ? 'google-hourly-page2.json'
+          : 'google-hourly-page1.json',
+      ),
     'forecast/days:lookup': () => fixture('google-daily.json'),
-    'marine-api.open-meteo.com': () => fixture('open-meteo-marine-coastal.json'),
+    'marine-api.open-meteo.com': () =>
+      fixture('open-meteo-marine-coastal.json'),
     'api.open-meteo.com/v1/forecast': () => fixture('open-meteo-solar.json'),
     ...routeOverrides,
   };
@@ -58,7 +87,8 @@ function harness(overrides = {}, routeOverrides = {}) {
     reportTimeoutMs: 1500,
     ...overrides,
   });
-  const count = (match) => calls.filter((call) => call.href.includes(match)).length;
+  const count = (match) =>
+    calls.filter((call) => call.href.includes(match)).length;
   return { handler, calls, count, clock };
 }
 
@@ -74,7 +104,12 @@ test('a full report normalizes every source, pages the hourly forecast and hides
   assert.equal(body.timeZone, 'America/Chicago');
   assert.equal(body.generatedAt, T0);
   assert.equal(body.stale, false);
-  assert.deepEqual(body.sources, { google: 'ok', openMeteoMarine: 'ok', openMeteoSolar: 'ok', place: 'ok' });
+  assert.deepEqual(body.sources, {
+    google: 'ok',
+    openMeteoMarine: 'ok',
+    openMeteoSolar: 'ok',
+    place: 'ok',
+  });
   assert.equal(body.now.temperatureC, 29.8);
   assert.equal(body.hourly.length, 48);
   assert.equal(body.daily.length, 10);
@@ -83,7 +118,10 @@ test('a full report normalizes every source, pages the hourly forecast and hides
   assert.equal(h.count('forecast/hours:lookup'), 2);
   assert.doesNotMatch(response.text, /TEST-KEY/);
   for (const call of h.calls) {
-    assert.equal(call.options.headers['User-Agent'], 'CyclopsView/0.1 (+https://github.com/CaptPat/gods-eye-view)');
+    assert.equal(
+      call.options.headers['User-Agent'],
+      'CyclopsView/0.1 (+https://github.com/CaptPat/gods-eye-view)',
+    );
   }
 });
 
@@ -91,31 +129,65 @@ test('reports are cached per grid cell for ten minutes, and the oldest key is ev
   const h = harness({ cacheLimit: 2 });
   await invoke(h.handler, ROUTE);
   await invoke(h.handler, '/?lat=29.26&lon=-94.79');
-  assert.equal(h.count('currentConditions:lookup'), 1, 'same 0.05° cell is a cache hit');
+  assert.equal(
+    h.count('currentConditions:lookup'),
+    1,
+    'same 0.05° cell is a cache hit',
+  );
   h.clock.now += FRESH_MS + 1;
   await invoke(h.handler, ROUTE);
-  assert.equal(h.count('currentConditions:lookup'), 2, 'expired after ten minutes');
+  assert.equal(
+    h.count('currentConditions:lookup'),
+    2,
+    'expired after ten minutes',
+  );
   await invoke(h.handler, '/?lat=10&lon=10');
   await invoke(h.handler, '/?lat=20&lon=20');
   await invoke(h.handler, ROUTE);
-  assert.equal(h.count('currentConditions:lookup'), 5, 'the oldest key was evicted at the cache limit');
+  assert.equal(
+    h.count('currentConditions:lookup'),
+    5,
+    'the oldest key was evicted at the cache limit',
+  );
 });
 
 test('one failing source leaves the others; inland marine is null but ok; place failure is tolerated', async () => {
-  const failing = harness({ fetchPlace: async () => { throw new Error('nominatim down'); } }, { 'marine-api.open-meteo.com': fail });
+  const failing = harness(
+    {
+      fetchPlace: async () => {
+        throw new Error('nominatim down');
+      },
+    },
+    { 'marine-api.open-meteo.com': fail },
+  );
   const body = (await invoke(failing.handler, ROUTE)).json();
-  assert.deepEqual(body.sources, { google: 'ok', openMeteoMarine: 'unavailable', openMeteoSolar: 'ok', place: 'unavailable' });
+  assert.deepEqual(body.sources, {
+    google: 'ok',
+    openMeteoMarine: 'unavailable',
+    openMeteoSolar: 'ok',
+    place: 'unavailable',
+  });
   assert.equal(body.marine, null);
   assert.equal(body.place, null);
 
-  const inland = harness({}, { 'marine-api.open-meteo.com': () => fixture('open-meteo-marine-inland.json') });
+  const inland = harness(
+    {},
+    {
+      'marine-api.open-meteo.com': () =>
+        fixture('open-meteo-marine-inland.json'),
+    },
+  );
   const inlandBody = (await invoke(inland.handler, ROUTE)).json();
   assert.equal(inlandBody.sources.openMeteoMarine, 'ok');
   assert.equal(inlandBody.marine, null);
 });
 
 test('with every weather source failing the route is 502, or serves the last report as stale for an hour', async () => {
-  const down = ['currentConditions:lookup', 'marine-api.open-meteo.com', 'api.open-meteo.com/v1/forecast'];
+  const down = [
+    'currentConditions:lookup',
+    'marine-api.open-meteo.com',
+    'api.open-meteo.com/v1/forecast',
+  ];
   const cold = harness({}, Object.fromEntries(down.map((key) => [key, fail])));
   const failed = await invoke(cold.handler, ROUTE);
   assert.equal(failed.status, 502);
@@ -123,11 +195,18 @@ test('with every weather source failing the route is 502, or serves the last rep
 
   const state = { broken: false };
   const guard = (answer) => (href) => (state.broken ? fail() : answer(href));
-  const h = harness({}, {
-    'currentConditions:lookup': guard(() => fixture('google-current.json')),
-    'marine-api.open-meteo.com': guard(() => fixture('open-meteo-marine-coastal.json')),
-    'api.open-meteo.com/v1/forecast': guard(() => fixture('open-meteo-solar.json')),
-  });
+  const h = harness(
+    {},
+    {
+      'currentConditions:lookup': guard(() => fixture('google-current.json')),
+      'marine-api.open-meteo.com': guard(() =>
+        fixture('open-meteo-marine-coastal.json'),
+      ),
+      'api.open-meteo.com/v1/forecast': guard(() =>
+        fixture('open-meteo-solar.json'),
+      ),
+    },
+  );
   await invoke(h.handler, ROUTE);
   state.broken = true;
   h.clock.now = T0 + 20 * MIN;
@@ -165,7 +244,10 @@ test('validation, rate limiting and methods', async () => {
 });
 
 test('a source still pending at the report deadline is unavailable', async () => {
-  const h = harness({ reportTimeoutMs: 50 }, { 'api.open-meteo.com/v1/forecast': () => new Promise(() => {}) });
+  const h = harness(
+    { reportTimeoutMs: 50 },
+    { 'api.open-meteo.com/v1/forecast': () => new Promise(() => {}) },
+  );
   const started = Date.now();
   const body = (await invoke(h.handler, ROUTE)).json();
   assert.ok(Date.now() - started < 1000);
@@ -181,9 +263,13 @@ test('concurrent requests for one grid cell share one upstream fan-out', async (
 });
 
 test('the plugin is registered in the Vite config at /api/weather-report', () => {
-  const plugin = createViteConfig({ mode: 'test' }).plugins.find((p) => p.name === 'weather-report-proxy');
+  const plugin = createViteConfig({ mode: 'test' }).plugins.find(
+    (p) => p.name === 'weather-report-proxy',
+  );
   assert.ok(plugin, 'weather-report-proxy must be registered');
   const routes = new Map();
-  plugin.configureServer({ middlewares: { use: (route, handler) => routes.set(route, handler) } });
+  plugin.configureServer({
+    middlewares: { use: (route, handler) => routes.set(route, handler) },
+  });
   assert.equal(typeof routes.get('/api/weather-report'), 'function');
 });

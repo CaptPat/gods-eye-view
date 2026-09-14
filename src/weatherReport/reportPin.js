@@ -4,13 +4,21 @@ export const PIN_SOURCE_ID = 'weather-report';
 const ENTITY_ID = 'weather-report-pin';
 
 /** One report location: a Cesium point marker plus a pinned world-overlay card. */
-export function createReportPin({ viewer, overlayHost, requestRender = () => {}, onActivate = () => {} }) {
+export function createReportPin({
+  viewer,
+  overlayHost,
+  requestRender = () => {},
+  onActivate = () => {},
+}) {
   let dataSource = null;
   let marker = null;
   let current = null;
 
   function publish() {
-    const position = Cesium.Cartesian3.fromDegrees(current.point.lon, current.point.lat);
+    const position = Cesium.Cartesian3.fromDegrees(
+      current.point.lon,
+      current.point.lat,
+    );
     overlayHost.setVisible(PIN_SOURCE_ID, true);
     overlayHost.setEntries(PIN_SOURCE_ID, [
       {

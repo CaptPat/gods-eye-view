@@ -1,5 +1,15 @@
 # Changelog
 
+## Right-click weather report (fork)
+
+- Right-click the globe and choose **Weather report here** to pin the spot and open a WEATHER
+  panel in the right rail: current conditions, the next 48 hours, 10 days, marine conditions,
+  and solar and surface readings.
+- Served by a new `/api/weather-report` proxy that combines Google Weather API (with a Google
+  Maps key) and Open-Meteo, cached in memory for ten minutes, with a stale report kept for an hour
+  if every source fails.
+- °F/°C switch remembered per browser; Google and Open-Meteo credits always visible in the panel.
+
 ## Weather radar layer (fork)
 
 - Add a Weather Radar layer: RainViewer precipitation worldwide with a two-hour loop, or

@@ -98,9 +98,13 @@ export const DATA_CREDITS = [
   {
     key: 'open-meteo',
     html:
-      'Cockpit current conditions: ' +
+      'Cockpit current conditions and weather report marine, solar and surface: ' +
       '<a href="https://open-meteo.com/en/licence" target="_blank" rel="noopener">Weather data by Open-Meteo.com</a> ' +
       '(CC BY 4.0)',
+  },
+  {
+    key: 'google-weather',
+    html: 'Weather report: Source: Includes weather data from Google',
   },
   {
     key: 'google-news-rss',

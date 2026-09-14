@@ -126,6 +126,22 @@
     ],
     "external": []
   },
+  "weather-report-provider": {
+    "runtime": "node",
+    "exports": ["./server/providers/weather-report"],
+    "modules": [
+      "server/providers/weather-report.js",
+      "server/providers/weather-report/normalize.js",
+      "server/providers/places/google-key.js",
+      "scripts/google-server-key.mjs",
+      "server/providers/regional/place.js",
+      "server/providers/regional/http.js",
+      "src/data/regionalBrief.js",
+      "server/providers/common/rate-limit.js",
+      "server/providers/common/http.js"
+    ],
+    "external": []
+  },
   "firms-provider": {
     "runtime": "node",
     "exports": ["./server/providers/firms"],
@@ -561,7 +577,8 @@
       "src/ui/styles/command-dock-sliding.css",
       "src/ui/styles/voice-cost.css",
       "src/ui/styles/first-run.css",
-      "src/ui/styles/provider-settings.css"
+      "src/ui/styles/provider-settings.css",
+      "src/ui/styles/weather-report.css"
     ],
     "external": []
   },
@@ -858,6 +875,20 @@
       "src/layers/weather-radar/frames.js",
       "src/layers/weather-radar/imagery.js",
       "src/layers/weather-radar/index.js"
+    ],
+    "external": ["cesium"]
+  },
+  "weather-report": {
+    "exports": ["./weather-report"],
+    "modules": [
+      "src/weatherReport/contextMenu.js",
+      "src/weatherReport/groundPick.js",
+      "src/weatherReport/index.js",
+      "src/weatherReport/reportModel.js",
+      "src/weatherReport/reportPanel.js",
+      "src/weatherReport/reportPin.js",
+      "src/data/scenePick.js",
+      "src/data/trackingClickGesture.js"
     ],
     "external": ["cesium"]
   },

@@ -10,6 +10,12 @@ import {
   releaseContinuousRender,
 } from '../renderGovernor.js';
 import { startStandaloneChrome } from './startupChrome.js';
+import { createWeatherReport } from '../weatherReport/index.js';
+import {
+  clearOverlaySource,
+  setOverlayEntries,
+  setOverlaySourceVisible,
+} from '../overlays/worldOverlay.js';
 
 /** Attach scene tools, rendering listeners and the standalone debug handle. */
 export function createStandaloneTools({
@@ -31,6 +37,22 @@ export function createStandaloneTools({
     if (window.__gevAnnotations === annotations) delete window.__gevAnnotations;
     annotations.destroy();
   });
+  // Right-click weather report (fork). The world overlay host was initialised in the controls phase.
+  const weatherReport = createWeatherReport({
+    viewer,
+    overlayHost: {
+      setEntries: setOverlayEntries,
+      setVisible: setOverlaySourceVisible,
+      clearSource: clearOverlaySource,
+    },
+    document,
+    storage: {
+      getItem: (key) => window.localStorage.getItem(key),
+      setItem: (key, value) => window.localStorage.setItem(key, value),
+    },
+    requestRender: governorRequestRender,
+  });
+  defer(() => weatherReport.destroy());
   defer(
     startStandaloneChrome({ loadingScreen, styleManager, dataManager, signal }),
   );

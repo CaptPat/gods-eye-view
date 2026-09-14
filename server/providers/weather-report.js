@@ -25,7 +25,8 @@ export const FRESH_MS = 10 * 60_000;
 export const STALE_MAX_MS = 60 * 60_000;
 export const CACHE_LIMIT = 500;
 const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
-const USER_AGENT = 'CyclopsView/0.1 (+https://github.com/CaptPat/gods-eye-view)';
+const USER_AGENT =
+  'CyclopsView/0.1 (+https://github.com/CaptPat/gods-eye-view)';
 const TIMED_OUT = Symbol('timed out');
 
 function sendJson(res, status, body, headers = {}) {
@@ -38,7 +39,9 @@ function sendJson(res, status, body, headers = {}) {
 }
 
 const usable = (report) =>
-  ['google', 'openMeteoMarine', 'openMeteoSolar'].some((name) => report.sources[name] === 'ok');
+  ['google', 'openMeteoMarine', 'openMeteoSolar'].some(
+    (name) => report.sources[name] === 'ok',
+  );
 
 export function createWeatherReportHandler({
   fetchImpl = (...args) => fetch(...args),
@@ -81,7 +84,9 @@ export function createWeatherReportHandler({
         if (value === TIMED_OUT) throw new Error('report deadline');
         return { ok: true, value };
       } catch (error) {
-        log(`[weather-report] ${label} unavailable (${error?.name || 'Error'})`);
+        log(
+          `[weather-report] ${label} unavailable (${error?.name || 'Error'})`,
+        );
         return { ok: false, value: null };
       }
     };
@@ -98,10 +103,16 @@ export function createWeatherReportHandler({
             ]);
             const pages = [firstPage];
             if (firstPage?.nextPageToken) {
-              pages.push(await getJson(googleHourlyUrl(point, key, firstPage.nextPageToken), signal));
+              pages.push(
+                await getJson(
+                  googleHourlyUrl(point, key, firstPage.nextPageToken),
+                  signal,
+                ),
+              );
             }
             const nowSection = normalizeGoogleNow(current);
-            if (!nowSection || nowSection.temperatureC === null) throw new Error('malformed');
+            if (!nowSection || nowSection.temperatureC === null)
+              throw new Error('malformed');
             return {
               now: nowSection,
               hourly: normalizeGoogleHourly(pages),
@@ -121,7 +132,10 @@ export function createWeatherReportHandler({
         return normalizeSolar(json);
       }),
       attempt('place', async () => {
-        const result = await fetchPlace({ latitude: point.lat, longitude: point.lon });
+        const result = await fetchPlace({
+          latitude: point.lat,
+          longitude: point.lon,
+        });
         return result?.label ?? null;
       }),
     ]);
@@ -156,8 +170,11 @@ export function createWeatherReportHandler({
   async function respond(point, res) {
     const cacheKey = reportCacheKey(point);
     const cached = cache.get(cacheKey);
-    if (cached && now() - cached.generatedAt < FRESH_MS) return sendJson(res, 200, cached);
-    const { promise } = coalesceProxyRequest(inFlight, cacheKey, () => buildReport(point));
+    if (cached && now() - cached.generatedAt < FRESH_MS)
+      return sendJson(res, 200, cached);
+    const { promise } = coalesceProxyRequest(inFlight, cacheKey, () =>
+      buildReport(point),
+    );
     const report = await promise;
     if (usable(report)) {
       remember(cacheKey, report);
@@ -171,9 +188,15 @@ export function createWeatherReportHandler({
 
   return async function handle(req, res) {
     try {
-      if (req.method !== 'GET') return sendJson(res, 405, { error: 'method not allowed' });
+      if (req.method !== 'GET')
+        return sendJson(res, 405, { error: 'method not allowed' });
       if (!limiter(clientKey(req))) {
-        return sendJson(res, 429, { error: 'rate limited' }, { 'Retry-After': '10' });
+        return sendJson(
+          res,
+          429,
+          { error: 'rate limited' },
+          { 'Retry-After': '10' },
+        );
       }
       const url = new URL(req.url || '/', 'http://weather-report.local');
       const point = parseReportQuery(url.searchParams);

@@ -93,6 +93,9 @@
     "./server/providers/weather-radar": {
       "node": "./server/providers/weather-radar.js"
     },
+    "./server/providers/weather-report": {
+      "node": "./server/providers/weather-report.js"
+    },
     "./server/providers/firms": {
       "node": "./server/providers/firms.js"
     },
@@ -158,6 +161,7 @@
     "./layers/awareness": "./src/layers/awareness/index.js",
     "./layers/traffic": "./src/layers/traffic/index.js",
     "./layers/weather-radar": "./src/layers/weather-radar/index.js",
+    "./weather-report": "./src/weatherReport/index.js",
     "./layers/bikeshare": "./src/layers/bikeshare/index.js",
     "./layers/cctv": "./src/layers/cctv/index.js"
   }

@@ -12,7 +12,16 @@ function setup(t, { pickResult = POINT } = {}) {
   const canvas = document.createElement('canvas');
   canvas._rect = { left: 100, top: 50, width: 800, height: 600 };
   document.body.appendChild(canvas);
-  const handler = { actions: new Map(), destroyed: false, setInputAction(fn, type) { this.actions.set(type, fn); }, destroy() { this.destroyed = true; } };
+  const handler = {
+    actions: new Map(),
+    destroyed: false,
+    setInputAction(fn, type) {
+      this.actions.set(type, fn);
+    },
+    destroy() {
+      this.destroyed = true;
+    },
+  };
   const camera = { moveStart: new Cesium.Event() };
   const picks = [];
   const chosen = [];
@@ -20,22 +29,46 @@ function setup(t, { pickResult = POINT } = {}) {
     viewer: { scene: { canvas }, camera },
     document,
     onPick: (point) => chosen.push(point),
-    pick: (_viewer, position) => { picks.push(position); return pickResult; },
-    createHandler: (target) => { assert.equal(target, canvas); return handler; },
+    pick: (_viewer, position) => {
+      picks.push(position);
+      return pickResult;
+    },
+    createHandler: (target) => {
+      assert.equal(target, canvas);
+      return handler;
+    },
   });
   const rightClick = (from, to = from) => {
     handler.actions.get(TYPES.RIGHT_DOWN)({ position: from });
-    if (to !== from) handler.actions.get(TYPES.MOUSE_MOVE)({ startPosition: from, endPosition: to });
+    if (to !== from)
+      handler.actions.get(TYPES.MOUSE_MOVE)({
+        startPosition: from,
+        endPosition: to,
+      });
     handler.actions.get(TYPES.RIGHT_UP)({ position: to });
     handler.actions.get(TYPES.RIGHT_CLICK)({ position: to });
   };
   const key = (target, name) => {
-    const event = Object.assign(new Event('keydown', { cancelable: true, bubbles: true }), { key: name });
+    const event = Object.assign(
+      new Event('keydown', { cancelable: true, bubbles: true }),
+      { key: name },
+    );
     target.dispatchEvent(event);
     return event;
   };
   const menuElement = () => document.body.querySelector('[role="menu"]');
-  return { document, canvas, handler, camera, picks, chosen, menu, rightClick, key, menuElement };
+  return {
+    document,
+    canvas,
+    handler,
+    camera,
+    picks,
+    chosen,
+    menu,
+    rightClick,
+    key,
+    menuElement,
+  };
 }
 
 test('a right click opens the menu at the pointer with the coordinates, focused', (t) => {
@@ -47,7 +80,10 @@ test('a right click opens the menu at the pointer with the coordinates, focused'
   assert.equal(element.style.top, '70px');
   const item = element.querySelector('[role="menuitem"]');
   assert.equal(item.textContent, MENU_ITEM_LABEL);
-  assert.equal(element.querySelector('.weather-report-menu-coords').textContent, '30.267, -97.743');
+  assert.equal(
+    element.querySelector('.weather-report-menu-coords').textContent,
+    '30.267, -97.743',
+  );
   assert.equal(s.document.activeElement, item);
   assert.deepEqual(s.picks, [{ x: 10, y: 20 }]);
   const contextmenu = new Event('contextmenu', { cancelable: true });
@@ -81,7 +117,11 @@ test('Enter, Space and click pick exactly once and close the menu', (t) => {
     if (activate === 'click') item.click();
     else s.key(s.menuElement(), activate);
     item.click();
-    assert.deepEqual(s.chosen, [POINT], `activation via ${JSON.stringify(activate)}`);
+    assert.deepEqual(
+      s.chosen,
+      [POINT],
+      `activation via ${JSON.stringify(activate)}`,
+    );
     assert.equal(s.menu.isOpen(), false);
     assert.equal(s.menuElement(), null);
     s.menu.destroy();
@@ -122,7 +162,11 @@ test('keys the menu handles do not reach page-wide shortcuts', (t) => {
   s.rightClick({ x: 10, y: 20 });
   const escape = s.key(s.menuElement(), 'Escape');
   assert.equal(escape.defaultPrevented, true);
-  assert.equal(escape.cancelBubble, true, 'Escape must not reach the tracking layers\' document listeners');
+  assert.equal(
+    escape.cancelBubble,
+    true,
+    "Escape must not reach the tracking layers' document listeners",
+  );
   assert.equal(s.menuElement(), null);
   s.menu.destroy();
 });

@@ -1,12 +1,22 @@
 // src/weatherReport/index.js
 import { createContextMenu } from './contextMenu.js';
-import { UNITS_STORAGE_KEY, buildReportView, normalizeUnits } from './reportModel.js';
+import {
+  UNITS_STORAGE_KEY,
+  buildReportView,
+  normalizeUnits,
+} from './reportModel.js';
 import { createReportPanel } from './reportPanel.js';
 import { createReportPin } from './reportPin.js';
 
 export const REPORT_ENDPOINT = '/api/weather-report';
-const LOADING_PIN = Object.freeze({ title: 'Loading weather', details: Object.freeze([]) });
-const UNAVAILABLE_PIN = Object.freeze({ title: 'Weather unavailable', details: Object.freeze([]) });
+const LOADING_PIN = Object.freeze({
+  title: 'Loading weather',
+  details: Object.freeze([]),
+});
+const UNAVAILABLE_PIN = Object.freeze({
+  title: 'Weather unavailable',
+  details: Object.freeze([]),
+});
 
 /** Right-click → pin → one report request → right-rail panel. */
 export function createWeatherReport({
@@ -44,9 +54,19 @@ export function createWeatherReport({
     }
   }
 
-  const coordinates = (value) => `${value.lat.toFixed(3)}, ${value.lon.toFixed(3)}`;
-  const pin = createPin({ viewer, overlayHost, requestRender, onActivate: () => panel?.reveal() });
-  const menu = createMenu({ viewer, document: doc, onPick: (picked) => open(picked) });
+  const coordinates = (value) =>
+    `${value.lat.toFixed(3)}, ${value.lon.toFixed(3)}`;
+  const pin = createPin({
+    viewer,
+    overlayHost,
+    requestRender,
+    onActivate: () => panel?.reveal(),
+  });
+  const menu = createMenu({
+    viewer,
+    document: doc,
+    onPick: (picked) => open(picked),
+  });
 
   function ensurePanel() {
     if (panel) return panel;
@@ -79,15 +99,24 @@ export function createWeatherReport({
     controller = request;
     point = picked;
     report = null;
-    const header = { title: coordinates(picked), coordinates: coordinates(picked) };
+    const header = {
+      title: coordinates(picked),
+      coordinates: coordinates(picked),
+    };
     pin.show(picked, LOADING_PIN);
     ensurePanel()?.showLoading(header);
     try {
-      const params = new URLSearchParams({ lat: picked.lat.toFixed(4), lon: picked.lon.toFixed(4) });
-      const response = await fetchImpl(`${REPORT_ENDPOINT}?${params}`, { signal: request.signal });
+      const params = new URLSearchParams({
+        lat: picked.lat.toFixed(4),
+        lon: picked.lon.toFixed(4),
+      });
+      const response = await fetchImpl(`${REPORT_ENDPOINT}?${params}`, {
+        signal: request.signal,
+      });
       const body = await response.json().catch(() => null);
       if (controller !== request) return;
-      if (!response.ok || !body || body.error) throw new Error(body?.error || 'Weather report unavailable');
+      if (!response.ok || !body || body.error)
+        throw new Error(body?.error || 'Weather report unavailable');
       report = body;
       renderReport();
     } catch (error) {
