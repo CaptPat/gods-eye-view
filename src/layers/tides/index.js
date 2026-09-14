@@ -29,7 +29,10 @@ export const SELECTED_SOURCE_OPTIONS = Object.freeze({
 
 function defaultClickHandler(viewer, onClick) {
   const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-  handler.setInputAction((click) => onClick(click.position), Cesium.ScreenSpaceEventType.LEFT_CLICK);
+  handler.setInputAction(
+    (click) => onClick(click.position),
+    Cesium.ScreenSpaceEventType.LEFT_CLICK,
+  );
   return { destroy: () => handler.destroy() };
 }
 
@@ -50,7 +53,8 @@ export function createNoaaStationsLayer({
 } = {}) {
   const meta = STATION_LAYERS[kind];
   if (!meta) throw new TypeError('kind must be tide or current');
-  if (!overlayHost) throw new TypeError('NOAA station layers require an overlay host');
+  if (!overlayHost)
+    throw new TypeError('NOAA station layers require an overlay host');
 
   let viewer = null;
   let points = null;
@@ -120,7 +124,9 @@ export function createNoaaStationsLayer({
     if (!report) return publishCard(buildPendingCard(station, CARD_LOADING));
     const options = { units: units(), now: now() };
     return publishCard(
-      kind === 'tide' ? buildTideCard(station, report, options) : buildCurrentCard(station, report, options),
+      kind === 'tide'
+        ? buildTideCard(station, report, options)
+        : buildCurrentCard(station, report, options),
     );
   }
 
@@ -155,7 +161,8 @@ export function createNoaaStationsLayer({
       if (selected?.controller !== controller) return;
       selected.report = report;
     } catch {
-      if (controller.signal.aborted || selected?.controller !== controller) return;
+      if (controller.signal.aborted || selected?.controller !== controller)
+        return;
       selected.failed = true;
     }
     renderSelected();
@@ -163,7 +170,12 @@ export function createNoaaStationsLayer({
 
   function handleClick(position) {
     if (!enabled || !viewer || !points) return undefined;
-    if (selected && overlayHost.hitTest?.(position?.x, position?.y, { sourceId: meta.selectedSourceId })) {
+    if (
+      selected &&
+      overlayHost.hitTest?.(position?.x, position?.y, {
+        sourceId: meta.selectedSourceId,
+      })
+    ) {
       openUrl(noaaStationUrl(kind, selected.station.id, selected.bin));
       return undefined;
     }
@@ -187,7 +199,10 @@ export function createNoaaStationsLayer({
 
     init(nextViewer) {
       viewer = nextViewer;
-      points = createPoints(nextViewer, { layerId: meta.id, color: meta.color });
+      points = createPoints(nextViewer, {
+        layerId: meta.id,
+        color: meta.color,
+      });
       overlayHost.setVisible(meta.selectedSourceId, false);
     },
 
@@ -221,7 +236,11 @@ export function createNoaaStationsLayer({
 
     async update(_viewer, { signal } = {}) {
       if (!enabled || !points || signal?.aborted) return false;
-      const fresh = stations.length && !stale && lastUpdate !== null && now() - lastUpdate < STATION_LIST_MAX_AGE_MS;
+      const fresh =
+        stations.length &&
+        !stale &&
+        lastUpdate !== null &&
+        now() - lastUpdate < STATION_LIST_MAX_AGE_MS;
       if (fresh) return true;
       listRequest?.abort();
       const controller = new AbortController();
@@ -230,7 +249,9 @@ export function createNoaaStationsLayer({
       signal?.addEventListener?.('abort', onAbort, { once: true });
       loading = true;
       try {
-        const response = await fetchImpl(`/api/tides/stations?kind=${kind}`, { signal: controller.signal });
+        const response = await fetchImpl(`/api/tides/stations?kind=${kind}`, {
+          signal: controller.signal,
+        });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const parsed = parseStationsPayload(await response.json(), kind);
         if (!parsed?.stations.length) throw new Error('malformed station list');
@@ -249,7 +270,9 @@ export function createNoaaStationsLayer({
         if (signal?.aborted) return false;
         if (controller.signal.aborted) return true;
         // Reported through getStats(): an enabled row saying why beats a failed enable.
-        error = stations.length ? 'Station list refresh failed' : 'Station list unavailable';
+        error = stations.length
+          ? 'Station list refresh failed'
+          : 'Station list unavailable';
         return true;
       } finally {
         if (listRequest === controller) {
@@ -272,7 +295,13 @@ export function createNoaaStationsLayer({
 
     getStats() {
       const count = stations.length;
-      if (loading) return { loading: true, loadingLabel: 'Loading stations', count, lastUpdate };
+      if (loading)
+        return {
+          loading: true,
+          loadingLabel: 'Loading stations',
+          count,
+          lastUpdate,
+        };
       if (error && !count) return { count: 0, lastUpdate: null, error };
       if (error) return { stale: true, count, lastUpdate, error };
       if (stale) return { stale: true, count, lastUpdate };

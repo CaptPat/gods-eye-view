@@ -20,8 +20,15 @@ function fakeViewer() {
     primitives,
     scene: {
       primitives: {
-        add(primitive) { primitives.push(primitive); return primitive; },
-        remove(primitive) { const index = primitives.indexOf(primitive); if (index >= 0) primitives.splice(index, 1); return index >= 0; },
+        add(primitive) {
+          primitives.push(primitive);
+          return primitive;
+        },
+        remove(primitive) {
+          const index = primitives.indexOf(primitive);
+          if (index >= 0) primitives.splice(index, 1);
+          return index >= 0;
+        },
       },
     },
   };
@@ -29,7 +36,10 @@ function fakeViewer() {
 
 test('stations become hidden, pickable points in one collection added to the scene', () => {
   const viewer = fakeViewer();
-  const points = createStationPoints(viewer, { layerId: 'tide-stations', color: '#38bdf8' });
+  const points = createStationPoints(viewer, {
+    layerId: 'tide-stations',
+    color: '#38bdf8',
+  });
   assert.equal(viewer.primitives.length, 1);
   const [collection] = viewer.primitives;
   assert.ok(collection instanceof Cesium.PointPrimitiveCollection);
@@ -45,22 +55,43 @@ test('stations become hidden, pickable points in one collection added to the sce
   assert.ok(Math.abs(Cesium.Math.toDegrees(carto.latitude) - 41.80717) < 1e-6);
   points.setShow(true);
   assert.equal(collection.show, true);
-  assert.equal(stationPickId('current-stations', 'ACT1616'), 'current-stations:ACT1616');
+  assert.equal(
+    stationPickId('current-stations', 'ACT1616'),
+    'current-stations:ACT1616',
+  );
 });
 
 test("picks resolve only this layer's stations, from either pick path", () => {
-  const points = createStationPoints(fakeViewer(), { layerId: 'tide-stations', color: '#38bdf8' });
+  const points = createStationPoints(fakeViewer(), {
+    layerId: 'tide-stations',
+    color: '#38bdf8',
+  });
   points.setStations(STATIONS);
-  assert.equal(points.stationIdFromPick({ primitive: { id: 'tide-stations:9063020' } }), '9063020');
-  assert.equal(points.stationIdFromPick({ id: 'tide-stations:8454000' }), '8454000');
-  assert.equal(points.stationIdFromPick({ primitive: { id: 'current-stations:8454000' } }), null);
-  assert.equal(points.stationIdFromPick({ primitive: { id: 'tide-stations:0000000' } }), null);
+  assert.equal(
+    points.stationIdFromPick({ primitive: { id: 'tide-stations:9063020' } }),
+    '9063020',
+  );
+  assert.equal(
+    points.stationIdFromPick({ id: 'tide-stations:8454000' }),
+    '8454000',
+  );
+  assert.equal(
+    points.stationIdFromPick({ primitive: { id: 'current-stations:8454000' } }),
+    null,
+  );
+  assert.equal(
+    points.stationIdFromPick({ primitive: { id: 'tide-stations:0000000' } }),
+    null,
+  );
   assert.equal(points.stationIdFromPick(undefined), null);
 });
 
 test('selection enlarges one point, survives a station refresh, and clears when its station disappears', () => {
   const viewer = fakeViewer();
-  const points = createStationPoints(viewer, { layerId: 'tide-stations', color: '#38bdf8' });
+  const points = createStationPoints(viewer, {
+    layerId: 'tide-stations',
+    color: '#38bdf8',
+  });
   points.setStations(STATIONS);
   points.setSelected('9063020');
   const collection = viewer.primitives[0];

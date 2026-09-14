@@ -24,7 +24,24 @@ export const STATION_LAYERS = Object.freeze({
 });
 
 const DASH = '—';
-const POINTS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+const POINTS = [
+  'N',
+  'NNE',
+  'NE',
+  'ENE',
+  'E',
+  'ESE',
+  'SE',
+  'SSE',
+  'S',
+  'SSW',
+  'SW',
+  'WSW',
+  'W',
+  'WNW',
+  'NW',
+  'NNW',
+];
 const TITLE_NAME_CHARS = 30;
 const isNum = (value) => typeof value === 'number' && Number.isFinite(value);
 
@@ -40,23 +57,36 @@ export function cardinal(deg) {
 
 /** Validate `/api/tides/stations` for one layer kind. */
 export function parseStationsPayload(payload, kind) {
-  if (!payload || payload.kind !== kind || !Array.isArray(payload.stations)) return null;
+  if (!payload || payload.kind !== kind || !Array.isArray(payload.stations))
+    return null;
   const stations = [];
   for (const entry of payload.stations) {
     const lat = Number(entry?.lat);
     const lon = Number(entry?.lon);
-    if (typeof entry?.id !== 'string' || !entry.id || !Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    if (
+      typeof entry?.id !== 'string' ||
+      !entry.id ||
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon)
+    )
+      continue;
     const station = {
       id: entry.id,
-      name: typeof entry.name === 'string' && entry.name ? entry.name : entry.id,
+      name:
+        typeof entry.name === 'string' && entry.name ? entry.name : entry.id,
       lat,
       lon,
-      timeZone: typeof entry.timeZone === 'string' && entry.timeZone ? entry.timeZone : null,
+      timeZone:
+        typeof entry.timeZone === 'string' && entry.timeZone
+          ? entry.timeZone
+          : null,
     };
     if (kind === 'tide') {
       station.greatLakes = entry.greatLakes === true;
     } else {
-      station.bins = Array.isArray(entry.bins) ? entry.bins.filter((bin) => Number.isInteger(bin) && bin > 0) : [];
+      station.bins = Array.isArray(entry.bins)
+        ? entry.bins.filter((bin) => Number.isInteger(bin) && bin > 0)
+        : [];
       if (!station.bins.length) continue;
     }
     stations.push(station);
@@ -79,13 +109,16 @@ export function formatStationTime(ms, timeZone) {
   } catch {
     return timeZone ? formatStationTime(ms, null) : DASH;
   }
-  const part = (type) => parts.find((entry) => entry.type === type)?.value ?? '';
+  const part = (type) =>
+    parts.find((entry) => entry.type === type)?.value ?? '';
   return `${part('weekday')} ${part('hour')}:${part('minute')} ${part('timeZoneName')}`;
 }
 
 export function formatHeight(meters, units) {
   if (!isNum(meters)) return DASH;
-  return units === 'metric' ? `${meters.toFixed(2)} m` : `${(meters * 3.28084).toFixed(1)} ft`;
+  return units === 'metric'
+    ? `${meters.toFixed(2)} m`
+    : `${(meters * 3.28084).toFixed(1)} ft`;
 }
 
 export function formatSpeed(metersPerSecond, units) {
@@ -97,7 +130,9 @@ export function formatSpeed(metersPerSecond, units) {
 
 export function formatDepth(meters, units) {
   if (!isNum(meters)) return DASH;
-  return units === 'metric' ? `${meters.toFixed(1)} m` : `${Math.round(meters * 3.28084)} ft`;
+  return units === 'metric'
+    ? `${meters.toFixed(1)} m`
+    : `${Math.round(meters * 3.28084)} ft`;
 }
 
 export function noaaStationUrl(kind, id, bin) {
@@ -109,7 +144,9 @@ export function noaaStationUrl(kind, id, bin) {
 
 export function stationTitle(station) {
   const name =
-    station.name.length > TITLE_NAME_CHARS ? `${station.name.slice(0, TITLE_NAME_CHARS - 1)}…` : station.name;
+    station.name.length > TITLE_NAME_CHARS
+      ? `${station.name.slice(0, TITLE_NAME_CHARS - 1)}…`
+      : station.name;
   return `${name} · ${station.id}`;
 }
 
@@ -125,11 +162,15 @@ export function buildTideCard(station, report, { units, now }) {
   if (station.greatLakes) {
     details.push('Great Lakes: no tide predictions');
   } else if (report.sources?.predictions === 'ok') {
-    const next = (report.predictions ?? []).filter((entry) => entry.time > now).slice(0, 4);
+    const next = (report.predictions ?? [])
+      .filter((entry) => entry.time > now)
+      .slice(0, 4);
     if (!next.length) details.push('No upcoming tides in range');
     for (const entry of next) {
       const label = entry.type === 'high' ? 'High' : 'Low';
-      details.push(`${label} ${formatHeight(entry.heightM, system)} · ${formatStationTime(entry.time, zone)}`);
+      details.push(
+        `${label} ${formatHeight(entry.heightM, system)} · ${formatStationTime(entry.time, zone)}`,
+      );
     }
   } else {
     details.push('Tide predictions unavailable');
@@ -153,7 +194,8 @@ export function buildCurrentCard(station, report, { units, now }) {
   const system = normalizeUnits(units);
   const zone = station.timeZone;
   const bin = [`Bin ${report.bin}`];
-  if (isNum(report.depthM)) bin.push(`depth ${formatDepth(report.depthM, system)}`);
+  if (isNum(report.depthM))
+    bin.push(`depth ${formatDepth(report.depthM, system)}`);
   if (station.bins.length > 1) bin.push(`${station.bins.length} bins`);
   const details = [bin.join(' · ')];
   if (report.sources?.predictions !== 'ok') {
@@ -168,7 +210,11 @@ export function buildCurrentCard(station, report, { units, now }) {
     details.push(flow('Flood', next('flood'), report.floodDirDeg));
     details.push(flow('Ebb', next('ebb'), report.ebbDirDeg));
     const slack = next('slack');
-    details.push(slack ? `Slack · ${formatStationTime(slack.time, zone)}` : `Slack ${DASH}`);
+    details.push(
+      slack
+        ? `Slack · ${formatStationTime(slack.time, zone)}`
+        : `Slack ${DASH}`,
+    );
   }
   details.push('Click card for NOAA predictions');
   return { title: stationTitle(station), details };

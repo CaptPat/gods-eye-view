@@ -208,7 +208,10 @@ export function upstreamError(json) {
 
 /** `yyyy-MM-dd HH:mm` in GMT → epoch ms. */
 export function parseGmtTime(value) {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(value))
+  if (
+    typeof value !== 'string' ||
+    !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(value)
+  )
     return null;
   const ms = Date.parse(`${value.replace(' ', 'T')}:00Z`);
   return Number.isFinite(ms) ? ms : null;
@@ -222,7 +225,9 @@ export function normalizeHilo(json) {
       type: row?.type === 'H' ? 'high' : row?.type === 'L' ? 'low' : null,
       heightM: finite(row?.v),
     }))
-    .filter((row) => row.time !== null && row.type !== null && row.heightM !== null)
+    .filter(
+      (row) => row.time !== null && row.type !== null && row.heightM !== null,
+    )
     .sort((a, b) => a.time - b.time);
 }
 
@@ -236,20 +241,25 @@ export function normalizeWaterLevel(json) {
 /** The 6-minute prediction at exactly the observation's timestamp. */
 export function predictionAt(json, time) {
   if (!Array.isArray(json?.predictions)) return null;
-  return finite(json.predictions.find((row) => parseGmtTime(row?.t) === time)?.v);
+  return finite(
+    json.predictions.find((row) => parseGmtTime(row?.t) === time)?.v,
+  );
 }
 
 export function normalizeCurrents(json) {
   const block = json?.current_predictions;
   if (!Array.isArray(block?.cp)) return null;
-  if (typeof block.units === 'string' && !block.units.includes('cm/s')) return null;
+  if (typeof block.units === 'string' && !block.units.includes('cm/s'))
+    return null;
   const events = block.cp
     .map((row) => ({
       time: parseGmtTime(row?.Time),
       type: ['flood', 'ebb', 'slack'].includes(row?.Type) ? row.Type : null,
       velocity: finite(row?.Velocity_Major),
     }))
-    .filter((row) => row.time !== null && row.type !== null && row.velocity !== null)
+    .filter(
+      (row) => row.time !== null && row.type !== null && row.velocity !== null,
+    )
     .map(({ time, type, velocity }) => ({
       time,
       type,

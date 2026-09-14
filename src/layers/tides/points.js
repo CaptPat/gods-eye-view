@@ -5,7 +5,12 @@ export const SELECTED_PIXEL_SIZE = 13;
 export const POINT_HEIGHT_M = 5;
 /** Inside this camera distance a station draws through terrain and 3D tiles. */
 export const DEPTH_TEST_DISTANCE_M = 50_000;
-const SCALE_BY_DISTANCE = new Cesium.NearFarScalar(50_000, 1.2, 12_000_000, 0.55);
+const SCALE_BY_DISTANCE = new Cesium.NearFarScalar(
+  50_000,
+  1.2,
+  12_000_000,
+  0.55,
+);
 const OUTLINE = Cesium.Color.BLACK.withAlpha(0.6);
 
 export function stationPickId(layerId, stationId) {
@@ -23,7 +28,9 @@ export function createStationPoints(
     layerId,
     color,
     createCollection = () =>
-      new Cesium.PointPrimitiveCollection({ blendOption: Cesium.BlendOption.TRANSLUCENT }),
+      new Cesium.PointPrimitiveCollection({
+        blendOption: Cesium.BlendOption.TRANSLUCENT,
+      }),
   },
 ) {
   const collection = createCollection();
@@ -46,7 +53,11 @@ export function createStationPoints(
       for (const station of stations) {
         const point = collection.add({
           id: stationPickId(layerId, station.id),
-          position: Cesium.Cartesian3.fromDegrees(station.lon, station.lat, POINT_HEIGHT_M),
+          position: Cesium.Cartesian3.fromDegrees(
+            station.lon,
+            station.lat,
+            POINT_HEIGHT_M,
+          ),
           color: base,
           scaleByDistance: SCALE_BY_DISTANCE,
           disableDepthTestDistance: DEPTH_TEST_DISTANCE_M,
@@ -54,13 +65,16 @@ export function createStationPoints(
         applyStyle(point, false);
         points.set(station.id, point);
       }
-      if (selectedId !== null && points.has(selectedId)) applyStyle(points.get(selectedId), true);
+      if (selectedId !== null && points.has(selectedId))
+        applyStyle(points.get(selectedId), true);
       else selectedId = null;
       return points.size;
     },
     setSelected(stationId) {
-      if (selectedId !== null && points.has(selectedId)) applyStyle(points.get(selectedId), false);
-      selectedId = stationId !== null && points.has(stationId) ? stationId : null;
+      if (selectedId !== null && points.has(selectedId))
+        applyStyle(points.get(selectedId), false);
+      selectedId =
+        stationId !== null && points.has(stationId) ? stationId : null;
       if (selectedId !== null) applyStyle(points.get(selectedId), true);
     },
     selectedId: () => selectedId,

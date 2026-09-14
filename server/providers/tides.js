@@ -23,7 +23,8 @@ export const REPORT_CACHE_LIMIT = 500;
 export const UPSTREAM_TIMEOUT_MS = 15_000;
 const MAX_STATION_LIST_BYTES = 8 * 1024 * 1024;
 const MAX_DATA_BYTES = 256 * 1024;
-const USER_AGENT = 'CyclopsView/0.1 (+https://github.com/CaptPat/gods-eye-view)';
+const USER_AGENT =
+  'CyclopsView/0.1 (+https://github.com/CaptPat/gods-eye-view)';
 const UNAVAILABLE = 'NOAA CO-OPS unavailable';
 
 function sendJson(res, status, body, headers = {}) {
@@ -71,15 +72,25 @@ export function createTidesHandler({
     const maxAge = cached?.stale ? STATIONS_RETRY_MS : STATIONS_TTL_MS;
     if (cached && now() - cached.checkedAt < maxAge) return cached;
     try {
-      const { promise } = coalesceProxyRequest(inFlight, `list:${kind}`, async () => {
-        const json = await getJson(stationListUrl(kind), MAX_STATION_LIST_BYTES);
-        const stations =
-          kind === 'tide'
-            ? normalizeTideStations(json)
-            : normalizeCurrentStations(json, (await loadList('tide')).stations);
-        if (!stations?.length) throw new Error(`empty ${kind} station list`);
-        return stations;
-      });
+      const { promise } = coalesceProxyRequest(
+        inFlight,
+        `list:${kind}`,
+        async () => {
+          const json = await getJson(
+            stationListUrl(kind),
+            MAX_STATION_LIST_BYTES,
+          );
+          const stations =
+            kind === 'tide'
+              ? normalizeTideStations(json)
+              : normalizeCurrentStations(
+                  json,
+                  (await loadList('tide')).stations,
+                );
+          if (!stations?.length) throw new Error(`empty ${kind} station list`);
+          return stations;
+        },
+      );
       const stations = await promise;
       const entry = {
         stations,
@@ -147,7 +158,10 @@ export function createTidesHandler({
         kind: 'tide',
         datum: 'IGLD',
         generatedAt,
-        sources: { predictions: 'none', observed: level.ok ? 'ok' : 'unavailable' },
+        sources: {
+          predictions: 'none',
+          observed: level.ok ? 'ok' : 'unavailable',
+        },
         predictions: null,
         observed: level.ok ? { ...level.value, predictedM: null } : null,
       };
@@ -178,7 +192,9 @@ export function createTidesHandler({
       observed: level.ok
         ? {
             ...level.value,
-            predictedM: latest.ok ? predictionAt(latest.value, level.value.time) : null,
+            predictedM: latest.ok
+              ? predictionAt(latest.value, level.value.time)
+              : null,
           }
         : null,
     };
@@ -186,13 +202,19 @@ export function createTidesHandler({
 
   async function currentReport(station, bin) {
     const generatedAt = now();
-    const result = await attempt(`${station.id} bin ${bin} currents`, async () => {
-      const parsed = normalizeCurrents(
-        await getJson(currentsUrl(station.id, bin, generatedAt), MAX_DATA_BYTES),
-      );
-      if (!parsed) throw new Error('malformed currents');
-      return parsed;
-    });
+    const result = await attempt(
+      `${station.id} bin ${bin} currents`,
+      async () => {
+        const parsed = normalizeCurrents(
+          await getJson(
+            currentsUrl(station.id, bin, generatedAt),
+            MAX_DATA_BYTES,
+          ),
+        );
+        if (!parsed) throw new Error('malformed currents');
+        return parsed;
+      },
+    );
     return {
       id: station.id,
       kind: 'current',
@@ -212,7 +234,8 @@ export function createTidesHandler({
     const { promise } = coalesceProxyRequest(inFlight, key, build);
     const body = await promise;
     const states = Object.values(body.sources);
-    if (!states.includes('ok')) return sendJson(res, 502, { error: UNAVAILABLE });
+    if (!states.includes('ok'))
+      return sendJson(res, 502, { error: UNAVAILABLE });
     // Partial reports are served but never cached, so a transient failure is retried next click.
     if (!states.includes('unavailable')) storeReport(key, body);
     return sendJson(res, 200, body);
@@ -245,18 +268,32 @@ export function createTidesHandler({
     }
     const binText = url.searchParams.get('bin');
     const bin =
-      binText === null ? station.bins[0] : /^\d{1,3}$/.test(binText) ? Number(binText) : Number.NaN;
+      binText === null
+        ? station.bins[0]
+        : /^\d{1,3}$/.test(binText)
+          ? Number(binText)
+          : Number.NaN;
     if (!station.bins.includes(bin)) {
-      return sendJson(res, 400, { error: 'bin is not offered by this station' });
+      return sendJson(res, 400, {
+        error: 'bin is not offered by this station',
+      });
     }
-    return serveReport(res, `current:${station.id}:${bin}`, () => currentReport(station, bin));
+    return serveReport(res, `current:${station.id}:${bin}`, () =>
+      currentReport(station, bin),
+    );
   }
 
   async function handle(req, res) {
     try {
-      if (req.method !== 'GET') return sendJson(res, 405, { error: 'method not allowed' });
+      if (req.method !== 'GET')
+        return sendJson(res, 405, { error: 'method not allowed' });
       if (!limiter(clientKey(req))) {
-        return sendJson(res, 429, { error: 'rate limited' }, { 'Retry-After': '10' });
+        return sendJson(
+          res,
+          429,
+          { error: 'rate limited' },
+          { 'Retry-After': '10' },
+        );
       }
       return await route(new URL(req.url || '/', 'http://tides.local'), res);
     } catch (error) {
