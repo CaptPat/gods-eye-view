@@ -64,6 +64,8 @@ export function createSevereWeatherHandler({
   zoneConcurrency = ZONE_CONCURRENCY,
   zoneDeadlineMs = ZONE_DEADLINE_MS,
   responseBudgetMs = RESPONSE_BUDGET_MS,
+  setTimeoutImpl = setTimeout,
+  clearTimeoutImpl = clearTimeout,
 } = {}) {
   const inFlight = new Map();
   /** zone key → { polygons, fetchedAt } */
@@ -337,7 +339,15 @@ export function createSevereWeatherHandler({
     return state.stale ? 'stale' : 'ok';
   };
 
-  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  /** A cancellable timer: { promise, cancel }. `cancel()` is always safe to
+   *  call, including after the timer already fired. */
+  function delay(ms) {
+    let timer;
+    const promise = new Promise((resolve) => {
+      timer = setTimeoutImpl(resolve, ms);
+    });
+    return { promise, cancel: () => clearTimeoutImpl(timer) };
+  }
 
   function sourceView(state, emptyShape) {
     const status = statusOf(state);
@@ -365,13 +375,43 @@ export function createSevereWeatherHandler({
       // refresh (if any) keeps running in the background. A source with
       // nothing servable is awaited, capped by the response budget so one
       // slow or unreachable source never delays the other.
+      //
+      // The budget only ever cuts the wait short when *something* is already
+      // servable by the time it elapses (e.g. the other source answered).
+      // If nothing is servable yet when the budget elapses — a first enable
+      // with a cold NWS build racing a hung GDACS, say — giving up would
+      // wrongly turn "still building" into a 502. Instead we keep awaiting
+      // the still-pending sources one at a time (each already bounded by its
+      // own upstream timeout / zone deadline) until one becomes servable or
+      // every awaited source has settled.
       const nwsRefresh = ensureRefresh('nws', NWS_TTL_MS, buildNws);
       const gdacsRefresh = ensureRefresh('gdacs', GDACS_TTL_MS, buildGdacs);
-      const awaits = [];
-      if (!isServable(sources.nws) && nwsRefresh) awaits.push(nwsRefresh);
-      if (!isServable(sources.gdacs) && gdacsRefresh) awaits.push(gdacsRefresh);
-      if (awaits.length) {
-        await Promise.race([Promise.all(awaits), delay(responseBudgetMs)]);
+      const pending = [];
+      if (!isServable(sources.nws) && nwsRefresh) pending.push(nwsRefresh);
+      if (!isServable(sources.gdacs) && gdacsRefresh)
+        pending.push(gdacsRefresh);
+      if (pending.length) {
+        const trackers = pending.map((promise) => {
+          const tracker = { settled: false, tracked: null };
+          tracker.tracked = promise.then(() => {
+            tracker.settled = true;
+          });
+          return tracker;
+        });
+        const budget = delay(responseBudgetMs);
+        try {
+          await Promise.race([
+            Promise.all(trackers.map((t) => t.tracked)),
+            budget.promise,
+          ]);
+          while (!isServable(sources.nws) && !isServable(sources.gdacs)) {
+            const unsettled = trackers.filter((t) => !t.settled);
+            if (!unsettled.length) break;
+            await Promise.race(unsettled.map((t) => t.tracked));
+          }
+        } finally {
+          budget.cancel();
+        }
       }
       const nws = sourceView(sources.nws, {
         updatedAt: null,
