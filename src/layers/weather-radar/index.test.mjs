@@ -187,11 +187,30 @@ test('params restored before init apply once the layer runs', async () => {
 
 test('Google 3D is reported from the attached controller and from map-stack events', async () => {
   const h = harness();
-  h.layer.attachMapStack({ getActiveId: () => 'photoreal' });
+  // A real MapStackController mutates its own _activeId before it emits the
+  // change event that becomes gev:map-stack-changed, so getActiveId() already
+  // reflects the new stack by the time the event fires — model that here too.
+  let activeId = 'photoreal';
+  h.layer.attachMapStack({ getActiveId: () => activeId });
   await enabled(h);
   assert.deepEqual(h.layer.getStats(), { status: 'idle', source: 'RainViewer', statusMessage: 'Hidden by Google 3D map source', count: 13 });
+  activeId = 'esri-imagery';
   h.events.dispatchEvent(new CustomEvent('gev:map-stack-changed', { detail: { activeStack: { id: 'esri-imagery' } } }));
   assert.equal(h.layer.getStats().status, 'ok');
+});
+
+test('the attached map-stack controller is read live, not snapshotted at attach time', async () => {
+  const h = harness();
+  let activeId = 'photoreal';
+  h.layer.attachMapStack({ getActiveId: () => activeId });
+  // Changed before init/enable, with no gev:map-stack-changed event ever dispatched.
+  activeId = 'esri-imagery';
+  await enabled(h);
+  assert.equal(h.layer.getStats().status, 'ok', 'a controller attached before init must still be polled live at getStats() time');
+
+  // And the reverse direction, again with no event.
+  activeId = 'photoreal';
+  assert.deepEqual(h.layer.getStats(), { status: 'idle', source: 'RainViewer', statusMessage: 'Hidden by Google 3D map source', count: 13 });
 });
 
 test('row-control listeners are notified; disable clears imagery and stops the loop; destroy unsubscribes', async () => {

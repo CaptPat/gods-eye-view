@@ -33,6 +33,7 @@ export function createWeatherRadarLayer({
   let error = null;
   let stale = false;
   let mapStackId = null;
+  let mapStackController = null;
   let rowListener = null;
   let request = null;
 
@@ -133,7 +134,7 @@ export function createWeatherRadarLayer({
     },
 
     attachMapStack(mapStack) {
-      mapStackId = mapStack?.getActiveId?.() ?? mapStackId;
+      mapStackController = mapStack ?? null;
       notifyRows();
     },
 
@@ -204,7 +205,8 @@ export function createWeatherRadarLayer({
     getStats() {
       const name = SOURCE_NAMES[currentSource()];
       const shown = imagery?.shownTime() ?? null;
-      if (mapStackId === 'photoreal') {
+      const activeStackId = mapStackController ? mapStackController.getActiveId?.() ?? null : mapStackId;
+      if (activeStackId === 'photoreal') {
         return { status: 'idle', source: name, statusMessage: 'Hidden by Google 3D map source', count: frames.length };
       }
       if (error && shown === null) {
