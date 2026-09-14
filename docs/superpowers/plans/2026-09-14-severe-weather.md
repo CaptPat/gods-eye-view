@@ -1706,6 +1706,27 @@ implementation instead:
 
 See `src/data/severeWeatherProxy.test.mjs` for the covering tests.
 
+**Post-review amendment (budget race fix):** the `Promise.race([Promise.all(awaits), delay(responseBudgetMs)])`
+above still had a gap: when the budget elapsed with **no** source servable yet (a first enable, cold
+NWS zone build racing a hung or merely slow GDACS, production budget 25 s but a cold NWS build can
+legitimately take up to the 30 s zone deadline plus the alerts fetch), the handler stopped waiting
+anyway and answered with whatever was — or wasn't — servable, which could 502 and drop a source that
+was moments from succeeding. The handler now distinguishes the two cases:
+
+- if the budget elapses and **at least one** source is servable, it responds now — pending sources
+  read `unavailable` for this response and their refresh continues into the cache, unchanged from
+  before;
+- if the budget elapses and **no** source is servable, it keeps awaiting the still-pending sources
+  one at a time — via a `tracked`/`settled` flag on each awaited promise and
+  `Promise.race(unsettled.map((t) => t.tracked))` — rechecking after each settles, until one becomes
+  servable or every awaited source has settled (bounded throughout by each source's own upstream
+  timeout and, for NWS, the zone deadline); only then, with nothing servable, is the response 502.
+
+`delay()` now returns `{ promise, cancel }` (backed by injectable `setTimeoutImpl`/`clearTimeoutImpl`,
+default `setTimeout`/`clearTimeout`) and its timer is cancelled in a `finally` once the race settles,
+so no timer is left pending after the response. See `src/data/severeWeatherProxy.test.mjs` for the
+covering tests, including one that fakes the timer pair to assert nothing is left pending.
+
 ---
 
 ### Task 4: Layer model — areas, cards and row status

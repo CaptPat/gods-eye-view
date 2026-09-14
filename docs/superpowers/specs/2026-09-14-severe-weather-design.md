@@ -88,6 +88,15 @@ This is sub-project 5 of 5. Each sub-project has its own spec, plan and build:
     (`RESPONSE_BUDGET_MS = 25_000`, injectable) so one slow or unreachable source never delays a
     response from the other. Only one refresh per source is ever in flight; a request that arrives
     while one is already running joins it rather than starting a second.
+  - The budget only ever cuts the wait short when it elapses with *something* already servable
+    (e.g. the other source answered while this one was still building). If it elapses with nothing
+    servable at all — a first enable with a cold NWS zone build racing a hung or slow GDACS, for
+    example — giving up there would wrongly turn "still building" into a 502 and drop a source that
+    was about to succeed. Instead the handler keeps awaiting the still-pending sources one at a
+    time (each already bounded by its own upstream timeout and, for NWS, the zone deadline) until
+    one becomes servable or every awaited source has settled; only then, with nothing servable, is
+    the response 502. The budget's timer is always cancelled once the race settles, so no timer is
+    left pending after the response.
 - **Zone cache.**
   - Simplified shapes are stored on disk at `.gev-cache/severe-weather/zones/<type>_<ID>.json`
     and kept for 7 days (file mtime).
