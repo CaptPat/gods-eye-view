@@ -7,6 +7,7 @@ import {
 } from './frames.js';
 import { buildRowControls, normalizeOpacity } from './controls.js';
 import { createRadarImagery } from './imagery.js';
+import { swapToFrame } from '../weather-imagery/frameImagery.js';
 
 export const REFRESH_MS = 5 * 60 * 1000;
 export const SWAP_CHECK_MS = 1000;
@@ -74,19 +75,10 @@ export function createWeatherRadarLayer({
       imagery.clear();
       return;
     }
-    const current = imagery.shownTime();
-    if (
-      current === null ||
-      current === newest.time ||
-      imagery.isReady(newest.time)
-    ) {
+    if (swapToFrame(imagery, newest.time)) {
       swapTimer = clearTimer(swapTimer);
-      imagery.show(newest.time);
-      imagery.release([newest.time]);
       return;
     }
-    imagery.preload([newest.time]);
-    imagery.release([current, newest.time]);
     // Do not re-arm while hidden: the next update() re-evaluates via renderLive().
     if (!swapTimer && isVisible()) {
       swapTimer = timers.setTimeout(() => {

@@ -1,4 +1,10 @@
-export const RADAR_OPACITIES = Object.freeze([0.4, 0.7, 1]);
+import {
+  IMAGERY_OPACITIES,
+  normalizeImageryOpacity,
+} from '../weather-imagery/opacity.js';
+
+export const RADAR_OPACITIES = IMAGERY_OPACITIES;
+export const normalizeOpacity = normalizeImageryOpacity;
 
 // Colours from RainViewer's published table (rainviewer_api_colors_table.csv):
 // the "Universal Blue" column is what the API serves; "NEXRAD Level III" is the
@@ -23,14 +29,6 @@ const LEGENDS = Object.freeze({
     ],
   }),
 });
-
-export function normalizeOpacity(value) {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return null;
-  return (
-    RADAR_OPACITIES.find((option) => Math.abs(option - numeric) < 0.001) ?? null
-  );
-}
 
 /** Row chips and legend for the Layers panel (see layerPanel._syncRowControls). */
 export function buildRowControls({

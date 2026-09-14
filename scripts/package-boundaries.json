@@ -888,6 +888,8 @@
   "weather-radar-layer": {
     "exports": ["./layers/weather-radar"],
     "modules": [
+      "src/layers/weather-imagery/frameImagery.js",
+      "src/layers/weather-imagery/opacity.js",
       "src/layers/weather-radar/controls.js",
       "src/layers/weather-radar/frames.js",
       "src/layers/weather-radar/imagery.js",
@@ -1453,6 +1455,8 @@
       "src/layers/vessels/store.js",
       "src/layers/vessels/testing.js",
       "src/layers/vessels/tracking.js",
+      "src/layers/weather-imagery/frameImagery.js",
+      "src/layers/weather-imagery/opacity.js",
       "src/layers/weather-radar/controls.js",
       "src/layers/weather-radar/frames.js",
       "src/layers/weather-radar/imagery.js",

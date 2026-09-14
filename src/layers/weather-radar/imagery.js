@@ -1,7 +1,10 @@
 import * as Cesium from 'cesium';
+import {
+  PRELOAD_ALPHA,
+  createFrameImagery,
+} from '../weather-imagery/frameImagery.js';
 
-/** Loaded but effectively invisible: Cesium still requests tiles for it. */
-export const PRELOAD_ALPHA = 0.001;
+export { PRELOAD_ALPHA };
 const IEM_RECTANGLE_DEGREES = Object.freeze([-130, 20, -60, 55]);
 
 export function rainViewerTemplate(timeMs) {
@@ -34,81 +37,7 @@ export function createProvider(source, timeMs) {
   });
 }
 
-export function createRadarImagery(
-  viewer,
-  {
-    createProvider: makeProvider = createProvider,
-    createLayer = (provider) => new Cesium.ImageryLayer(provider),
-  } = {},
-) {
-  const layers = new Map();
-  const pending = new Set();
-  const ready = new Set();
-  let source = null;
-  let shown = null;
-  let alpha = 0.7;
-
-  const removeProgressListener =
-    viewer.scene.globe.tileLoadProgressEvent.addEventListener((queued) => {
-      if (queued !== 0) return;
-      for (const time of pending) ready.add(time);
-      pending.clear();
-    });
-
-  function remove(time) {
-    const layer = layers.get(time);
-    if (!layer) return;
-    viewer.imageryLayers.remove(layer, true);
-    layers.delete(time);
-    pending.delete(time);
-    ready.delete(time);
-    if (shown === time) shown = null;
-  }
-
-  function ensure(time) {
-    if (layers.has(time)) return layers.get(time);
-    const layer = createLayer(makeProvider(source, time));
-    layer.alpha = PRELOAD_ALPHA;
-    layer.show = true;
-    viewer.imageryLayers.add(layer);
-    layers.set(time, layer);
-    pending.add(time);
-    return layer;
-  }
-
-  return {
-    setSource(nextSource) {
-      if (nextSource === source) return;
-      for (const time of [...layers.keys()]) remove(time);
-      source = nextSource;
-    },
-    preload(times) {
-      for (const time of times) ensure(time);
-    },
-    show(time) {
-      if (shown !== null && shown !== time && layers.has(shown))
-        layers.get(shown).alpha = PRELOAD_ALPHA;
-      ensure(time).alpha = alpha;
-      shown = time;
-    },
-    setAlpha(nextAlpha) {
-      alpha = nextAlpha;
-      if (shown !== null && layers.has(shown)) layers.get(shown).alpha = alpha;
-    },
-    release(keepTimes) {
-      const keep = new Set(keepTimes);
-      for (const time of [...layers.keys()]) if (!keep.has(time)) remove(time);
-    },
-    isReady: (time) => ready.has(time),
-    readyCount: () =>
-      [...layers.keys()].filter((time) => ready.has(time)).length,
-    shownTime: () => shown,
-    clear() {
-      for (const time of [...layers.keys()]) remove(time);
-    },
-    destroy() {
-      this.clear();
-      removeProgressListener();
-    },
-  };
+/** Radar keeps its own providers; frame bookkeeping is shared with Weather Overlays. */
+export function createRadarImagery(viewer, options = {}) {
+  return createFrameImagery(viewer, { createProvider, ...options });
 }
