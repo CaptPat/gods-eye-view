@@ -276,6 +276,26 @@ export const IEM_NEXRAD_CREDIT = Object.freeze({
   html: 'US radar: <a href="https://mesonet.agron.iastate.edu/" target="_blank" rel="noopener">Iowa Environmental Mesonet</a> NEXRAD',
 });
 
+export const NOAA_GMGSI_CREDIT = Object.freeze({
+  key: 'noaa-gmgsi',
+  html: 'Clouds: <a href="https://nowcoast.noaa.gov/" target="_blank" rel="noopener">NOAA nowCOAST</a> GMGSI geostationary satellite mosaic',
+});
+
+export const NOAA_GFS_CREDIT = Object.freeze({
+  key: 'noaa-gfs',
+  html: 'Temperature: NOAA NCEP GFS via <a href="https://pae-paha.pacioos.hawaii.edu/erddap/griddap/ncep_global.html" target="_blank" rel="noopener">PacIOOS ERDDAP</a>',
+});
+
+export const GOOGLE_AIR_QUALITY_CREDIT = Object.freeze({
+  key: 'google-air-quality',
+  html: 'Air quality overlay: Source: Includes air quality data from Google',
+});
+
+export const GOOGLE_POLLEN_CREDIT = Object.freeze({
+  key: 'google-pollen',
+  html: 'Pollen overlay: Source: Includes pollen data from Google',
+});
+
 export const NOAA_COOPS_CREDIT = Object.freeze({
   key: 'noaa-coops',
   html: 'Tides and currents: <a href="https://tidesandcurrents.noaa.gov/" target="_blank" rel="noopener">NOAA CO-OPS</a>',
