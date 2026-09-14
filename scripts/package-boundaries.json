@@ -153,6 +153,22 @@
     ],
     "external": []
   },
+  "weather-overlays-provider": {
+    "runtime": "node",
+    "exports": ["./server/providers/weather-overlays"],
+    "modules": [
+      "server/providers/weather-overlays.js",
+      "server/providers/weather-overlays/render.js",
+      "server/providers/weather-overlays/sources.js",
+      "src/layers/weather-overlays/modes.js",
+      "src/layers/weather-overlays/palette.js",
+      "server/providers/places/google-key.js",
+      "scripts/google-server-key.mjs",
+      "server/providers/common/rate-limit.js",
+      "server/providers/common/http.js"
+    ],
+    "external": []
+  },
   "firms-provider": {
     "runtime": "node",
     "exports": ["./server/providers/firms"],
@@ -906,6 +922,19 @@
     ],
     "external": ["cesium"]
   },
+  "weather-overlays-layer": {
+    "exports": ["./layers/weather-overlays"],
+    "modules": [
+      "src/layers/weather-imagery/frameImagery.js",
+      "src/layers/weather-imagery/opacity.js",
+      "src/layers/weather-overlays/controls.js",
+      "src/layers/weather-overlays/imagery.js",
+      "src/layers/weather-overlays/index.js",
+      "src/layers/weather-overlays/modes.js",
+      "src/layers/weather-overlays/palette.js"
+    ],
+    "external": ["cesium"]
+  },
   "weather-report": {
     "exports": ["./weather-report"],
     "modules": [
@@ -1238,6 +1267,7 @@
       "src/data/trafficQueue.js",
       "src/data/trailRenderer.js",
       "src/data/vesselLabels.js",
+      "src/data/weatherOverlays.js",
       "src/data/weatherRadar.js",
       "src/firstRunExperience.js",
       "src/geocodeOsm.js",
@@ -1457,6 +1487,11 @@
       "src/layers/vessels/tracking.js",
       "src/layers/weather-imagery/frameImagery.js",
       "src/layers/weather-imagery/opacity.js",
+      "src/layers/weather-overlays/controls.js",
+      "src/layers/weather-overlays/imagery.js",
+      "src/layers/weather-overlays/index.js",
+      "src/layers/weather-overlays/modes.js",
+      "src/layers/weather-overlays/palette.js",
       "src/layers/weather-radar/controls.js",
       "src/layers/weather-radar/frames.js",
       "src/layers/weather-radar/imagery.js",

@@ -32,6 +32,19 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## Weather overlays layer (fork)
+
+- Add a Weather Overlays layer with four modes, one shown at a time: cloud cover (NOAA GMGSI
+  geostationary infrared, hourly), 2 m temperature (NOAA GFS via PacIOOS ERDDAP, rendered into
+  colour tiles), Google Air Quality (US AQI) and Google Pollen (tree, grass or weed).
+- Row controls for mode, pollen type and 40/70/100% opacity, with a legend per mode. Mode, pollen
+  type and opacity travel in share links (layer token `o`).
+- Served through a `/api/weather-overlays` proxy with separate manifest and tile rate limits and an
+  in-memory tile cache pruned by age. Google modes report "Google Maps API key not configured"
+  without a key, and every mode reports when the Google 3D map source hides it.
+- Weather Radar and Weather Overlays now share one frame-imagery helper; overlays sit directly above
+  the base map, so radar draws on top.
+
 ## Tide and current stations (fork)
 
 - Add Tide Stations and Current Stations layers from NOAA CO-OPS (US and territories), served
