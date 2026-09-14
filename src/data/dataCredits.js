@@ -276,6 +276,11 @@ export const IEM_NEXRAD_CREDIT = Object.freeze({
   html: 'US radar: <a href="https://mesonet.agron.iastate.edu/" target="_blank" rel="noopener">Iowa Environmental Mesonet</a> NEXRAD',
 });
 
+export const NOAA_COOPS_CREDIT = Object.freeze({
+  key: 'noaa-coops',
+  html: 'Tides and currents: <a href="https://tidesandcurrents.noaa.gov/" target="_blank" rel="noopener">NOAA CO-OPS</a>',
+});
+
 /** Registered when the first Natural Earth region outline resolves (public
  * domain — no attribution required; credited as a courtesy). */
 export const NATURAL_EARTH_CREDIT = {
