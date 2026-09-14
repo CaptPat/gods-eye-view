@@ -1,0 +1,258 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.72c6ec33bfeaa6b7c7b00e6f14f58fc54f222fe4.001.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.72c6ec33bfeaa6b7c7b00e6f14f58fc54f222fe4.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.72c6ec33bfeaa6b7c7b00e6f14f58fc54f222fe4.001.1",
+        "areaDesc": "Two Rivers; Fairbanks Metro Area",
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/AKZ843",
+          "https://api.weather.gov/zones/forecast/AKZ844"
+        ],
+        "sent": "2026-09-13T13:21:00-08:00",
+        "effective": "2026-09-13T13:21:00-08:00",
+        "onset": "2026-09-15T12:00:00-08:00",
+        "expires": "2026-09-14T16:00:00-08:00",
+        "ends": "2026-09-19T16:00:00-08:00",
+        "status": "Actual",
+        "messageType": "Alert",
+        "category": "Met",
+        "severity": "Severe",
+        "certainty": "Possible",
+        "urgency": "Future",
+        "event": "Flood Watch",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Fairbanks AK",
+        "headline": "Flood Watch issued September 13 at 1:21PM AKDT until September 19 at 4:00PM AKDT by NWS Fairbanks AK",
+        "response": "Prepare",
+        "web": "http://www.weather.gov"
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.ce0bdc8db3bf7d7a2ede9df04628f7946e2f7f62.001.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.ce0bdc8db3bf7d7a2ede9df04628f7946e2f7f62.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.ce0bdc8db3bf7d7a2ede9df04628f7946e2f7f62.001.1",
+        "areaDesc": "Fairbanks Metro Area",
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/AKZ844"
+        ],
+        "sent": "2026-09-14T07:30:00-08:00",
+        "effective": "2026-09-14T07:30:00-08:00",
+        "onset": "2026-09-14T07:30:00-08:00",
+        "expires": "2026-09-14T10:00:00-08:00",
+        "ends": "2026-09-14T10:00:00-08:00",
+        "status": "Actual",
+        "messageType": "Alert",
+        "category": "Met",
+        "severity": "Moderate",
+        "certainty": "Likely",
+        "urgency": "Expected",
+        "event": "Dense Fog Advisory",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Fairbanks AK",
+        "headline": "Dense Fog Advisory issued September 14 at 7:30AM AKDT until September 14 at 10:00AM AKDT by NWS Fairbanks AK",
+        "response": "Execute",
+        "web": "http://www.weather.gov"
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.e3ac6de7a2c9965c92385376cb839fd3f4ccdd19.001.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.e3ac6de7a2c9965c92385376cb839fd3f4ccdd19.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.e3ac6de7a2c9965c92385376cb839fd3f4ccdd19.001.1",
+        "areaDesc": "Lower Yukon and Innoko Valleys; North Slopes of the Western Alaska Range; Upper Kuskokwim Valley",
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/AKZ830",
+          "https://api.weather.gov/zones/forecast/AKZ851",
+          "https://api.weather.gov/zones/forecast/AKZ852"
+        ],
+        "sent": "2026-09-14T06:20:00-08:00",
+        "effective": "2026-09-14T06:20:00-08:00",
+        "onset": "2026-09-15T10:00:00-08:00",
+        "expires": "2026-09-14T16:00:00-08:00",
+        "ends": "2026-09-16T10:00:00-08:00",
+        "status": "Actual",
+        "messageType": "Update",
+        "category": "Met",
+        "severity": "Moderate",
+        "certainty": "Likely",
+        "urgency": "Expected",
+        "event": "Wind Advisory",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Fairbanks AK",
+        "headline": "Wind Advisory issued September 14 at 6:20AM AKDT until September 16 at 10:00AM AKDT by NWS Fairbanks AK",
+        "response": "Execute",
+        "web": "http://www.weather.gov"
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.a8cf6ef01a03c20165689da85615d4de7004b983.001.1",
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -95.05,
+              41.24
+            ],
+            [
+              -95.13,
+              41.33
+            ],
+            [
+              -94.79,
+              41.7
+            ],
+            [
+              -94.37,
+              41.54
+            ],
+            [
+              -95.05,
+              41.24
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.a8cf6ef01a03c20165689da85615d4de7004b983.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.a8cf6ef01a03c20165689da85615d4de7004b983.001.1",
+        "areaDesc": "Audubon; Guthrie; Cass; Adair",
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/IAZ057",
+          "https://api.weather.gov/zones/forecast/IAZ058",
+          "https://api.weather.gov/zones/forecast/IAZ070",
+          "https://api.weather.gov/zones/forecast/IAZ071"
+        ],
+        "sent": "2026-09-14T10:33:00-05:00",
+        "effective": "2026-09-14T10:33:00-05:00",
+        "onset": "2026-09-14T10:33:00-05:00",
+        "expires": "2026-09-14T11:15:00-05:00",
+        "ends": null,
+        "status": "Actual",
+        "messageType": "Alert",
+        "category": "Met",
+        "severity": "Moderate",
+        "certainty": "Observed",
+        "urgency": "Expected",
+        "event": "Special Weather Statement",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Des Moines IA",
+        "headline": "Special Weather Statement issued September 14 at 10:33AM CDT by NWS Des Moines IA",
+        "response": "Execute",
+        "web": "http://www.weather.gov"
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.6f9326bba7f902ca0acac3471340cf25e7cde570.001.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.6f9326bba7f902ca0acac3471340cf25e7cde570.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.6f9326bba7f902ca0acac3471340cf25e7cde570.001.1",
+        "areaDesc": "Pine Ridge/Nebraska National Forest; Box Butte/South Sioux/Niobrara River; Lower North Platte River Basin/Scottsbluff National Monument",
+        "affectedZones": [
+          "https://api.weather.gov/zones/fire/NEZ434",
+          "https://api.weather.gov/zones/fire/NEZ435",
+          "https://api.weather.gov/zones/fire/NEZ436"
+        ],
+        "sent": "2026-09-14T01:26:00-06:00",
+        "effective": "2026-09-14T01:26:00-06:00",
+        "onset": "2026-09-14T12:00:00-06:00",
+        "expires": "2026-09-14T20:00:00-06:00",
+        "ends": "2026-09-14T20:00:00-06:00",
+        "status": "Actual",
+        "messageType": "Alert",
+        "category": "Met",
+        "severity": "Severe",
+        "certainty": "Likely",
+        "urgency": "Expected",
+        "event": "Red Flag Warning",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Cheyenne WY",
+        "headline": "Red Flag Warning issued September 14 at 1:26AM MDT until September 14 at 8:00PM MDT by NWS Cheyenne WY",
+        "response": "Prepare",
+        "web": "http://www.weather.gov"
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0-KEEPALIVE-52623",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0-KEEPALIVE-52623",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0-KEEPALIVE-52623",
+        "areaDesc": "Montgomery",
+        "affectedZones": [
+          "https://api.weather.gov/zones/county/MDC031"
+        ],
+        "sent": "2026-09-14T16:03:09+00:00",
+        "effective": "2026-09-14T16:03:09+00:00",
+        "onset": null,
+        "expires": "2026-09-14T16:13:09+00:00",
+        "ends": null,
+        "status": "Test",
+        "messageType": "Alert",
+        "category": "Met",
+        "severity": "Unknown",
+        "certainty": "Unknown",
+        "urgency": "Unknown",
+        "event": "Test Message",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS",
+        "headline": null,
+        "response": "None",
+        "web": "http://www.weather.gov"
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.2b609fc293568533409d8d1e98727dca5c257dbe.002.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.2b609fc293568533409d8d1e98727dca5c257dbe.002.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.2b609fc293568533409d8d1e98727dca5c257dbe.002.1",
+        "areaDesc": "Cherokee",
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/OKZ068"
+        ],
+        "sent": "2026-09-14T10:56:00-05:00",
+        "effective": "2026-09-14T10:56:00-05:00",
+        "onset": "2026-09-15T12:00:00-05:00",
+        "expires": "2026-09-14T23:00:00-05:00",
+        "ends": "2026-09-15T19:00:00-05:00",
+        "status": "Actual",
+        "messageType": "Alert",
+        "category": "Met",
+        "severity": "Moderate",
+        "certainty": "Likely",
+        "urgency": "Expected",
+        "event": "Heat Advisory",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Tulsa OK",
+        "headline": "Heat Advisory issued September 14 at 10:56AM CDT until September 15 at 7:00PM CDT by NWS Tulsa OK",
+        "response": "Execute",
+        "web": "http://www.weather.gov"
+      }
+    }
+  ],
+  "title": "Current watches, warnings, and advisories",
+  "updated": "2026-09-14T16:05:29+00:00"
+}

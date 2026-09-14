@@ -1,0 +1,306 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "bbox": [
+        -137.8,
+        19.4,
+        -137.8,
+        19.4
+      ],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -137.8,
+          19.4
+        ]
+      },
+      "properties": {
+        "eventtype": "TC",
+        "eventid": 1001320,
+        "episodeid": 20,
+        "eventname": "NORBERT-26",
+        "glide": "",
+        "name": "Tropical Cyclone NORBERT-26",
+        "description": "Tropical Cyclone NORBERT-26",
+        "url": {
+          "geometry": "https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=TC&eventid=1001320&episodeid=20",
+          "report": "https://www.gdacs.org/report.aspx?eventid=1001320&episodeid=20&eventtype=TC",
+          "details": "https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=TC&eventid=1001320"
+        },
+        "alertlevel": "Green",
+        "alertscore": 1,
+        "episodealertlevel": "Green",
+        "istemporary": "false",
+        "iscurrent": "true",
+        "country": "",
+        "fromdate": "2026-09-09T21:00:00",
+        "todate": "2026-09-14T15:00:00",
+        "datemodified": "2026-09-14T14:44:24",
+        "iso3": "",
+        "source": "NOAA",
+        "polygonlabel": "Centroid",
+        "Class": "Point_Centroid"
+      }
+    },
+    {
+      "type": "Feature",
+      "bbox": [
+        -119.7,
+        16.3,
+        -119.7,
+        16.3
+      ],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.7,
+          16.3
+        ]
+      },
+      "properties": {
+        "eventtype": "TC",
+        "eventid": 1001321,
+        "episodeid": 4,
+        "eventname": "FIFTEEN-E-26",
+        "glide": "",
+        "name": "Tropical Cyclone FIFTEEN-E-26",
+        "description": "Tropical Cyclone FIFTEEN-E-26",
+        "url": {
+          "geometry": "https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=TC&eventid=1001321&episodeid=4",
+          "report": "https://www.gdacs.org/report.aspx?eventid=1001321&episodeid=4&eventtype=TC",
+          "details": "https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=TC&eventid=1001321"
+        },
+        "alertlevel": "Green",
+        "alertscore": 1,
+        "episodealertlevel": "Green",
+        "istemporary": "false",
+        "iscurrent": "true",
+        "country": "",
+        "fromdate": "2026-09-13T21:00:00",
+        "todate": "2026-09-14T15:00:00",
+        "datemodified": "2026-09-14T14:45:48",
+        "iso3": "",
+        "source": "NOAA",
+        "polygonlabel": "Centroid",
+        "Class": "Point_Centroid"
+      }
+    },
+    {
+      "type": "Feature",
+      "bbox": [
+        -73.3711,
+        41.119,
+        -73.3711,
+        41.119
+      ],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.3711,
+          41.119
+        ]
+      },
+      "properties": {
+        "eventtype": "FL",
+        "eventid": 1103888,
+        "episodeid": 91,
+        "eventname": "",
+        "glide": "",
+        "name": "Flood in United States",
+        "description": "Flood in United States",
+        "url": {
+          "geometry": "https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=FL&eventid=1103888&episodeid=91",
+          "report": "https://www.gdacs.org/report.aspx?eventid=1103888&episodeid=91&eventtype=FL",
+          "details": "https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=FL&eventid=1103888"
+        },
+        "alertlevel": "Green",
+        "alertscore": 1,
+        "episodealertlevel": "Green",
+        "istemporary": "false",
+        "iscurrent": "true",
+        "country": "United States",
+        "fromdate": "2026-05-19T01:00:00",
+        "todate": "2026-09-15T01:00:00",
+        "datemodified": "2026-09-14T10:27:56",
+        "iso3": "USA",
+        "source": "GLOFAS",
+        "polygonlabel": "Centroid",
+        "Class": "Point_Centroid"
+      }
+    },
+    {
+      "type": "Feature",
+      "bbox": [
+        -67.747,
+        7.273,
+        -67.747,
+        7.273
+      ],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -67.747,
+          7.273
+        ]
+      },
+      "properties": {
+        "eventtype": "DR",
+        "eventid": 1023877,
+        "episodeid": 8,
+        "eventname": "Northern South America, Panama Isthmus-2026",
+        "glide": "",
+        "name": "Drought in Brazil, Colombia, Costa Rica, , Guyana, Panama, Suriname, Venezuela",
+        "description": "Drought in Brazil, Colombia, Costa Rica, , Guyana, Panama, Suriname, Venezuela",
+        "url": {
+          "geometry": "https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=DR&eventid=1023877&episodeid=8",
+          "report": "https://www.gdacs.org/report.aspx?eventid=1023877&episodeid=8&eventtype=DR",
+          "details": "https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=DR&eventid=1023877"
+        },
+        "alertlevel": "Green",
+        "alertscore": 1,
+        "episodealertlevel": "Green",
+        "istemporary": "false",
+        "iscurrent": "false",
+        "country": "Brazil, Colombia, Costa Rica, , Guyana, Panama, Suriname, Venezuela",
+        "fromdate": "2026-02-21T00:00:00",
+        "todate": "2026-09-14T14:38:42",
+        "datemodified": "2026-09-14T14:38:42",
+        "iso3": "BRA",
+        "source": "GDO",
+        "polygonlabel": "Centroid",
+        "Class": "Point_Centroid"
+      }
+    },
+    {
+      "type": "Feature",
+      "bbox": [
+        47.017,
+        -19.34,
+        47.017,
+        -19.34
+      ],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          47.017,
+          -19.34
+        ]
+      },
+      "properties": {
+        "eventtype": "DR",
+        "eventid": 1018431,
+        "episodeid": 14,
+        "eventname": "Madagascar-2026",
+        "glide": "DR-2025-000238-MDG",
+        "name": "Drought in Madagascar",
+        "description": "Drought in Madagascar",
+        "url": {
+          "geometry": "https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=DR&eventid=1018431&episodeid=14",
+          "report": "https://www.gdacs.org/report.aspx?eventid=1018431&episodeid=14&eventtype=DR",
+          "details": "https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=DR&eventid=1018431"
+        },
+        "alertlevel": "Orange",
+        "alertscore": 2,
+        "episodealertlevel": "Orange",
+        "istemporary": "false",
+        "iscurrent": "false",
+        "country": "Madagascar",
+        "fromdate": "2025-11-21T00:00:00",
+        "todate": "2026-09-14T14:38:32",
+        "datemodified": "2026-09-14T14:38:32",
+        "iso3": "MDG",
+        "source": "GDO",
+        "polygonlabel": "Centroid",
+        "Class": "Point_Centroid"
+      }
+    },
+    {
+      "type": "Feature",
+      "bbox": [
+        134.5302,
+        -14.8229,
+        134.5302,
+        -14.8229
+      ],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          134.5302,
+          -14.8229
+        ]
+      },
+      "properties": {
+        "eventtype": "WF",
+        "eventid": 1031964,
+        "episodeid": 1,
+        "eventname": "",
+        "glide": "",
+        "name": "Forest fires in Australia",
+        "description": "Forest fires in Australia",
+        "url": {
+          "geometry": "https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=WF&eventid=1031964&episodeid=1",
+          "report": "https://www.gdacs.org/report.aspx?eventid=1031964&episodeid=1&eventtype=WF",
+          "details": "https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=WF&eventid=1031964"
+        },
+        "alertlevel": "Green",
+        "alertscore": 1,
+        "episodealertlevel": "Green",
+        "istemporary": "false",
+        "iscurrent": "true",
+        "country": "Australia",
+        "fromdate": "2026-09-06T00:00:00",
+        "todate": "2026-09-14T00:00:00",
+        "datemodified": "2026-09-14T15:08:41",
+        "iso3": "AUS",
+        "source": "GWIS",
+        "polygonlabel": "Centroid",
+        "Class": "Point_Centroid"
+      }
+    },
+    {
+      "type": "Feature",
+      "bbox": [
+        141.5344,
+        37.6068,
+        141.5344,
+        37.6068
+      ],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          141.5344,
+          37.6068
+        ]
+      },
+      "properties": {
+        "eventtype": "EQ",
+        "eventid": 1565204,
+        "episodeid": 1732985,
+        "eventname": "",
+        "glide": "",
+        "name": "Earthquake in Japan",
+        "description": "Earthquake in Japan",
+        "url": {
+          "geometry": "https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=EQ&eventid=1565204&episodeid=1732985",
+          "report": "https://www.gdacs.org/report.aspx?eventid=1565204&episodeid=1732985&eventtype=EQ",
+          "details": "https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=EQ&eventid=1565204"
+        },
+        "alertlevel": "Green",
+        "alertscore": 1,
+        "episodealertlevel": "Green",
+        "istemporary": "false",
+        "iscurrent": "true",
+        "country": "Japan",
+        "fromdate": "2026-09-14T10:59:54",
+        "todate": "2026-09-14T10:59:54",
+        "datemodified": "2026-09-14T11:40:03",
+        "iso3": "JPN",
+        "source": "NEIC",
+        "polygonlabel": "Centroid",
+        "Class": "Point_Centroid"
+      }
+    }
+  ]
+}
