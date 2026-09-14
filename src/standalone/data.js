@@ -2,6 +2,7 @@ import { DataLayerManager } from '../data/manager.js';
 import flightsLayer from '../data/flights.js';
 import militaryFlightsLayer from '../data/militaryFlights.js';
 import earthquakesLayer from '../data/earthquakes.js';
+import weatherRadarLayer from '../data/weatherRadar.js';
 import satellitesLayer from '../data/satellites.js';
 import rocketLaunchesLayer from '../data/rocketLaunches.js';
 import trafficLayer from '../data/traffic.js';
@@ -16,7 +17,7 @@ import { LAYER_STATE_REGISTRY } from '../data/layerState.js';
 
 /** Register the standalone layer catalog before allowing state restoration. */
 export function createStandaloneData({
-  scene: { viewer },
+  scene: { viewer, mapStackController },
   controls: { styleManager },
   allowQaRegistration,
   defer,
@@ -35,6 +36,8 @@ export function createStandaloneData({
   dataManager.register(flightsLayer);
   dataManager.register(militaryFlightsLayer);
   dataManager.register(earthquakesLayer);
+  dataManager.register(weatherRadarLayer);
+  weatherRadarLayer.attachMapStack(mapStackController);
   dataManager.register(satellitesLayer);
   dataManager.register(rocketLaunchesLayer);
   rocketLaunchesLayer.attachDataManager(dataManager);

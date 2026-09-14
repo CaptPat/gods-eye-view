@@ -1,10 +1,19 @@
-import { LOOP_FRAME_MS, newestFrame, nextLoopStep, parseFramesPayload, pruneFrames } from './frames.js';
+import {
+  LOOP_FRAME_MS,
+  newestFrame,
+  nextLoopStep,
+  parseFramesPayload,
+  pruneFrames,
+} from './frames.js';
 import { buildRowControls, normalizeOpacity } from './controls.js';
 import { createRadarImagery } from './imagery.js';
 
 export const REFRESH_MS = 5 * 60 * 1000;
 export const SWAP_CHECK_MS = 1000;
-const SOURCE_NAMES = Object.freeze({ rainviewer: 'RainViewer', iem: 'Iowa State NEXRAD' });
+const SOURCE_NAMES = Object.freeze({
+  rainviewer: 'RainViewer',
+  iem: 'Iowa State NEXRAD',
+});
 const MAP_STACK_EVENT = 'gev:map-stack-changed';
 
 const hhmm = (timeMs) => new Date(timeMs).toISOString().slice(11, 16);
@@ -16,7 +25,10 @@ export function createWeatherRadarLayer({
   credits = {},
   eventTarget = globalThis.window,
   isVisible = () => globalThis.document?.visibilityState !== 'hidden',
-  timers = { setTimeout: (fn, ms) => setTimeout(fn, ms), clearTimeout: (timer) => clearTimeout(timer) },
+  timers = {
+    setTimeout: (fn, ms) => setTimeout(fn, ms),
+    clearTimeout: (timer) => clearTimeout(timer),
+  },
   now = Date.now,
 } = {}) {
   let viewer = null;
@@ -62,7 +74,11 @@ export function createWeatherRadarLayer({
       return;
     }
     const current = imagery.shownTime();
-    if (current === null || current === newest.time || imagery.isReady(newest.time)) {
+    if (
+      current === null ||
+      current === newest.time ||
+      imagery.isReady(newest.time)
+    ) {
       swapTimer = clearTimer(swapTimer);
       imagery.show(newest.time);
       imagery.release([newest.time]);
@@ -166,16 +182,25 @@ export function createWeatherRadarLayer({
       request?.abort();
       const controller = new AbortController();
       request = controller;
-      signal?.addEventListener?.('abort', () => controller.abort(), { once: true });
+      signal?.addEventListener?.('abort', () => controller.abort(), {
+        once: true,
+      });
       try {
-        const response = await fetchImpl(`/api/radar/frames?source=${source}`, { signal: controller.signal });
-        if (!response.ok) throw new Error(`radar frames HTTP ${response.status}`);
+        const response = await fetchImpl(`/api/radar/frames?source=${source}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok)
+          throw new Error(`radar frames HTTP ${response.status}`);
         const parsed = parseFramesPayload(await response.json());
         if (!parsed) throw new Error('malformed radar frames');
         // Superseded by a newer request or a source switch: not a failure.
-        if (!enabled || source !== currentSource() || request !== controller) return true;
+        if (!enabled || source !== currentSource() || request !== controller)
+          return true;
         // Two hours back from the newest frame, so upstream latency never drops the 13th.
-        frames = pruneFrames(parsed.frames, newestFrame(parsed.frames)?.time ?? now());
+        frames = pruneFrames(
+          parsed.frames,
+          newestFrame(parsed.frames)?.time ?? now(),
+        );
         stale = parsed.stale;
         error = null;
         lastUpdate = now();
@@ -205,12 +230,23 @@ export function createWeatherRadarLayer({
     getStats() {
       const name = SOURCE_NAMES[currentSource()];
       const shown = imagery?.shownTime() ?? null;
-      const activeStackId = mapStackController ? mapStackController.getActiveId?.() ?? null : mapStackId;
+      const activeStackId = mapStackController
+        ? (mapStackController.getActiveId?.() ?? null)
+        : mapStackId;
       if (activeStackId === 'photoreal') {
-        return { status: 'idle', source: name, statusMessage: 'Hidden by Google 3D map source', count: frames.length };
+        return {
+          status: 'idle',
+          source: name,
+          statusMessage: 'Hidden by Google 3D map source',
+          count: frames.length,
+        };
       }
       if (error && shown === null) {
-        return { status: 'unavailable', source: name, error: 'Radar source unavailable' };
+        return {
+          status: 'unavailable',
+          source: name,
+          error: 'Radar source unavailable',
+        };
       }
       if ((error || stale) && shown !== null) {
         return {
@@ -222,11 +258,19 @@ export function createWeatherRadarLayer({
         };
       }
       if (playing && imagery.readyCount() < frames.length) {
-        return { loading: true, source: `${name} · Loading ${imagery.readyCount()}/${frames.length}` };
+        return {
+          loading: true,
+          source: `${name} · Loading ${imagery.readyCount()}/${frames.length}`,
+        };
       }
       if (shown !== null) {
         const ageMinutes = Math.max(0, Math.floor((now() - shown) / 60_000));
-        return { status: 'ok', source: `${name} · ${hhmm(shown)} UTC · ${ageMinutes} min old`, count: frames.length, lastUpdate };
+        return {
+          status: 'ok',
+          source: `${name} · ${hhmm(shown)} UTC · ${ageMinutes} min old`,
+          count: frames.length,
+          lastUpdate,
+        };
       }
       return { status: 'ok', source: name, count: frames.length, lastUpdate };
     },
@@ -246,7 +290,8 @@ export function createWeatherRadarLayer({
         if (normalized === null) return false;
         next.opacity = normalized;
       }
-      if (Object.hasOwn(params, 'loop') && typeof params.loop !== 'boolean') return false;
+      if (Object.hasOwn(params, 'loop') && typeof params.loop !== 'boolean')
+        return false;
 
       if (Object.hasOwn(next, 'opacity')) {
         opacity = next.opacity;
@@ -275,7 +320,12 @@ export function createWeatherRadarLayer({
     },
 
     getRowControls() {
-      return buildRowControls({ playing, usDetail, opacity, loopAvailable: frames.length >= 2 });
+      return buildRowControls({
+        playing,
+        usDetail,
+        opacity,
+        loopAvailable: frames.length >= 2,
+      });
     },
 
     setRowControlsListener(listener) {

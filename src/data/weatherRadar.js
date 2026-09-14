@@ -1,5 +1,9 @@
 import { createWeatherRadarLayer as createLayer } from '../layers/weather-radar/index.js';
-import { IEM_NEXRAD_CREDIT, RAINVIEWER_CREDIT, registerDynamicCredit } from './dataCredits.js';
+import {
+  IEM_NEXRAD_CREDIT,
+  RAINVIEWER_CREDIT,
+  registerDynamicCredit,
+} from './dataCredits.js';
 
 export * from '../layers/weather-radar/index.js';
 

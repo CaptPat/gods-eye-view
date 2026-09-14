@@ -37,5 +37,8 @@ export function frameAtOrBefore(frames, timeMs) {
 export function nextLoopStep(index, count) {
   if (count <= 0) return { index: -1, delayMs: LOOP_HOLD_MS };
   const next = index + 1 >= count ? 0 : index + 1;
-  return { index: next, delayMs: next === count - 1 ? LOOP_HOLD_MS : LOOP_FRAME_MS };
+  return {
+    index: next,
+    delayMs: next === count - 1 ? LOOP_HOLD_MS : LOOP_FRAME_MS,
+  };
 }

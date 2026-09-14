@@ -1,5 +1,14 @@
 # Changelog
 
+## Weather radar layer (fork)
+
+- Add a Weather Radar layer: RainViewer precipitation worldwide with a two-hour loop, or
+  Iowa State NEXRAD in US detail, served through a caching `/api/radar` proxy.
+- Row controls for loop, US detail and 40/70/100% opacity. US detail and opacity travel in
+  share links (layer token `p`); the loop state does not.
+- The layer row reports the shown frame's time and age, a stale or unavailable source, and when
+  the Google 3D map source hides the overlay.
+
 ## Keyless place search and self-hosted Overpass (fork)
 
 - Resolve place names through Nominatim (`/api/geocode/search`) when Google has no key or

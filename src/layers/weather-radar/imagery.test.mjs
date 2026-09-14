@@ -1,7 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as Cesium from 'cesium';
-import { PRELOAD_ALPHA, createProvider, createRadarImagery, iemTemplate, rainViewerTemplate } from './imagery.js';
+import {
+  PRELOAD_ALPHA,
+  createProvider,
+  createRadarImagery,
+  iemTemplate,
+  rainViewerTemplate,
+} from './imagery.js';
 
 const T = Date.UTC(2026, 8, 14, 4, 50);
 const MIN = 60_000;
@@ -11,13 +17,31 @@ function fakeViewer() {
   const layers = [{ base: true }];
   return {
     layers,
-    progress: (queued) => { for (const listener of [...listeners]) listener(queued); },
+    progress: (queued) => {
+      for (const listener of [...listeners]) listener(queued);
+    },
     listenerCount: () => listeners.size,
     imageryLayers: {
-      add(layer) { layers.push(layer); return layer; },
-      remove(layer) { const index = layers.indexOf(layer); if (index >= 0) layers.splice(index, 1); return index >= 0; },
+      add(layer) {
+        layers.push(layer);
+        return layer;
+      },
+      remove(layer) {
+        const index = layers.indexOf(layer);
+        if (index >= 0) layers.splice(index, 1);
+        return index >= 0;
+      },
     },
-    scene: { globe: { tileLoadProgressEvent: { addEventListener(listener) { listeners.add(listener); return () => listeners.delete(listener); } } } },
+    scene: {
+      globe: {
+        tileLoadProgressEvent: {
+          addEventListener(listener) {
+            listeners.add(listener);
+            return () => listeners.delete(listener);
+          },
+        },
+      },
+    },
   };
 }
 
@@ -29,7 +53,10 @@ const fakeFactories = () => ({
 const radarLayers = (viewer) => viewer.layers.filter((layer) => !layer.base);
 
 test('URL templates point at the proxy with Cesium tile tags', () => {
-  assert.equal(rainViewerTemplate(T), `/api/radar/rainviewer/${T}/{z}/{x}/{y}.png`);
+  assert.equal(
+    rainViewerTemplate(T),
+    `/api/radar/rainviewer/${T}/{z}/{x}/{y}.png`,
+  );
   assert.equal(
     iemTemplate(T),
     '/api/radar/iem?time=2026-09-14T04:50:00Z&bbox={westDegrees},{southDegrees},{eastDegrees},{northDegrees}&width={width}&height={height}',
@@ -54,7 +81,13 @@ test('preloaded frames sit above the base map, nearly transparent, and become re
   imagery.setSource('rainviewer');
   imagery.preload([T - 10 * MIN, T]);
   assert.equal(viewer.layers[0].base, true, 'the base map stays at index 0');
-  assert.deepEqual(radarLayers(viewer).map((layer) => [layer.provider.time, layer.alpha]), [[T - 10 * MIN, PRELOAD_ALPHA], [T, PRELOAD_ALPHA]]);
+  assert.deepEqual(
+    radarLayers(viewer).map((layer) => [layer.provider.time, layer.alpha]),
+    [
+      [T - 10 * MIN, PRELOAD_ALPHA],
+      [T, PRELOAD_ALPHA],
+    ],
+  );
   assert.equal(imagery.readyCount(), 0);
   viewer.progress(5);
   assert.equal(imagery.readyCount(), 0);
@@ -62,7 +95,11 @@ test('preloaded frames sit above the base map, nearly transparent, and become re
   assert.equal(imagery.readyCount(), 2);
   assert.equal(imagery.isReady(T), true);
   imagery.preload([T]);
-  assert.equal(radarLayers(viewer).length, 2, 'preloading an existing frame adds nothing');
+  assert.equal(
+    radarLayers(viewer).length,
+    2,
+    'preloading an existing frame adds nothing',
+  );
 });
 
 test('show brings one frame to full opacity and dims the previous; setAlpha follows the shown frame', () => {
@@ -88,7 +125,10 @@ test('release keeps only the given frames; a source change and clear remove ever
   imagery.preload([T - 20 * MIN, T - 10 * MIN, T]);
   imagery.show(T);
   imagery.release([T - 10 * MIN, T]);
-  assert.deepEqual(radarLayers(viewer).map((layer) => layer.provider.time), [T - 10 * MIN, T]);
+  assert.deepEqual(
+    radarLayers(viewer).map((layer) => layer.provider.time),
+    [T - 10 * MIN, T],
+  );
   viewer.layers[0] = { base: true, replaced: true };
   imagery.setSource('iem');
   assert.equal(radarLayers(viewer).length, 0);

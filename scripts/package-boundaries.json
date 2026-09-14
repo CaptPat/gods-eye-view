@@ -115,6 +115,17 @@
     "modules": ["src/data/tomtomTiles.js"],
     "external": []
   },
+  "weather-radar-provider": {
+    "runtime": "node",
+    "exports": ["./server/providers/weather-radar"],
+    "modules": [
+      "server/providers/weather-radar.js",
+      "server/providers/weather-radar/sources.js",
+      "server/providers/common/rate-limit.js",
+      "server/providers/common/http.js"
+    ],
+    "external": []
+  },
   "firms-provider": {
     "runtime": "node",
     "exports": ["./server/providers/firms"],
@@ -839,6 +850,16 @@
       "src/layers/traffic/viewport.js"
     ],
     "external": ["cesium", "pbf", "@mapbox/vector-tile"]
+  },
+  "weather-radar-layer": {
+    "exports": ["./layers/weather-radar"],
+    "modules": [
+      "src/layers/weather-radar/controls.js",
+      "src/layers/weather-radar/frames.js",
+      "src/layers/weather-radar/imagery.js",
+      "src/layers/weather-radar/index.js"
+    ],
+    "external": ["cesium"]
   },
   "bikeshare-layer": {
     "exports": ["./layers/bikeshare"],

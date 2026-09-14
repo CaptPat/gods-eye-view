@@ -455,5 +455,18 @@
   "src/layers/cctv/ground.js",
   "src/layers/cctv/health.js",
   "src/data/cctv.js",
-  "src/layers/cctv/source.test.mjs"
+  "src/layers/cctv/source.test.mjs",
+  "server/providers/weather-radar.js",
+  "server/providers/weather-radar/sources.js",
+  "src/data/weatherRadar.js",
+  "src/data/weatherRadarProxy.test.mjs",
+  "src/data/weatherRadarSources.test.mjs",
+  "src/layers/weather-radar/controls.js",
+  "src/layers/weather-radar/controls.test.mjs",
+  "src/layers/weather-radar/frames.js",
+  "src/layers/weather-radar/frames.test.mjs",
+  "src/layers/weather-radar/imagery.js",
+  "src/layers/weather-radar/imagery.test.mjs",
+  "src/layers/weather-radar/index.js",
+  "src/layers/weather-radar/index.test.mjs"
 ]

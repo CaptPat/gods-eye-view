@@ -6,22 +6,39 @@ export const RADAR_OPACITIES = Object.freeze([0.4, 0.7, 1]);
 const LEGENDS = Object.freeze({
   rainviewer: Object.freeze({
     palette: 'Universal Blue',
-    items: [['Light', '20 dBZ', '#00a3e0'], ['Moderate', '30 dBZ', '#005588'], ['Heavy', '50 dBZ', '#c10000'], ['Extreme', '65 dBZ', '#ffffff']],
+    items: [
+      ['Light', '20 dBZ', '#00a3e0'],
+      ['Moderate', '30 dBZ', '#005588'],
+      ['Heavy', '50 dBZ', '#c10000'],
+      ['Extreme', '65 dBZ', '#ffffff'],
+    ],
   }),
   iem: Object.freeze({
     palette: 'NEXRAD Level III',
-    items: [['Light', '20 dBZ', '#00ff00'], ['Moderate', '30 dBZ', '#087305'], ['Heavy', '50 dBZ', '#ff0000'], ['Extreme', '65 dBZ', '#fe00fe']],
+    items: [
+      ['Light', '20 dBZ', '#00ff00'],
+      ['Moderate', '30 dBZ', '#087305'],
+      ['Heavy', '50 dBZ', '#ff0000'],
+      ['Extreme', '65 dBZ', '#fe00fe'],
+    ],
   }),
 });
 
 export function normalizeOpacity(value) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return null;
-  return RADAR_OPACITIES.find((option) => Math.abs(option - numeric) < 0.001) ?? null;
+  return (
+    RADAR_OPACITIES.find((option) => Math.abs(option - numeric) < 0.001) ?? null
+  );
 }
 
 /** Row chips and legend for the Layers panel (see layerPanel._syncRowControls). */
-export function buildRowControls({ playing, usDetail, opacity, loopAvailable }) {
+export function buildRowControls({
+  playing,
+  usDetail,
+  opacity,
+  loopAvailable,
+}) {
   const legend = LEGENDS[usDetail ? 'iem' : 'rainviewer'];
   return {
     chips: [

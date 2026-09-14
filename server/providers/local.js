@@ -51,7 +51,10 @@ function localProviderPlugins() {
 
 export { localProviderPlugins };
 
-export { createWeatherRadarHandler, weatherRadarProxy } from './weather-radar.js';
+export {
+  createWeatherRadarHandler,
+  weatherRadarProxy,
+} from './weather-radar.js';
 
 export {
   CCTV_FRAME_FETCH_TIMEOUT_MS,

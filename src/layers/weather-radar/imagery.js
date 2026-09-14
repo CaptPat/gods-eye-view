@@ -34,10 +34,13 @@ export function createProvider(source, timeMs) {
   });
 }
 
-export function createRadarImagery(viewer, {
-  createProvider: makeProvider = createProvider,
-  createLayer = (provider) => new Cesium.ImageryLayer(provider),
-} = {}) {
+export function createRadarImagery(
+  viewer,
+  {
+    createProvider: makeProvider = createProvider,
+    createLayer = (provider) => new Cesium.ImageryLayer(provider),
+  } = {},
+) {
   const layers = new Map();
   const pending = new Set();
   const ready = new Set();
@@ -45,11 +48,12 @@ export function createRadarImagery(viewer, {
   let shown = null;
   let alpha = 0.7;
 
-  const removeProgressListener = viewer.scene.globe.tileLoadProgressEvent.addEventListener((queued) => {
-    if (queued !== 0) return;
-    for (const time of pending) ready.add(time);
-    pending.clear();
-  });
+  const removeProgressListener =
+    viewer.scene.globe.tileLoadProgressEvent.addEventListener((queued) => {
+      if (queued !== 0) return;
+      for (const time of pending) ready.add(time);
+      pending.clear();
+    });
 
   function remove(time) {
     const layer = layers.get(time);
@@ -82,7 +86,8 @@ export function createRadarImagery(viewer, {
       for (const time of times) ensure(time);
     },
     show(time) {
-      if (shown !== null && shown !== time && layers.has(shown)) layers.get(shown).alpha = PRELOAD_ALPHA;
+      if (shown !== null && shown !== time && layers.has(shown))
+        layers.get(shown).alpha = PRELOAD_ALPHA;
       ensure(time).alpha = alpha;
       shown = time;
     },
@@ -95,7 +100,8 @@ export function createRadarImagery(viewer, {
       for (const time of [...layers.keys()]) if (!keep.has(time)) remove(time);
     },
     isReady: (time) => ready.has(time),
-    readyCount: () => [...layers.keys()].filter((time) => ready.has(time)).length,
+    readyCount: () =>
+      [...layers.keys()].filter((time) => ready.has(time)).length,
     shownTime: () => shown,
     clear() {
       for (const time of [...layers.keys()]) remove(time);
