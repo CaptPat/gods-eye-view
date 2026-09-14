@@ -94,7 +94,7 @@ comparing image hashes across times, not by HTTP status.
 | Temperature rendering | The server fetches one 1° grid per step and renders 256 × 256 Web Mercator PNG tiles with bilinear sampling; `maximumLevel` 6 | Uniform tile path for all four modes; a 1° grid holds no more detail past z6. Pure Node (`zlib` plus a 30-line PNG encoder), testable without a browser |
 | Air quality type | `US_AQI` only; no type sub-option | All eight types work, but one index keeps one legend. US AQI's EPA colours match the tiles, and the index renders worldwide |
 | Google zoom caps | Air quality 12, pollen 10 | Google bills per tile. Measured detail falls off after z12 (AQ) and vanishes after z10 (pollen); Cesium upsamples beyond the cap |
-| Tile cache | Memory only, per-entry age limit (Google 10 min, clouds 3 h, temperature 1 h), at most 1,500 entries, oldest evicted first, age prune at most once a minute. Nothing is written to disk | Refines "disk or memory with an age prune" by the Pollen policy, which prohibits caching and storage: Google tiles never touch disk, and the short in-memory window only absorbs Cesium's repeated requests. See Risks |
+| Tile cache | Memory only, per-entry age limit (Google not cached — Pollen policy prohibits caching and storage; clouds 3 h, temperature 1 h), at most 1,500 entries, oldest evicted first, age prune at most once a minute. Nothing is written to disk | Refines "disk or memory with an age prune" by the Pollen policy, which prohibits caching and storage: Google tiles are never cached (`GOOGLE_TILE_TTL_MS = 0`, `Cache-Control: no-store`), and the short in-memory window still absorbs Cesium's repeated NOAA requests. See Risks |
 | Rate limits | Manifest 600/min per client and 2,000 global; tiles 6,000/min per client and 20,000 global, as two limiters | Lessons memory: Cesium never retries a 429 tile |
 | Refresh | Every 10 minutes while the tab is visible | GMGSI updates hourly; a new hour appears within 10 minutes of being advertised |
 | Stacking | Overlay imagery layers are inserted at imagery index 1 (clamped to the collection length) | Directly above the base map (index 0), so radar, which appends, draws on top whatever the enable order |
@@ -154,7 +154,8 @@ Routes, mounted at `/api/weather-overlays`:
     that step's grid.
   - Upstream bodies are capped at 2 MB and must start with the PNG signature; failures answer 502
     and are never cached. Responses carry `X-Overlay-Cache: HIT|MISS` and
-    `Cache-Control: private, max-age=600`.
+    `Cache-Control: private, max-age=600`, except Google tiles, which are always `MISS` with
+    `Cache-Control: no-store` (never cached, per the Pollen and Air Quality policies).
 - 405 for non-GET, 404 for other paths, and 429 with `Retry-After: 10` from the matching limiter.
 
 ### Client: `src/layers/weather-overlays/`
@@ -287,9 +288,9 @@ must pass: format check, boundaries, `npm test`, build.
 
 ## Risks
 
-- **Pollen caching policy.** The 10-minute in-memory tile window may still count as caching under
-  the Pollen policy. Setting `GOOGLE_TILE_TTL_MS` to 0 turns it off at the cost of more billed
-  tiles.
+- **Pollen caching policy.** Resolved: `GOOGLE_TILE_TTL_MS` is 0, so Google tiles are never read
+  from or written to the tile cache, and their responses carry `Cache-Control: no-store`. This
+  costs more billed tiles than a short cache would.
 - **Google billing.** Air quality and pollen tiles are billed per request; the zoom caps and the
   cache bound it, but a long session at z12 can still request many tiles.
 - **GMGSI brightness threshold.** 0.3 was chosen from one tile's histogram; the smoke check in the
