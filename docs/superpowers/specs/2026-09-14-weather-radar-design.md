@@ -59,7 +59,11 @@ Out of scope:
 
 A Vite plugin, `weatherRadarProxy()`, registered in `localProviderPlugins()` in
 `server/providers/local.js`. It follows the existing provider conventions:
-- `makeRateLimiter` per client and globally;
+- `makeRateLimiter` per client and globally, in two independent limiters: `limiter` for
+  `/frames` (1200/min per client, 4000/min global) and `tileLimiter` for the
+  `/rainviewer/...` and `/iem` tile routes (6000/min per client, 20000/min global) — split so
+  the loop's own tile preload, which Cesium never retries on a 429, can't be starved by a
+  client's `/frames` traffic sharing the same budget. Both answer 429 with `Retry-After: 10`;
 - `coalesceProxyRequest` per upstream URL;
 - a disk cache under `.gev-cache/radar/`;
 - a 15 s upstream timeout and a 2 MB response cap;
@@ -94,7 +98,9 @@ Routes:
       tile the client requests passes;
     - width and height are integers 1–512.
   - Cached at `.gev-cache/radar/iem/<sha1 of normalized params>.png`: 5 minutes for frames
-    younger than 15 minutes, 24 hours otherwise.
+    younger than 15 minutes, 24 hours otherwise. At most once per hour, an IEM image request
+    also prunes cache files older than `IEM_TTL_MS` (24 h) from disk — validation rejects frame
+    times older than 6 h, so a file that old could otherwise never be served again.
 
 ### Client: `src/layers/weather-radar/`
 
@@ -171,8 +177,9 @@ dependencies and the default instance. The layer is registered in `src/standalon
   whole minutes since that frame.
   - normal: `{ status: 'ok', source: '<name> · 04:50 UTC · 6 min old', count: <retained frames>,
     lastUpdate: <epoch ms of last successful frames fetch> }`;
-  - while frames load: `{ loading: true, source: '<name> · Loading 9/13' }`, where 9 is
-    `readyCount()` and 13 the retained frames;
+  - while frames load: `{ loading: true, source: '<name>', loadingLabel: 'Loading 9/13' }`, where
+    9 is `readyCount()` and 13 the retained frames; the panel renders this row as
+    `<name> · Loading 9/13`;
   - stale manifest or a failed refresh with a frame still shown:
     `{ stale: true, source: '<name> · 04:30 UTC', error: 'Radar source unavailable — showing 04:30 UTC' }`;
   - no frame at all: `{ status: 'unavailable', source: '<name>', error: 'Radar source unavailable' }`;

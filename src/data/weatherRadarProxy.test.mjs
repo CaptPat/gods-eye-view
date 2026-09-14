@@ -2,11 +2,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { mkdtemp, rm, stat, utimes } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, stat, utimes, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import createViteConfig from '../../vite.config.js';
-import { createWeatherRadarHandler } from '../../server/providers/weather-radar.js';
+import {
+  IEM_TTL_MS,
+  RAINVIEWER_CACHE_GRACE_MS,
+  createWeatherRadarHandler,
+} from '../../server/providers/weather-radar.js';
 import { iemCacheKey } from '../../server/providers/weather-radar/sources.js';
 
 const MANIFEST = JSON.parse(
@@ -175,6 +179,7 @@ test('RainViewer tiles are validated, fetched once, cached, and failures are nev
     cacheDir,
     now: () => NEWEST_MS + 5 * MINUTE,
     limiter: () => true,
+    tileLimiter: () => true,
     log: () => {},
   });
   const route = `/rainviewer/${NEWEST_MS}/4/3/6.png`;
@@ -232,6 +237,7 @@ test('IEM images use the time-aware layer and cache recent frames 5 minutes, old
     cacheDir,
     now: () => nowMs,
     limiter: () => true,
+    tileLimiter: () => true,
     log: () => {},
   });
   const query = (ms) => ({
@@ -292,6 +298,96 @@ test('IEM images use the time-aware layer and cache recent frames 5 minutes, old
   );
 });
 
+test('the IEM disk cache is pruned at most once per hour', async (t) => {
+  const cacheDir = await tempDir(t);
+  const iemDir = path.join(cacheDir, 'iem');
+  await mkdir(iemDir, { recursive: true });
+
+  const oldFile = path.join(iemDir, 'old-frame.png');
+  const freshFile = path.join(iemDir, 'fresh-frame.png');
+  await writeFile(oldFile, PNG);
+  await writeFile(freshFile, PNG);
+  let clock = Date.UTC(2026, 8, 14, 5, 0, 0);
+  const beyondTtl = new Date(clock - IEM_TTL_MS - MINUTE);
+  await utimes(oldFile, beyondTtl, beyondTtl);
+
+  const net = upstream([['n0q-t.cgi', png]]);
+  const handler = createWeatherRadarHandler({
+    fetchImpl: net.fetchImpl,
+    cacheDir,
+    now: () => clock,
+    limiter: () => true,
+    tileLimiter: () => true,
+    log: () => {},
+  });
+  const query = {
+    time: '2026-09-14T04:30:00Z',
+    bbox: [-100, 28, -94, 34],
+    width: 256,
+    height: 256,
+  };
+  const route = `/iem?time=${query.time}&bbox=${query.bbox.join(',')}&width=${query.width}&height=${query.height}`;
+
+  await invoke(handler, route);
+  await assert.rejects(
+    () => stat(oldFile),
+    /ENOENT/,
+    'a file older than IEM_TTL_MS was pruned on the next IEM request',
+  );
+  await stat(freshFile); // still present, no error thrown
+
+  // A second, still-old file placed after the first prune is not swept again
+  // within the hour.
+  const secondOldFile = path.join(iemDir, 'old-frame-2.png');
+  await writeFile(secondOldFile, PNG);
+  await utimes(secondOldFile, beyondTtl, beyondTtl);
+  clock += 10 * MINUTE;
+  await invoke(handler, route);
+  await stat(secondOldFile); // not yet pruned — under an hour since the scan
+
+  clock += 55 * MINUTE; // now over an hour since the first prune
+  await invoke(handler, route);
+  await assert.rejects(
+    () => stat(secondOldFile),
+    /ENOENT/,
+    'pruning resumes once an hour has passed',
+  );
+});
+
+test('the RainViewer disk cache is pruned once a time drops out of the manifest', async (t) => {
+  const cacheDir = await tempDir(t);
+  const oldestFrameMs = 1789353600 * 1000; // the fixture manifest's oldest frame
+  const staleDir = path.join(
+    cacheDir,
+    'rainviewer',
+    String(oldestFrameMs - RAINVIEWER_CACHE_GRACE_MS - MINUTE),
+  );
+  const keptDir = path.join(cacheDir, 'rainviewer', String(oldestFrameMs));
+  await mkdir(path.join(staleDir, '4', '3'), { recursive: true });
+  await writeFile(path.join(staleDir, '4', '3', '6.png'), PNG);
+  await mkdir(path.join(keptDir, '4', '3'), { recursive: true });
+  await writeFile(path.join(keptDir, '4', '3', '6.png'), PNG);
+
+  const net = upstream([['weather-maps.json', MANIFEST]]);
+  const handler = createWeatherRadarHandler({
+    fetchImpl: net.fetchImpl,
+    cacheDir,
+    now: () => NEWEST_MS + 5 * MINUTE,
+    limiter: () => true,
+    tileLimiter: () => true,
+    log: () => {},
+  });
+
+  await invoke(handler, '/frames'); // triggers the manifest refresh and its prune
+
+  await assert.rejects(
+    () => stat(staleDir),
+    /ENOENT/,
+    'a directory older than the oldest frame minus the grace window was pruned',
+  );
+  await stat(keptDir); // still present, no error thrown
+});
+
 test('rate limits, methods, unknown paths and non-PNG bodies', async (t) => {
   const cacheDir = await tempDir(t);
   const limited = createWeatherRadarHandler({
@@ -320,6 +416,50 @@ test('rate limits, methods, unknown paths and non-PNG bodies', async (t) => {
   assert.equal(
     (await invoke(handler, `/rainviewer/${NEWEST_MS}/2/1/1.png`)).status,
     502,
+  );
+});
+
+test('the tile limiter and the frames limiter throttle independently', async (t) => {
+  const net = upstream([
+    ['weather-maps.json', MANIFEST],
+    ['/256/4/3/6/', png],
+  ]);
+
+  const tilesRefused = createWeatherRadarHandler({
+    fetchImpl: net.fetchImpl,
+    cacheDir: await tempDir(t),
+    now: () => NEWEST_MS + 5 * MINUTE,
+    limiter: () => true,
+    tileLimiter: () => false,
+    log: () => {},
+  });
+  const refusedTile = await invoke(
+    tilesRefused,
+    `/rainviewer/${NEWEST_MS}/4/3/6.png`,
+  );
+  assert.equal(refusedTile.status, 429);
+  assert.equal(refusedTile.headers['Retry-After'], '10');
+  assert.equal(
+    (await invoke(tilesRefused, '/frames')).status,
+    200,
+    'the frames limiter is unaffected by a refused tile limiter',
+  );
+
+  const framesRefused = createWeatherRadarHandler({
+    fetchImpl: net.fetchImpl,
+    cacheDir: await tempDir(t),
+    now: () => NEWEST_MS + 5 * MINUTE,
+    limiter: () => false,
+    tileLimiter: () => true,
+    log: () => {},
+  });
+  const refusedFrames = await invoke(framesRefused, '/frames');
+  assert.equal(refusedFrames.status, 429);
+  assert.equal(refusedFrames.headers['Retry-After'], '10');
+  assert.equal(
+    (await invoke(framesRefused, `/rainviewer/${NEWEST_MS}/4/3/6.png`)).status,
+    200,
+    'the tile limiter is unaffected by a refused frames limiter',
   );
 });
 
