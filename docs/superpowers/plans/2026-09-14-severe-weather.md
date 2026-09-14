@@ -1684,6 +1684,28 @@ git add server/providers/severe-weather.js server/providers/local.js src/data/se
 git commit -m "feat(severe-weather): caching proxy with zone shapes and stale serving" -m "Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 ```
 
+**Post-review amendment (final whole-branch review, finding I1, M1, M2):** the handler above,
+as first written, awaited `Promise.all([refresh('nws'), refresh('gdacs')])` before responding, so a
+slow or unreachable source delayed the other, and the zone deadline was checked only before a
+worker started a fetch (never aborting one already in flight). It also re-checked `STALE_MAX_MS`
+only when a refresh happened to run, and let one bad disk entry (a non-`ENOENT` error from
+`readZoneFromDisk` or from the prune's `readdir`) fail the whole NWS build. The shipped
+implementation instead:
+
+- serves a source with servable data (fresh, or stale within 60 minutes) immediately and starts its
+  due refresh in the background, un-awaited, coalesced so at most one refresh per source is ever in
+  flight;
+- awaits only a source with nothing servable, capped by an exported, injectable
+  `RESPONSE_BUDGET_MS = 25_000`;
+- aborts in-flight zone fetches at the 30 s deadline via a combined
+  `AbortSignal.any([AbortSignal.timeout(UPSTREAM_TIMEOUT_MS), deadlineController.signal])`; an
+  aborted zone is not remembered as a 404 and not cached;
+- computes staleness against `STALE_MAX_MS` at response-build time, not only at refresh time;
+- treats a non-`ENOENT`/`SyntaxError` disk read or prune failure as a logged cache miss, never a
+  whole-refresh failure.
+
+See `src/data/severeWeatherProxy.test.mjs` for the covering tests.
+
 ---
 
 ### Task 4: Layer model — areas, cards and row status
@@ -3066,6 +3088,19 @@ git add src/layers/severe-weather/rendering.js src/layers/severe-weather/renderi
 git commit -m "feat(severe-weather): ground-clamped alert areas, events and ready pump" -m "Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 ```
 
+**Post-review amendment (final whole-branch review, finding I2, M3):** `setSelected(key)`, as first
+written, called the full `applyHighlight()` walk on every selection change — with real Cesium,
+writing a graphics property (even to the same value) always raises `definitionChanged`, so every
+click marked every outline, track and point dirty. The shipped `setSelected` instead tracks the
+previously selected key and applies only that key's highlighters with `false` and the newly
+selected key's with `true`; the full walk now runs only inside `render()`, once, for freshly built
+entities. Separately, `render()`'s rebuild (`suspendEvents()` … `resumeEvents()`) had no
+`try/finally`, so an exception partway through the entity-building loop left events suspended and
+also left `signature` pointing at the broken set (silently skipping every later retry). The rebuild
+is now wrapped in `try { … } finally { resumeEvents() }`, and `signature` is only committed to the
+new value after the rebuild succeeds. See `src/layers/severe-weather/rendering.test.mjs` for the
+covering tests.
+
 ---
 
 ### Task 6: Selection card and context publication
@@ -4167,6 +4202,16 @@ Expected: PASS, 23 tests.
 git add src/layers/severe-weather/index.js src/layers/severe-weather/index.test.mjs src/data/severeWeather.js src/data/dataCredits.js
 git commit -m "feat(severe-weather): data layer lifecycle, services and credits" -m "Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 ```
+
+**Post-review amendment (final whole-branch review, finding M3):** `update()`, as first written,
+committed `payload` and `lastUpdate` before calling `draw()`, so a render exception (already fixed
+to resume entity events — see the Task 5 amendment) still left the layer believing the broken
+payload had drawn successfully. `draw()` now renders first and only assigns `data` after
+`rendering.render()` returns; `update()` calls `draw(parsed)` before committing `payload`,
+`error = null` and `lastUpdate`, so a draw failure leaves all three at their last good values and
+surfaces only through `getStats().error`, per the manager contract (`update()` still resolves
+`true`: the failure is handled). See `src/layers/severe-weather/index.test.mjs` for the covering
+test.
 
 ---
 
