@@ -37,7 +37,7 @@ Seven fork layers, all in a new "Sky" group in the Layers panel, built in three 
 
 Specs are `docs/superpowers/specs/2026-09-15-sky-events-design.md` and `…-night-sky-design.md`.
 
-- **Share-link budget.** 30 of the 32 layers the share link can carry are now used (the enabled list is capped at 64 characters). There is room for two more.
+- **Share-link budget.** Raised from 32 to 62 layers (`feat/layer-capacity`). Tokens may now be `[a-zA-Z0-9]` and are case-sensitive; the enabled list is capped at 128 characters. When diffing tokens on an upstream sync, remember that `a` and `A` are different layers.
 - **Not browser-tested:**
   - the sky sphere's alignment with Cesium's star skybox, which depends on ICRF data loading;
   - label legibility over the atmosphere in daylight;
