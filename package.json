@@ -195,6 +195,7 @@
     "./layers/oil-gas": "./src/layers/oil-gas/index.js",
     "./layers/offshore-platforms": "./src/layers/offshore-platforms/index.js",
     "./layers/us-pipelines": "./src/layers/us-pipelines/index.js",
+    "./layers/sea-ice": "./src/layers/sea-ice/index.js",
     "./weather-report": "./src/weatherReport/index.js",
     "./layers/severe-weather": "./src/layers/severe-weather/index.js",
     "./layers/bikeshare": "./src/layers/bikeshare/index.js",
