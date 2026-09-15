@@ -4,11 +4,58 @@ Fork: `CaptPat/gods-eye-view`, branded Cyclops View in Pinokio. This work is for
 
 ## State at handoff
 
-- `main` is at `77a9966`, pushed; `origin/main` matches. It holds all of `bilawalsidhu/gods-eye-view` main through PR #583 (`1ad565c`), from three syncs: `6462f0a` for #433–#456, `3eab0cc` for #501–#570 and `77a9966` for #571–#583.
+- `main` is at `7a841cc`, pushed; `origin/main` matches.
+- `main` holds all of `bilawalsidhu/gods-eye-view` main through PR #583 (`1ad565c`), from three syncs: `6462f0a` for #433–#456, `3eab0cc` for #501–#570 and `77a9966` for #571–#583. Every fork layer since then is merged on top.
 - The weather suite was built before the second sync. That merge ported the fork's layers into upstream's new catalog (`src/app/layers/`) and moved the radar token to `z`.
-- CI parity passes on `main`: `npm run format:check`, `npm run check:boundaries` (now also runs `check-import-directions.mjs`), `npm test` (3,929 pass, 0 fail, 9 skips) and `npm run build`.
-- Not browser-tested since the syncs: the right-click weather report alongside upstream's draw tool and directions (both claim pointer input), and the fork's layer rows alongside #583's camera controls and reorganized layer panel.
+- CI parity passes on `main`:
+  - `npm run format:check`;
+  - `npm run check:boundaries`, which now also runs `check-import-directions.mjs`;
+  - `npm test`: 4,147 pass, 0 fail, 9 skips;
+  - `npm run build`.
+- **Not browser-tested since the syncs:**
+  - the right-click weather report alongside upstream's draw tool and directions, which both claim pointer input;
+  - the fork's layer rows alongside #583's camera controls and reorganized layer panel;
+  - every layer added on 2026-09-15 (see the next two sections).
 - No open branches or worktrees. No dev servers running.
+
+## Energy, infrastructure, heritage and ice layers (2026-09-15)
+
+Eleven fork layers were added after the celestial wave. The share-link registry now holds 43 of its 62 layers.
+
+| Merge | Layers (share token) | Panel group | Source | Data |
+|---|---|---|---|---|
+| `d004694` | Nuclear Power Plants (`6`), Nuclear Waste Sites (`7`), Nuclear Accidents (`8`) | Energy | Wikidata (CC0) | bundled |
+| `96c02d1` | Power Plants (`9`), Airports (`0`) | Energy, Infrastructure | WRI GPPD (CC BY 4.0); OurAirports (public domain) | bundled |
+| `f7bf72e` | World Heritage Sites (`H`), Forts & Castles (`K`), National Parks & Monuments (`P`) | Heritage | Wikidata (CC0) | bundled |
+| `41fdf9c` | Transmission Lines (`L`), Oil & Gas (`G`) | Energy | OpenStreetMap through `/api/overpass` (ODbL) | live, per view |
+| `6e8b426` | Offshore Platforms (`O`) | Energy | BSEE Data Center (public domain) | bundled |
+| `3746eba` | US Pipelines (`U`) | Energy | EIA U.S. Energy Atlas; BOEM/BSEE offshore segments (public domain) | bundled |
+| `7a841cc` | Sea Ice (`I`) | Events | NASA GIBS GHRSST MUR sea ice concentration | live tiles |
+
+- **Rebuild scripts:**
+  - `scripts/build-wikidata-layers.mjs`;
+  - `scripts/build-csv-layers.mjs`;
+  - `scripts/build-bsee-platforms.mjs`;
+  - `scripts/build-us-pipelines.mjs`.
+
+  The last two share `scripts/zip-entry.mjs`. Every bundled folder under `src/data/local_data/` has a README with counts and filters.
+- **Shared packages added:**
+  - `src/layers/osm-infrastructure`: viewport-bounded Overpass layers with pluggable classifiers and cards.
+  - `src/layers/catalog-lines`: a single `GroundPolylinePrimitive` batch that implements the catalog-points interface.
+- **Not browser-tested:**
+  - Transmission Lines and Oil & Gas:
+    - the zoom thresholds (views up to 1.5° and 1° across);
+    - ground-clamped line weight;
+    - card anchoring on long lines.
+  - US Pipelines:
+    - the time to build the 20,999-instance ground batch;
+    - selection highlighting, which applies only after the batch is ready.
+  - The point catalogues: density at globe scale, especially Forts & Castles (30,154 points).
+  - Sea Ice: the palette over dark and satellite base maps. The imagery is hidden on the photoreal stack by design.
+- **Follow-ups:**
+  - GEM oil and gas field and reserve data needs a manual form download (CC BY 4.0), so it was not built.
+  - About 30% of OSM pipelines have no `substance` tag, so Oil & Gas shows them as "unknown".
+  - If the full US Pipelines batch proves slow, it could draw only interstate and trunk lines when the camera is far out.
 
 ## Third sync: upstream #571–#583 (2026-09-15)
 
