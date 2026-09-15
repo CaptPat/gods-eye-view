@@ -59,6 +59,18 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## Transmission lines and oil & gas (fork)
+
+- Add two OpenStreetMap layers to the Energy group, loaded per view through the shared Overpass proxy.
+- Transmission Lines (token `L`): power lines and cables coloured and thickened by voltage (500 kV and
+  above, 220, 110, 33, lower or unknown), plus substations and power plants. Loads when the view is
+  within about 1.5°.
+- Oil & Gas (token `G`): gas, oil and other pipelines, petroleum wells, offshore platforms, refineries
+  and oil and gas works. Loads when the view is within 1°.
+- Cards give voltage, circuits, substance, location, diameter and operator, and link to the feature on
+  openstreetmap.org. Layer rows show zoom-in guidance, a coverage notice when the element cap is
+  reached, and per-style legend counts.
+
 ## Heritage layers (fork)
 
 - Add a Heritage group in the Layers panel with three Wikidata (CC0) snapshot layers.

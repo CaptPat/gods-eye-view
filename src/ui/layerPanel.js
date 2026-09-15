@@ -61,6 +61,8 @@ const PANEL_GROUPS = [
       'nuclear-waste-sites',
       'nuclear-accidents',
       'power-plants',
+      'transmission-lines',
+      'oil-gas',
     ],
   },
   {

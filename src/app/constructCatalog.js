@@ -42,6 +42,10 @@ import {
   createApplicationParksMonuments,
   createApplicationWorldHeritage,
 } from './layers/heritage.js';
+import {
+  createApplicationOilGas,
+  createApplicationTransmissionLines,
+} from './layers/osmInfrastructure.js';
 import { createApplicationCables } from './layers/submarineCables.js';
 import { createInfrastructureLayers } from '../data/infrastructure.js';
 import { localGeoJsonServices } from './localGeojsonServices.js';
@@ -151,6 +155,8 @@ export function createApplicationCatalog({
         createApplicationWorldHeritage(),
         createApplicationFortsCastles(),
         createApplicationParksMonuments(),
+        createApplicationTransmissionLines(),
+        createApplicationOilGas(),
         createApplicationAlpr({ surface, source: sources.alpr }),
         satellites,
         createApplicationLaunches({ source: sources.launches, satellites }),
