@@ -1,0 +1,710 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "itemLabel",
+   "itemDescription",
+   "clsLabel",
+   "coord",
+   "placeCoord",
+   "placeLabel",
+   "date",
+   "ines",
+   "deaths",
+   "countryLabel",
+   "article"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q899724"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(12.934739261 50.358572498)"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(12.94 50.37444444)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Důl Bratrství"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "deep geological repository"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Jáchymov"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Czech Republic"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q556851"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(33.282777777 69.263888888)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Lepse"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "radioactive waste repository"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Sayda Bay"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Russia"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Russian (formerly Soviet) ship used as nuclear waste storage"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q556851"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(33.23333333 69.24861111)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Lepse"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "radioactive waste repository"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Sayda Bay"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Russia"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Russian (formerly Soviet) ship used as nuclear waste storage"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q486"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Chernobyl_disaster"
+    },
+    "ines": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "INES level 7 event"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1986-04-26T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(30.099147 51.389553)"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(30.099169444 51.389438888)"
+    },
+    "deaths": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "4000"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Chernobyl disaster"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "1986 nuclear accident in the Soviet Union"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear disaster"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Chernobyl Nuclear Power Plant"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Soviet Union"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q486"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Chernobyl_disaster"
+    },
+    "ines": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "INES level 7 event"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1986-04-26T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(30.5 50.25)"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(30.099169444 51.389438888)"
+    },
+    "deaths": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "4000"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Chernobyl disaster"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "1986 nuclear accident in the Soviet Union"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear disaster"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Kyiv Oblast"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Soviet Union"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q591045"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Goi%C3%A2nia_accident"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1987-09-13T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-49.256388888 -16.680555555)"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-49.2641 -16.6746)"
+    },
+    "deaths": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "4"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Goiânia accident"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "radioactive contamination accident in Brazil"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear accident"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Goiânia"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Brazil"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q591045"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Goi%C3%A2nia_accident"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1987-09-13T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-49.256388888 -16.680555555)"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-49.2641 -16.6746)"
+    },
+    "deaths": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "4"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Goiânia accident"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "radioactive contamination accident in Brazil"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear accident"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Goiânia"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Brazil"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q591045"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Goi%C3%A2nia_accident"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1987-09-13T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-49.256388888 -16.680555555)"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-49.2641 -16.6746)"
+    },
+    "deaths": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "4"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Goiânia accident"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "radioactive contamination accident in Brazil"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear accident"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Goiânia"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Brazil"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q591045"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Goi%C3%A2nia_accident"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1987-09-13T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-49.256388888 -16.680555555)"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-49.2641 -16.6746)"
+    },
+    "deaths": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "4"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Goiânia accident"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "radioactive contamination accident in Brazil"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear accident"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Goiânia"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Brazil"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1349539"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Kyshtym_disaster"
+    },
+    "ines": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "INES level 6 event"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1957-09-29T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(60.7798 55.6999)"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(60.80433333 55.69363889)"
+    },
+    "deaths": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "200"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Kyshtym disaster"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear disaster"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear disaster"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Mayak"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Soviet Union"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1349539"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Kyshtym_disaster"
+    },
+    "ines": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "INES level 6 event"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1957-09-29T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(60.70278 55.75556)"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(60.80433333 55.69363889)"
+    },
+    "deaths": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "200"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Kyshtym disaster"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear disaster"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear disaster"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Ozyorsk"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Soviet Union"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1349539"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Kyshtym_disaster"
+    },
+    "ines": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "INES level 6 event"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1957-09-29T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(60.7798 55.6999)"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(60.80433333 55.69363889)"
+    },
+    "deaths": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "200"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Kyshtym disaster"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear disaster"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear disaster"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Mayak"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Russia"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1349539"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Kyshtym_disaster"
+    },
+    "ines": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "INES level 6 event"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1957-09-29T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(60.70278 55.75556)"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(60.80433333 55.69363889)"
+    },
+    "deaths": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "200"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Kyshtym disaster"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear disaster"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear disaster"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Ozyorsk"
+    },
+    "countryLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Russia"
+    }
+   }
+  ]
+ }
+}

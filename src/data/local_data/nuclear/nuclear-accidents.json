@@ -1,0 +1,871 @@
+{
+ "source": "Wikidata",
+ "license": "CC0-1.0",
+ "retrievedAt": "2026-09-15",
+ "records": [
+  {
+   "id": "Q5603167",
+   "name": "Green Run",
+   "description": "1949 nuclear test",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1949-12-02",
+   "lat": 46.55639,
+   "lon": -119.64444,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Green_Run",
+   "wikidata": "https://www.wikidata.org/wiki/Q5603167",
+   "deaths": null,
+   "country": "United States",
+   "ines": null
+  },
+  {
+   "id": "Q2822735",
+   "name": "Nuclear Accident in Chalk River",
+   "description": "INES 5 nuclear accident in Ontario in 1952",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1952-12-12",
+   "lat": 46.05024,
+   "lon": -77.361,
+   "place": null,
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q2822735",
+   "deaths": null,
+   "country": "Canada",
+   "ines": 5
+  },
+  {
+   "id": "Q1349539",
+   "name": "Kyshtym disaster",
+   "description": "nuclear disaster",
+   "kinds": [
+    "disaster"
+   ],
+   "date": "1957-09-29",
+   "lat": 55.69364,
+   "lon": 60.80433,
+   "place": "Mayak",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Kyshtym_disaster",
+   "wikidata": "https://www.wikidata.org/wiki/Q1349539",
+   "deaths": 200,
+   "country": "Soviet Union",
+   "ines": 6
+  },
+  {
+   "id": "Q649682",
+   "name": "Windscale fire",
+   "description": "major nuclear accident in the UK",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1957-10-10",
+   "lat": 54.42486,
+   "lon": -3.5,
+   "place": "Windscale Piles",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Windscale_fire",
+   "wikidata": "https://www.wikidata.org/wiki/Q649682",
+   "deaths": null,
+   "country": "United Kingdom",
+   "ines": 5
+  },
+  {
+   "id": "Q2822707",
+   "name": "accident de Béryl",
+   "description": "French nuclear test, #6, in Algerian Sahara in 1962",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1962-05-01",
+   "lat": 24.063,
+   "lon": 5.04189,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/B%C3%A9ryl_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q2822707",
+   "deaths": null,
+   "country": "France",
+   "ines": null
+  },
+  {
+   "id": "Q2822737",
+   "name": "accident nucléaire de Saint-Laurent-des-Eaux de 1969",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "1969-10-17",
+   "lat": 47.72,
+   "lon": 1.58028,
+   "place": "Saint-Laurent-des-Eaux",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q2822737",
+   "deaths": null,
+   "country": "France",
+   "ines": null
+  },
+  {
+   "id": "Q12019307",
+   "name": "Jaslovské Bohunice A1 power plant accident",
+   "description": "several accidents in the nuclear power plant Bohunice A1, Slovakia",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1976-01-05",
+   "lat": 48.4918,
+   "lon": 17.6728,
+   "place": "Bohunice A1 Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q12019307",
+   "deaths": null,
+   "country": "Czechoslovakia",
+   "ines": null
+  },
+  {
+   "id": "Q136467970",
+   "name": "The accident of the Jaslovské Bohunice A1 power plant in 1976",
+   "description": "nuclear accident in the Czechoslovakia",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1976-01-05",
+   "lat": 48.4918,
+   "lon": 17.6728,
+   "place": "Bohunice A1 Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q136467970",
+   "deaths": 2,
+   "country": "Czechoslovakia",
+   "ines": null
+  },
+  {
+   "id": "Q136467974",
+   "name": "The accident of the Jaslovské Bohunice A1 power plant in 1977",
+   "description": "nuclear accident in the Czechoslovakia",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1977-02-22",
+   "lat": 48.4918,
+   "lon": 17.6728,
+   "place": "Bohunice A1 Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q136467974",
+   "deaths": null,
+   "country": "Czechoslovakia",
+   "ines": 4
+  },
+  {
+   "id": "Q840847",
+   "name": "Three Mile Island accident",
+   "description": "nuclear accident",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1979-03-28",
+   "lat": 40.15333,
+   "lon": -76.72528,
+   "place": "Pennsylvania",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Three_Mile_Island_accident",
+   "wikidata": "https://www.wikidata.org/wiki/Q840847",
+   "deaths": null,
+   "country": "United States",
+   "ines": 5
+  },
+  {
+   "id": "Q2822738",
+   "name": "1980 Saint-Laurent-des-Eaux nuclear accident",
+   "description": "accident nucléaire en France",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1980-03-13",
+   "lat": 47.72,
+   "lon": 1.58028,
+   "place": "Saint-Laurent-Nouan",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q2822738",
+   "deaths": null,
+   "country": "France",
+   "ines": 4
+  },
+  {
+   "id": "Q5656167",
+   "name": "Nuclear Accident of reactor RA-2",
+   "description": "El accidente ocurrió en Argentina en el año 1983",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1983-09-23",
+   "lat": -34.57246,
+   "lon": -58.51316,
+   "place": "Constituyentes Atomic Center",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q5656167",
+   "deaths": 2,
+   "country": "Argentina",
+   "ines": null
+  },
+  {
+   "id": "Q65160775",
+   "name": "Ciudad Juárez cobalt-60 contamination incident",
+   "description": "Radioactive contamination accident in Mexico",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1984-01-01",
+   "lat": 31.6685,
+   "lon": -106.42,
+   "place": "Ciudad Juárez",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Ciudad_Ju%C3%A1rez_cobalt-60_contamination_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q65160775",
+   "deaths": 0,
+   "country": "Mexico",
+   "ines": null
+  },
+  {
+   "id": "Q43747691",
+   "name": "1984 Wolseong-1 Nuclear Power Plant heavy water leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "1984-11-25",
+   "lat": 35.71111,
+   "lon": 129.475,
+   "place": "Wolseong Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q43747691",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q486",
+   "name": "Chernobyl disaster",
+   "description": "1986 nuclear accident in the Soviet Union",
+   "kinds": [
+    "disaster"
+   ],
+   "date": "1986-04-26",
+   "lat": 51.38944,
+   "lon": 30.09917,
+   "place": "Chernobyl Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Chernobyl_disaster",
+   "wikidata": "https://www.wikidata.org/wiki/Q486",
+   "deaths": 4000,
+   "country": "Soviet Union",
+   "ines": 7
+  },
+  {
+   "id": "Q591045",
+   "name": "Goiânia accident",
+   "description": "radioactive contamination accident in Brazil",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1987-09-13",
+   "lat": -16.6746,
+   "lon": -49.2641,
+   "place": "Goiânia",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Goi%C3%A2nia_accident",
+   "wikidata": "https://www.wikidata.org/wiki/Q591045",
+   "deaths": 4,
+   "country": "Brazil",
+   "ines": null
+  },
+  {
+   "id": "Q58626707",
+   "name": "1988 Wolseong Nuclear Power Plant heavy water leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "1988-10-01",
+   "lat": 35.71111,
+   "lon": 129.475,
+   "place": "Wolseong Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q58626707",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q42295408",
+   "name": "Vandellòs I Nuclear Accident",
+   "description": "1989 nuclear accident in Tarragona, Spain",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1989-10-19",
+   "lat": 40.95139,
+   "lon": 0.86667,
+   "place": "Province of Tarragona",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Vandell%C3%B2s_I_nuclear_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q42295408",
+   "deaths": null,
+   "country": "Spain",
+   "ines": 3
+  },
+  {
+   "id": "Q58626582",
+   "name": "June 1995 Kori Nuclear Power Plant radiation leaks",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "1995-06-01",
+   "lat": 35.32022,
+   "lon": 129.29461,
+   "place": "Kori Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q58626582",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q58626952",
+   "name": "1996 Yonggwang Nuclear Power Plant cooleant leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "1996-01-01",
+   "lat": 35.415,
+   "lon": 126.42389,
+   "place": "Hanbit Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q58626952",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q58626753",
+   "name": "February 1997 Wolseong-2 Nuclear Power Plant heavy water leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "1997-02-27",
+   "lat": 35.71111,
+   "lon": 129.475,
+   "place": "Wolseong Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q58626753",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q18337477",
+   "name": "PNC Tōkai Works fire and explosion",
+   "description": "1997年に茨城県東海村で発生した原子力事故",
+   "kinds": [
+    "accident"
+   ],
+   "date": "1997-03-11",
+   "lat": 36.43925,
+   "lon": 140.6035,
+   "place": "Tōkai Reprocessing Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q18337477",
+   "deaths": null,
+   "country": "Japan",
+   "ines": null
+  },
+  {
+   "id": "Q58626879",
+   "name": "August 1997 Wolseong-2 Nuclear Power Plant heavy water leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "1997-08-20",
+   "lat": 35.71111,
+   "lon": 129.475,
+   "place": "Wolseong Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q58626879",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q43747761",
+   "name": "2000 Wolseong Nuclear Power Plant cooling water leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2000-05-01",
+   "lat": 35.71111,
+   "lon": 129.475,
+   "place": "Wolseong Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q43747761",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q55003122",
+   "name": "2002 Uljin No. 4 Nuclear Power coolant water leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2002-04-05",
+   "lat": 37.08459,
+   "lon": 129.38949,
+   "place": "Hanul Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q55003122",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q58627007",
+   "name": "2003 Yeonggwang Nuclear Power Plant radioactive water leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2003-12-22",
+   "lat": 35.415,
+   "lon": 126.42389,
+   "place": "Hanbit Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q58627007",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q58626837",
+   "name": "2004 Wolseong-2 Nuclear Power Plant heavy water leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2004-09-14",
+   "lat": 35.71111,
+   "lon": 129.475,
+   "place": "Wolseong Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q58626837",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q43749294",
+   "name": "2007 Kori Nuclear Power Plant nuclear water leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2007-03-19",
+   "lat": 35.32022,
+   "lon": 129.29461,
+   "place": "Kori Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q43749294",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q43749427",
+   "name": "2009 Wolseong Nuclear Power Plant leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2009-03-13",
+   "lat": 35.71111,
+   "lon": 129.475,
+   "place": "Wolseong Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q43749427",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q43748918",
+   "name": "2011-2016 Kori Nuclear Power Plant polydimethylsiloxane leaks",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2011-01-01",
+   "lat": 40,
+   "lon": 135,
+   "place": "Sea of Japan",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q43748918",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q171178",
+   "name": "Fukushima Daiichi nuclear disaster",
+   "description": "2011 nuclear disaster in Japan",
+   "kinds": [
+    "disaster"
+   ],
+   "date": "2011-03-11",
+   "lat": 37.42139,
+   "lon": 141.0325,
+   "place": "Fukushima Daiichi Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Fukushima_nuclear_accident",
+   "wikidata": "https://www.wikidata.org/wiki/Q171178",
+   "deaths": 1,
+   "country": "Japan",
+   "ines": 7
+  },
+  {
+   "id": "Q11593709",
+   "name": "Fukushima Daiichi nuclear disaster (Unit 1 Reactor)",
+   "description": "Fukushima reactor n°1",
+   "kinds": [
+    "disaster"
+   ],
+   "date": "2011-03-11",
+   "lat": 37.42139,
+   "lon": 141.0325,
+   "place": "Okuma",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Fukushima_nuclear_accident_(Unit_1_Reactor)",
+   "wikidata": "https://www.wikidata.org/wiki/Q11593709",
+   "deaths": null,
+   "country": "Japan",
+   "ines": 5
+  },
+  {
+   "id": "Q11593710",
+   "name": "Fukushima Daiichi nuclear disaster (Unit 2 Reactor)",
+   "description": "reactor 2",
+   "kinds": [
+    "disaster"
+   ],
+   "date": "2011-03-11",
+   "lat": 37.42139,
+   "lon": 141.0325,
+   "place": "Okuma",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Fukushima_nuclear_accident_(Unit_2_Reactor)",
+   "wikidata": "https://www.wikidata.org/wiki/Q11593710",
+   "deaths": null,
+   "country": "Japan",
+   "ines": 5
+  },
+  {
+   "id": "Q43747885",
+   "name": "2013 Wolseong Nuclear Power Plant coolant leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2013-02-01",
+   "lat": 35.71111,
+   "lon": 129.475,
+   "place": "Wolseong Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q43747885",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q17228698",
+   "name": "J-PARC放射性同位体漏洩事故",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2013-05-23",
+   "lat": 36.44444,
+   "lon": 140.60472,
+   "place": "J-PARC",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q17228698",
+   "deaths": null,
+   "country": "Japan",
+   "ines": null
+  },
+  {
+   "id": "Q55003253",
+   "name": "2014 Kori Nuclear Power Plant nitrogen gas leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2014-12-26",
+   "lat": 35.32022,
+   "lon": 129.29461,
+   "place": "Kori Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q55003253",
+   "deaths": 3,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q43749130",
+   "name": "2015 Kori Nuclear Power Plant hydrogen leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2015-02-03",
+   "lat": 35.32022,
+   "lon": 129.29461,
+   "place": "Kori Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q43749130",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q58626342",
+   "name": "2016 Hanul Nuclear Power Plant 5 cooling water leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2016-12-20",
+   "lat": 37.08459,
+   "lon": 129.38949,
+   "place": "Hanul Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q58626342",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q43746779",
+   "name": "2017 Wolseong Nuclear Power Plant coolant leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2017-10-05",
+   "lat": 35.71111,
+   "lon": 129.475,
+   "place": "Wolseong Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q43746779",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q58626439",
+   "name": "2018 Kori Nuclear Power Plant Unit 4 coolant water leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2018-03-28",
+   "lat": 35.32022,
+   "lon": 129.29461,
+   "place": "Kori Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q58626439",
+   "deaths": null,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q55002916",
+   "name": "2018 Wolseong-3 Nuclear Power Plant coolant leak",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": "2018-06-11",
+   "lat": 35.71111,
+   "lon": 129.475,
+   "place": "Wolseong Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q55002916",
+   "deaths": 0,
+   "country": "South Korea",
+   "ines": null
+  },
+  {
+   "id": "Q66424571",
+   "name": "nuclear accident in Russia in August 2019",
+   "description": "nuclear explosion in Nionoksa",
+   "kinds": [
+    "accident"
+   ],
+   "date": "2019-08-08",
+   "lat": 64.6459,
+   "lon": 39.2027,
+   "place": "Sopka",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Nyonoksa_radiation_accident",
+   "wikidata": "https://www.wikidata.org/wiki/Q66424571",
+   "deaths": 5,
+   "country": "Russia",
+   "ines": null
+  },
+  {
+   "id": "Q117194158",
+   "name": "Monticello Nuclear Generating Plant accident",
+   "description": "Nuclear leak in Minnesota, United States",
+   "kinds": [
+    "accident"
+   ],
+   "date": "2022-11-01",
+   "lat": 45.33361,
+   "lon": -93.84919,
+   "place": "Monticello Nuclear Generating Plant",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Monticello_Nuclear_Generating_Plant_accident",
+   "wikidata": "https://www.wikidata.org/wiki/Q117194158",
+   "deaths": null,
+   "country": "United States",
+   "ines": null
+  },
+  {
+   "id": "Q128483418",
+   "name": "Nuclear incident at Khabarovsk, Russia",
+   "description": "Radiation incident in Russia (2024)",
+   "kinds": [
+    "accident"
+   ],
+   "date": "2024-01-01",
+   "lat": 48.48333,
+   "lon": 135.06667,
+   "place": "Khabarovsk",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Nuclear_incident_at_Khabarovsk,_Russia",
+   "wikidata": "https://www.wikidata.org/wiki/Q128483418",
+   "deaths": null,
+   "country": "Russia",
+   "ines": null
+  },
+  {
+   "id": "Q4622664",
+   "name": "2011 Type 094 accident",
+   "description": null,
+   "kinds": [
+    "accident"
+   ],
+   "date": null,
+   "lat": 38.8031,
+   "lon": 121.123,
+   "place": "Liaoning",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/2011_Type_094_accident",
+   "wikidata": "https://www.wikidata.org/wiki/Q4622664",
+   "deaths": null,
+   "country": "People's Republic of China",
+   "ines": null
+  },
+  {
+   "id": "Q30752769",
+   "name": "Accident nucléaire de Forbach",
+   "description": "accident nucléaire en France",
+   "kinds": [
+    "accident"
+   ],
+   "date": null,
+   "lat": 49.18888,
+   "lon": 6.90083,
+   "place": null,
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q30752769",
+   "deaths": 1,
+   "country": null,
+   "ines": 3
+  },
+  {
+   "id": "Q117218858",
+   "name": "Prachin Buri radiation accident",
+   "description": "2023 radiation accident in Thailand",
+   "kinds": [
+    "accident"
+   ],
+   "date": null,
+   "lat": 14.04778,
+   "lon": 101.3725,
+   "place": "Prachin Buri",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Prachin_Buri_radiation_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q117218858",
+   "deaths": null,
+   "country": "Thailand",
+   "ines": null
+  },
+  {
+   "id": "Q2004548",
+   "name": "Samut Prakan radiation accident",
+   "description": "2000 radiation accident in Thailand",
+   "kinds": [
+    "accident"
+   ],
+   "date": null,
+   "lat": 13.65333,
+   "lon": 100.59028,
+   "place": "Samut Prakan",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Samut_Prakan_radiation_accident",
+   "wikidata": "https://www.wikidata.org/wiki/Q2004548",
+   "deaths": null,
+   "country": "Thailand",
+   "ines": null
+  }
+ ]
+}

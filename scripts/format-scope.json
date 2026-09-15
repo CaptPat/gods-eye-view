@@ -823,5 +823,16 @@
   "src/layers/sky-objects/index.test.mjs",
   "src/layers/sky-objects/model.test.mjs",
   "src/layers/sky-objects/planets.test.mjs",
-  "scripts/build-night-sky.mjs"
+  "scripts/build-night-sky.mjs",
+  "src/layers/wikidata-points/normalize.js",
+  "src/layers/wikidata-points/normalize.test.mjs",
+  "src/layers/nuclear/bundledSource.js",
+  "src/layers/nuclear/index.js",
+  "src/layers/nuclear/model.js",
+  "src/layers/nuclear/wikidata.js",
+  "src/layers/nuclear/index.test.mjs",
+  "src/layers/nuclear/model.test.mjs",
+  "src/layers/nuclear/wikidata.test.mjs",
+  "src/app/layers/nuclear.js",
+  "scripts/build-wikidata-layers.mjs"
 ]

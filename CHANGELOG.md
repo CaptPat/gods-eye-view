@@ -59,6 +59,20 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## Share-link capacity and nuclear layers (fork)
+
+- Share links now carry up to 62 layers, up from 32. Layer tokens may be any case-sensitive
+  letter or digit, and the enabled-layer list may reach 128 characters. Existing links decode
+  unchanged.
+- Add Nuclear Power Plants (token `6`), coloured by status (operating, under construction, planned,
+  decommissioned, cancelled) and sized by capacity. Cards give capacity, operator, service years
+  and country.
+- Add Nuclear Waste Sites (`7`): radioactive-waste and deep geological repositories.
+- Add Nuclear Accidents (`8`), coloured and sized by International Nuclear Event Scale level, with
+  date and deaths.
+- All three are Wikidata (CC0) snapshots in a new "Energy" group. They use a shared Wikidata point
+  normaliser (`src/layers/wikidata-points`) and `scripts/build-wikidata-layers.mjs`.
+
 ## Night sky, planets and deep sky (fork)
 
 - Add a Night Sky layer: 921 stars to magnitude 4.5, sized by brightness and tinted by colour
