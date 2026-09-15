@@ -13,7 +13,7 @@ export const OIL_GAS_META = Object.freeze({
 
 export const OIL_GAS_QUERY = Object.freeze({
   selectors: Object.freeze([
-    'way["man_made"="pipeline"]["substance"!~"^(water|sewage|hot_water|steam|heat)$"]',
+    'way["man_made"="pipeline"]["substance"!~"water|sewage|sewer|steam|heat"]',
     'node["man_made"="petroleum_well"]',
     'nwr["man_made"="offshore_platform"]',
     'nwr["industrial"~"^(refinery|oil|gas)$"]',
@@ -22,10 +22,12 @@ export const OIL_GAS_QUERY = Object.freeze({
   maxViewDegrees: 1,
 });
 
-const NOT_HYDROCARBON = /^(water|sewage|hot_water|steam|heat)$/;
+/** Mapped values include `rainwater`, `waterwaste` and `hot_water`, so match anywhere. */
+const NOT_HYDROCARBON = /water|sewage|sewer|steam|heat/;
 const OIL =
   /oil|petrol|gasoline|diesel|fuel|kerosene|naphtha|condensate|crude|jet/;
-const GAS = /gas|methane|lng|lpg|propane|ethane|butane/;
+/** Natural gas liquids (`ngl`, `y-grade`) are mixed light hydrocarbons from gas processing. */
+const GAS = /gas|methane|lng|lpg|ngl|y-grade|propane|ethane|butane/;
 
 /** 'oil', 'gas', 'other', 'unknown', or null for water-like pipelines. Refined fuels test as oil first ('gasoline'). */
 export function pipelineSubstance(tags) {

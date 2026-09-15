@@ -25,7 +25,7 @@ test('the layer meta and query describe non-water pipelines, wells, platforms an
   );
   assert.deepEqual(OIL_GAS_QUERY, {
     selectors: [
-      'way["man_made"="pipeline"]["substance"!~"^(water|sewage|hot_water|steam|heat)$"]',
+      'way["man_made"="pipeline"]["substance"!~"water|sewage|sewer|steam|heat"]',
       'node["man_made"="petroleum_well"]',
       'nwr["man_made"="offshore_platform"]',
       'nwr["industrial"~"^(refinery|oil|gas)$"]',
@@ -39,11 +39,17 @@ test('pipeline substance reads refined fuels as oil before matching gas', () => 
   const cases = [
     [{ substance: 'gas' }, 'gas'],
     [{ substance: 'natural_gas' }, 'gas'],
+    [{ substance: 'ngl' }, 'gas'],
+    [{ substance: 'y-grade' }, 'gas'],
     [{ substance: 'gasoline' }, 'oil'],
     [{ substance: 'crude_oil' }, 'oil'],
     [{ type: 'petroleum' }, 'oil'],
     [{ substance: 'water' }, null],
+    [{ substance: 'rainwater' }, null],
+    [{ substance: 'waterwaste' }, null],
+    [{ substance: 'sewer' }, null],
     [{ substance: 'ammonia' }, 'other'],
+    [{ substance: 'propylene' }, 'other'],
     [{}, 'unknown'],
   ];
   for (const [tags, substance] of cases)
