@@ -43,7 +43,13 @@ const PANEL_GROUPS = [
   },
   {
     label: 'Sky',
-    ids: ['fireballs', 'ufo-incidents'],
+    ids: [
+      'aurora-forecast',
+      'day-night',
+      'meteor-showers',
+      'fireballs',
+      'ufo-incidents',
+    ],
   },
   {
     label: 'Utilities',

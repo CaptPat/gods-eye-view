@@ -108,6 +108,9 @@
     "./server/providers/fireballs": {
       "node": "./server/providers/fireballs.js"
     },
+    "./server/providers/aurora": {
+      "node": "./server/providers/aurora.js"
+    },
     "./server/providers/firms": {
       "node": "./server/providers/firms.js"
     },
@@ -178,6 +181,9 @@
     "./layers/tides": "./src/layers/tides/index.js",
     "./layers/ufo-incidents": "./src/layers/ufo-incidents/index.js",
     "./layers/fireballs": "./src/layers/fireballs/index.js",
+    "./layers/aurora-forecast": "./src/layers/aurora/index.js",
+    "./layers/day-night": "./src/layers/day-night/index.js",
+    "./layers/meteor-showers": "./src/layers/meteor-showers/index.js",
     "./weather-report": "./src/weatherReport/index.js",
     "./layers/severe-weather": "./src/layers/severe-weather/index.js",
     "./layers/bikeshare": "./src/layers/bikeshare/index.js",

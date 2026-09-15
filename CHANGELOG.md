@@ -59,6 +59,21 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## Aurora, day and night, meteor showers (fork)
+
+- Add an Aurora Forecast layer: NOAA SWPC's OVATION forecast drawn as ground bands at 5, 10, 30
+  and 50% probability (green to magenta). The row shows the peak probability and forecast time.
+  Served by a new `/api/aurora` proxy that turns the 1° grid into merged rectangles and caches
+  them for five minutes. Share token `1`.
+- Add a Day & Night layer: civil, nautical and astronomical twilight and night shaded on the globe,
+  with markers where the Sun and Moon stand overhead and the Moon's lit fraction. Computed locally
+  every two minutes. Share token `2`.
+- Add a Meteor Showers layer: each shower active today (37 from the IMO working list) drawn under
+  its radiant, drifting west as the Earth turns. Cards give peak, hourly rate, speed, parent body
+  and where the radiant climbs 30° high. Share token `3`.
+- Shared `grid-bands` package: value grids become antimeridian-safe ground rectangles. Fireballs
+  and aurora share one cached single-document proxy helper (`server/providers/common/cachedJson.js`).
+
 ## UFO incidents and fireballs (fork)
 
 - Add a UFO Incidents layer: about 50 notable incidents from Wikidata (CC0), including sightings,
