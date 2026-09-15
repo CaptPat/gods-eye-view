@@ -144,7 +144,9 @@ export function createSevereWeatherRendering(
         color,
         outlineColor: Cesium.Color.BLACK,
         outlineWidth: 2,
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        // No heightReference: the globe is hidden, so clamping samples the
+        // photoreal tiles, which at globe zoom can return a height far
+        // underground and pin the point near Earth's centre on screen.
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
     });

@@ -155,10 +155,10 @@ test('NWS areas become ground fills with outlines; GDACS events become points, t
   );
 
   const drought = entity('severe-weather:gdacs:DR-1018431');
-  assert.equal(
-    drought.point.heightReference.getValue(T),
-    Cesium.HeightReference.CLAMP_TO_GROUND,
-  );
+  // Not clamped: with the globe hidden, a clamp samples the photoreal tiles,
+  // and at globe zoom that sample can land far underground, leaving the point
+  // near Earth's centre so it stays put on screen while the globe turns.
+  assert.equal(drought.point.heightReference, undefined);
   assert.equal(
     drought.point.disableDepthTestDistance.getValue(T),
     Number.POSITIVE_INFINITY,
