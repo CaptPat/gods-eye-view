@@ -37,6 +37,11 @@ import {
 } from './layers/nuclear.js';
 import { createApplicationPowerPlants } from './layers/powerPlants.js';
 import { createApplicationAirports } from './layers/airports.js';
+import {
+  createApplicationFortsCastles,
+  createApplicationParksMonuments,
+  createApplicationWorldHeritage,
+} from './layers/heritage.js';
 import { createApplicationCables } from './layers/submarineCables.js';
 import { createInfrastructureLayers } from '../data/infrastructure.js';
 import { localGeoJsonServices } from './localGeojsonServices.js';
@@ -143,6 +148,9 @@ export function createApplicationCatalog({
         createApplicationNuclearAccidents(),
         createApplicationPowerPlants(),
         createApplicationAirports(),
+        createApplicationWorldHeritage(),
+        createApplicationFortsCastles(),
+        createApplicationParksMonuments(),
         createApplicationAlpr({ surface, source: sources.alpr }),
         satellites,
         createApplicationLaunches({ source: sources.launches, satellites }),

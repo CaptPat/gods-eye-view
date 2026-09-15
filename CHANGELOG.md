@@ -59,6 +59,17 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## Heritage layers (fork)
+
+- Add a Heritage group in the Layers panel with three Wikidata (CC0) snapshot layers.
+- World Heritage Sites (token `H`): 3,339 sites with every country, inception year and description.
+- Forts & Castles (token `K`): castles, forts, fortifications and star forts, coloured by kind, as
+  compact 4 px points.
+- National Parks & Monuments (token `P`): national parks and US National Monuments, with country and
+  established year.
+- The Wikidata build script now splits heavy queries per class, retries timed-out responses, and
+  writes large layers as compact `{ fields, rows }` tables.
+
 ## Power plants and airports (fork)
 
 - Add a Power Plants layer (token `9`) in the Energy group. It shows 27,780 non-hydro plants from

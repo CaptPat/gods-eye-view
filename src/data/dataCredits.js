@@ -362,6 +362,11 @@ export const OURAIRPORTS_CREDIT = Object.freeze({
   html: 'Airports: <a href="https://ourairports.com/" target="_blank" rel="noopener">OurAirports</a> (public domain)',
 });
 
+export const WIKIDATA_HERITAGE_CREDIT = Object.freeze({
+  key: 'wikidata-heritage',
+  html: 'Heritage sites: <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a> (CC0), linked to Wikipedia',
+});
+
 export const NWS_ALERTS_CREDIT = Object.freeze({
   key: 'nws-alerts',
   html: 'US weather alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (NOAA, public domain)',
