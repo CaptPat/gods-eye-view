@@ -372,6 +372,11 @@ export const OSM_INFRASTRUCTURE_CREDIT = Object.freeze({
   html: 'Transmission lines and oil &amp; gas infrastructure: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> (ODbL 1.0), via Overpass',
 });
 
+export const BSEE_PLATFORMS_CREDIT = Object.freeze({
+  key: 'bsee-platforms',
+  html: 'Offshore platforms: <a href="https://www.data.bsee.gov/Main/Platform.aspx" target="_blank" rel="noopener">BSEE Data Center</a> (public domain)',
+});
+
 export const NWS_ALERTS_CREDIT = Object.freeze({
   key: 'nws-alerts',
   html: 'US weather alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (NOAA, public domain)',

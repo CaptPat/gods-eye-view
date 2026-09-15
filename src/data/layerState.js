@@ -337,6 +337,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'nuclear-accidents', token: '8', disposition: 'enabled-only' }),
   Object.freeze({ id: 'nuclear-power-plants', token: '6', disposition: 'enabled-only' }),
   Object.freeze({ id: 'nuclear-waste-sites', token: '7', disposition: 'enabled-only' }),
+  Object.freeze({ id: 'offshore-platforms', token: 'O', disposition: 'enabled-only' }),
   Object.freeze({ id: 'oil-gas', token: 'G', disposition: 'enabled-only' }),
   Object.freeze({ id: 'parks-monuments', token: 'P', disposition: 'enabled-only' }),
   Object.freeze({ id: 'power-plants', token: '9', disposition: 'enabled-only' }),
