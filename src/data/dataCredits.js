@@ -327,6 +327,16 @@ export const CNEOS_FIREBALLS_CREDIT = Object.freeze({
   html: 'Fireballs: <a href="https://cneos.jpl.nasa.gov/fireballs/" target="_blank" rel="noopener">NASA/JPL CNEOS</a>',
 });
 
+export const NOAA_SWPC_AURORA_CREDIT = Object.freeze({
+  key: 'noaa-swpc-aurora',
+  html: 'Aurora forecast: <a href="https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" target="_blank" rel="noopener">NOAA SWPC</a> OVATION',
+});
+
+export const IMO_METEOR_SHOWERS_CREDIT = Object.freeze({
+  key: 'imo-meteor-showers',
+  html: 'Meteor showers: <a href="https://www.imo.net/" target="_blank" rel="noopener">International Meteor Organization</a> calendar',
+});
+
 export const NWS_ALERTS_CREDIT = Object.freeze({
   key: 'nws-alerts',
   html: 'US weather alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (NOAA, public domain)',

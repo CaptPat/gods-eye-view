@@ -182,9 +182,24 @@
     "modules": [
       "server/providers/fireballs.js",
       "server/providers/fireballs/normalize.js",
+      "server/providers/common/cachedJson.js",
       "server/providers/common/rate-limit.js",
       "server/providers/common/http.js",
       "src/sources/httpBody.js"
+    ],
+    "external": []
+  },
+  "aurora-provider": {
+    "runtime": "node",
+    "exports": ["./server/providers/aurora"],
+    "modules": [
+      "server/providers/aurora.js",
+      "server/providers/aurora/normalize.js",
+      "server/providers/common/cachedJson.js",
+      "server/providers/common/rate-limit.js",
+      "server/providers/common/http.js",
+      "src/sources/httpBody.js",
+      "src/layers/grid-bands/bands.js"
     ],
     "external": []
   },
@@ -1032,6 +1047,37 @@
     ],
     "external": ["cesium"]
   },
+  "aurora-forecast-layer": {
+    "exports": ["./layers/aurora-forecast"],
+    "modules": [
+      "src/layers/aurora/index.js",
+      "src/layers/aurora/model.js",
+      "src/layers/grid-bands/rendering.js"
+    ],
+    "external": ["cesium"]
+  },
+  "day-night-layer": {
+    "exports": ["./layers/day-night"],
+    "modules": [
+      "src/layers/day-night/bodies.js",
+      "src/layers/day-night/index.js",
+      "src/layers/day-night/markers.js",
+      "src/layers/day-night/solar.js",
+      "src/layers/grid-bands/bands.js",
+      "src/layers/grid-bands/rendering.js"
+    ],
+    "external": ["cesium"]
+  },
+  "meteor-showers-layer": {
+    "exports": ["./layers/meteor-showers"],
+    "modules": [
+      "src/layers/catalog-points/index.js",
+      "src/layers/catalog-points/points.js",
+      "src/layers/meteor-showers/index.js",
+      "src/layers/meteor-showers/model.js"
+    ],
+    "external": ["cesium"]
+  },
   "weather-overlays-layer": {
     "exports": ["./layers/weather-overlays"],
     "modules": [
@@ -1629,6 +1675,16 @@
       "src/layers/ufo-incidents/bundledSource.js",
       "src/layers/ufo-incidents/index.js",
       "src/layers/ufo-incidents/model.js",
+      "src/layers/aurora/index.js",
+      "src/layers/aurora/model.js",
+      "src/layers/day-night/bodies.js",
+      "src/layers/day-night/index.js",
+      "src/layers/day-night/markers.js",
+      "src/layers/day-night/solar.js",
+      "src/layers/grid-bands/bands.js",
+      "src/layers/grid-bands/rendering.js",
+      "src/layers/meteor-showers/index.js",
+      "src/layers/meteor-showers/model.js",
       "src/layers/traffic/animation.js",
       "src/layers/traffic/controls.js",
       "src/layers/traffic/flow.js",
@@ -1831,6 +1887,9 @@
       "src/app/layers/catalogPointServices.js",
       "src/app/layers/fireballs.js",
       "src/app/layers/ufoIncidents.js",
+      "src/app/layers/auroraForecast.js",
+      "src/app/layers/dayNight.js",
+      "src/app/layers/meteorShowers.js",
       "src/app/layers/weatherOverlays.js",
       "src/search/coordinateGeocoder.js",
       "src/search/coordinateParser.js",
@@ -2199,6 +2258,9 @@
       "src/app/layers/catalogPointServices.js",
       "src/app/layers/fireballs.js",
       "src/app/layers/ufoIncidents.js",
+      "src/app/layers/auroraForecast.js",
+      "src/app/layers/dayNight.js",
+      "src/app/layers/meteorShowers.js",
       "src/app/layers/weatherOverlays.js",
       "src/app/layers/weatherRadar.js",
       "src/weatherReport/groundPick.js",
@@ -2224,6 +2286,16 @@
       "src/layers/ufo-incidents/bundledSource.js",
       "src/layers/ufo-incidents/index.js",
       "src/layers/ufo-incidents/model.js",
+      "src/layers/aurora/index.js",
+      "src/layers/aurora/model.js",
+      "src/layers/day-night/bodies.js",
+      "src/layers/day-night/index.js",
+      "src/layers/day-night/markers.js",
+      "src/layers/day-night/solar.js",
+      "src/layers/grid-bands/bands.js",
+      "src/layers/grid-bands/rendering.js",
+      "src/layers/meteor-showers/index.js",
+      "src/layers/meteor-showers/model.js",
       "src/layers/weather-overlays/palette.js",
       "src/layers/weather-overlays/controls.js",
       "src/layers/weather-overlays/index.js",

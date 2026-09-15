@@ -25,6 +25,9 @@ import {
 } from './layers/tides.js';
 import { createApplicationUfoIncidents } from './layers/ufoIncidents.js';
 import { createApplicationFireballs } from './layers/fireballs.js';
+import { createApplicationAuroraForecast } from './layers/auroraForecast.js';
+import { createApplicationDayNight } from './layers/dayNight.js';
+import { createApplicationMeteorShowers } from './layers/meteorShowers.js';
 import { createApplicationCables } from './layers/submarineCables.js';
 import { createInfrastructureLayers } from '../data/infrastructure.js';
 import { localGeoJsonServices } from './localGeojsonServices.js';
@@ -121,6 +124,9 @@ export function createApplicationCatalog({
         createApplicationCurrentStations(),
         createApplicationFireballs(),
         createApplicationUfoIncidents(),
+        createApplicationAuroraForecast(),
+        createApplicationDayNight(),
+        createApplicationMeteorShowers(),
         createApplicationAlpr({ surface, source: sources.alpr }),
         satellites,
         createApplicationLaunches({ source: sources.launches, satellites }),
