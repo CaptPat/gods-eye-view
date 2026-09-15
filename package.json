@@ -188,6 +188,8 @@
     "./layers/night-sky": "./src/layers/night-sky/index.js",
     "./layers/sky-objects": "./src/layers/sky-objects/index.js",
     "./layers/nuclear": "./src/layers/nuclear/index.js",
+    "./layers/power-plants": "./src/layers/power-plants/index.js",
+    "./layers/airports": "./src/layers/airports/index.js",
     "./weather-report": "./src/weatherReport/index.js",
     "./layers/severe-weather": "./src/layers/severe-weather/index.js",
     "./layers/bikeshare": "./src/layers/bikeshare/index.js",

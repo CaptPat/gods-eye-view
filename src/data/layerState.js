@@ -313,6 +313,7 @@ export const SHARE_TRACKING_RESTORE_POLICIES = Object.freeze({
  * owns stable URL ordering.
  */
 export const LAYER_STATE_REGISTRY = Object.freeze([
+  Object.freeze({ id: 'airports', token: '0', disposition: 'enabled-only' }),
   Object.freeze({ id: 'ais-live-vessels', token: 'a', disposition: 'enabled-only' }),
   Object.freeze({ id: 'alpr-cameras', token: 'p', disposition: 'enabled-only' }),
   Object.freeze({ id: 'aurora-forecast', token: '1', disposition: 'enabled-only' }),
@@ -335,6 +336,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'nuclear-accidents', token: '8', disposition: 'enabled-only' }),
   Object.freeze({ id: 'nuclear-power-plants', token: '6', disposition: 'enabled-only' }),
   Object.freeze({ id: 'nuclear-waste-sites', token: '7', disposition: 'enabled-only' }),
+  Object.freeze({ id: 'power-plants', token: '9', disposition: 'enabled-only' }),
   Object.freeze({ id: 'radio', token: 'r', disposition: 'enabled+options', optionOwner: 'radio' }),
   Object.freeze({ id: 'rocket-launches', token: 'x', disposition: 'enabled-only' }),
   Object.freeze({ id: 'satellites', token: 's', disposition: 'enabled+options', optionOwner: 'satellites' }),

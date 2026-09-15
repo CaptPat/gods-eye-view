@@ -352,6 +352,16 @@ export const WIKIDATA_NUCLEAR_CREDIT = Object.freeze({
   html: 'Nuclear sites: <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a> (CC0), linked to Wikipedia',
 });
 
+export const GPPD_CREDIT = Object.freeze({
+  key: 'wri-gppd',
+  html: 'Power plants: <a href="https://datasets.wri.org/dataset/globalpowerplantdatabase" target="_blank" rel="noopener">WRI Global Power Plant Database</a> (CC BY 4.0)',
+});
+
+export const OURAIRPORTS_CREDIT = Object.freeze({
+  key: 'ourairports',
+  html: 'Airports: <a href="https://ourairports.com/" target="_blank" rel="noopener">OurAirports</a> (public domain)',
+});
+
 export const NWS_ALERTS_CREDIT = Object.freeze({
   key: 'nws-alerts',
   html: 'US weather alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (NOAA, public domain)',
