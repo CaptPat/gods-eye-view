@@ -1140,6 +1140,18 @@
     ],
     "external": ["cesium"]
   },
+  "heritage-layer": {
+    "exports": ["./layers/heritage"],
+    "modules": [
+      "src/layers/catalog-points/bundled.js",
+      "src/layers/catalog-points/index.js",
+      "src/layers/catalog-points/points.js",
+      "src/layers/heritage/bundledSource.js",
+      "src/layers/heritage/index.js",
+      "src/layers/heritage/model.js"
+    ],
+    "external": ["cesium"]
+  },
   "weather-overlays-layer": {
     "exports": ["./layers/weather-overlays"],
     "modules": [
@@ -1769,6 +1781,9 @@
       "src/layers/airports/index.js",
       "src/layers/airports/model.js",
       "src/layers/airports/source.js",
+      "src/layers/heritage/bundledSource.js",
+      "src/layers/heritage/index.js",
+      "src/layers/heritage/model.js",
       "src/layers/traffic/animation.js",
       "src/layers/traffic/controls.js",
       "src/layers/traffic/flow.js",
@@ -1979,6 +1994,7 @@
       "src/app/layers/nuclear.js",
       "src/app/layers/powerPlants.js",
       "src/app/layers/airports.js",
+      "src/app/layers/heritage.js",
       "src/app/layers/weatherOverlays.js",
       "src/search/coordinateGeocoder.js",
       "src/search/coordinateParser.js",
@@ -2356,6 +2372,7 @@
       "src/app/layers/nuclear.js",
       "src/app/layers/powerPlants.js",
       "src/app/layers/airports.js",
+      "src/app/layers/heritage.js",
       "src/app/layers/weatherOverlays.js",
       "src/app/layers/weatherRadar.js",
       "src/weatherReport/groundPick.js",
@@ -2413,6 +2430,9 @@
       "src/layers/airports/index.js",
       "src/layers/airports/model.js",
       "src/layers/airports/source.js",
+      "src/layers/heritage/bundledSource.js",
+      "src/layers/heritage/index.js",
+      "src/layers/heritage/model.js",
       "src/layers/weather-overlays/palette.js",
       "src/layers/weather-overlays/controls.js",
       "src/layers/weather-overlays/index.js",

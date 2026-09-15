@@ -854,5 +854,14 @@
   "src/layers/airports/source.test.mjs",
   "src/app/layers/powerPlants.js",
   "src/app/layers/airports.js",
-  "scripts/build-csv-layers.mjs"
+  "scripts/build-csv-layers.mjs",
+  "src/layers/heritage/bundledSource.js",
+  "src/layers/heritage/index.js",
+  "src/layers/heritage/model.js",
+  "src/layers/heritage/wikidata.js",
+  "src/layers/heritage/index.test.mjs",
+  "src/layers/heritage/model.test.mjs",
+  "src/layers/heritage/wikidata.test.mjs",
+  "src/app/layers/heritage.js",
+  "src/layers/heritage/fortsTwoPhase.test.mjs"
 ]

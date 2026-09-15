@@ -64,6 +64,10 @@ const PANEL_GROUPS = [
     ],
   },
   {
+    label: 'Heritage',
+    ids: ['world-heritage', 'forts-castles', 'parks-monuments'],
+  },
+  {
     label: 'Utilities',
     ids: ['directions', 'radio'],
   },

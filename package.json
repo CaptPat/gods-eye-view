@@ -190,6 +190,7 @@
     "./layers/nuclear": "./src/layers/nuclear/index.js",
     "./layers/power-plants": "./src/layers/power-plants/index.js",
     "./layers/airports": "./src/layers/airports/index.js",
+    "./layers/heritage": "./src/layers/heritage/index.js",
     "./weather-report": "./src/weatherReport/index.js",
     "./layers/severe-weather": "./src/layers/severe-weather/index.js",
     "./layers/bikeshare": "./src/layers/bikeshare/index.js",

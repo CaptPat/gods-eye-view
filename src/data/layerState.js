@@ -325,6 +325,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'earthquakes', token: 'e', disposition: 'enabled-only' }),
   Object.freeze({ id: 'fireballs', token: 'l', disposition: 'enabled-only' }),
   Object.freeze({ id: 'flights', token: 'f', disposition: 'enabled+options', optionOwner: 'flights' }),
+  Object.freeze({ id: 'forts-castles', token: 'K', disposition: 'enabled-only' }),
   Object.freeze({ id: 'local-dams', token: 'q', disposition: 'enabled-only' }),
   Object.freeze({ id: 'local-datacenters', token: 'd', disposition: 'enabled-only' }),
   Object.freeze({ id: 'local-firms', token: 'w', disposition: 'enabled-only' }),
@@ -336,6 +337,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'nuclear-accidents', token: '8', disposition: 'enabled-only' }),
   Object.freeze({ id: 'nuclear-power-plants', token: '6', disposition: 'enabled-only' }),
   Object.freeze({ id: 'nuclear-waste-sites', token: '7', disposition: 'enabled-only' }),
+  Object.freeze({ id: 'parks-monuments', token: 'P', disposition: 'enabled-only' }),
   Object.freeze({ id: 'power-plants', token: '9', disposition: 'enabled-only' }),
   Object.freeze({ id: 'radio', token: 'r', disposition: 'enabled+options', optionOwner: 'radio' }),
   Object.freeze({ id: 'rocket-launches', token: 'x', disposition: 'enabled-only' }),
@@ -348,6 +350,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'ufo-incidents', token: 'j', disposition: 'enabled-only' }),
   Object.freeze({ id: 'weather-overlays', token: 'o', disposition: 'enabled+options', optionOwner: 'weather-overlays' }),
   Object.freeze({ id: 'weather-radar', token: 'z', disposition: 'enabled+options', optionOwner: 'weather-radar' }),
+  Object.freeze({ id: 'world-heritage', token: 'H', disposition: 'enabled-only' }),
 ]);
 
 export const REGISTERED_LAYER_IDS = Object.freeze(LAYER_STATE_REGISTRY.map((entry) => entry.id));
