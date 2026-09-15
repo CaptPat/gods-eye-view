@@ -14,6 +14,7 @@ import { weatherReportProxy } from './weather-report.js';
 import { severeWeatherProxy } from './severe-weather.js';
 import { weatherOverlaysProxy } from './weather-overlays.js';
 import { tidesProxy } from './tides.js';
+import { fireballsProxy } from './fireballs.js';
 import { cctvProxy } from './cctv.js';
 import { defaultSourceRoot } from './common/source-root.js';
 import { radioBrowserProxy } from './radio.js';
@@ -43,6 +44,7 @@ function localProviderPlugins() {
     weatherReportProxy(),
     weatherOverlaysProxy(),
     tidesProxy(),
+    fireballsProxy(),
     weatherEffectsProxy(),
     severeWeatherProxy(),
     cctvProxy({ sourceRoot: defaultSourceRoot }),
@@ -75,6 +77,8 @@ export {
 } from './weather-overlays.js';
 
 export { createTidesHandler, tidesProxy } from './tides.js';
+
+export { createFireballsHandler, fireballsProxy } from './fireballs.js';
 
 export {
   createSevereWeatherHandler,

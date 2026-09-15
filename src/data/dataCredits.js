@@ -317,6 +317,16 @@ export const NOAA_COOPS_CREDIT = Object.freeze({
   html: 'Tides and currents: <a href="https://tidesandcurrents.noaa.gov/" target="_blank" rel="noopener">NOAA CO-OPS</a>',
 });
 
+export const UFO_INCIDENTS_CREDIT = Object.freeze({
+  key: 'wikidata-ufo-incidents',
+  html: 'UFO incidents: <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a> (CC0), linked to Wikipedia',
+});
+
+export const CNEOS_FIREBALLS_CREDIT = Object.freeze({
+  key: 'cneos-fireballs',
+  html: 'Fireballs: <a href="https://cneos.jpl.nasa.gov/fireballs/" target="_blank" rel="noopener">NASA/JPL CNEOS</a>',
+});
+
 export const NWS_ALERTS_CREDIT = Object.freeze({
   key: 'nws-alerts',
   html: 'US weather alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (NOAA, public domain)',

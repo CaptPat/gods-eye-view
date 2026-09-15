@@ -1,0 +1,794 @@
+{
+ "source": "Wikidata",
+ "license": "CC0-1.0",
+ "retrievedAt": "2026-09-15",
+ "incidents": [
+  {
+   "id": "Q112206043",
+   "name": "Airship of Clonmacnoise",
+   "description": "alleged apparition of ships with their crews in the sky over Ireland in the 740s",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "0740-01-01",
+   "lat": 53.70026,
+   "lon": -6.76655,
+   "place": "Teltown",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Airship_of_Clonmacnoise",
+   "wikidata": "https://www.wikidata.org/wiki/Q112206043"
+  },
+  {
+   "id": "Q2420196",
+   "name": "Aurora, Texas, UFO incident",
+   "description": "The Aurora, Texas, UFO incident happened, at the United States of America on the 17th day of April 1897.",
+   "kinds": [
+    "sighting",
+    "ufo"
+   ],
+   "date": "1897-04-17",
+   "lat": 33.05278,
+   "lon": -97.50028,
+   "place": "Aurora Cemetery",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Aurora,_Texas,_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q2420196"
+  },
+  {
+   "id": "Q3149892",
+   "name": "Maury Island incident",
+   "description": "alleged UFO encounter in the United States in 1947",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1947-06-21",
+   "lat": 47.37694,
+   "lon": -122.42972,
+   "place": "Maury Island",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Maury_Island_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q3149892"
+  },
+  {
+   "id": "Q4424090",
+   "name": "Kenneth Arnold UFO sighting",
+   "description": "1947 UFO encounter",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1947-06-24",
+   "lat": 46.85167,
+   "lon": -121.76028,
+   "place": "Mount Rainier",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Kenneth_Arnold_UFO_sighting",
+   "wikidata": "https://www.wikidata.org/wiki/Q4424090"
+  },
+  {
+   "id": "Q111467273",
+   "name": "Flight 105 UFO sighting",
+   "description": "UFO sighting in 1947",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1947-07-04",
+   "lat": 45.8288,
+   "lon": -120.32227,
+   "place": "Pacific Northwest",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Flight_105_UFO_sighting",
+   "wikidata": "https://www.wikidata.org/wiki/Q111467273"
+  },
+  {
+   "id": "Q2791513",
+   "name": "Chiles-Whitted UFO encounter",
+   "description": "1948 UFO encounter",
+   "kinds": [
+    "sighting",
+    "ufo"
+   ],
+   "date": "1948-07-24",
+   "lat": 32.7,
+   "lon": -86.7,
+   "place": "Alabama",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Chiles-Whitted_UFO_encounter",
+   "wikidata": "https://www.wikidata.org/wiki/Q2791513"
+  },
+  {
+   "id": "Q1521925",
+   "name": "Gorman dogfight",
+   "description": "1948 UFO sighting and aviation accident",
+   "kinds": [
+    "ufo"
+   ],
+   "date": "1948-10-01",
+   "lat": 46.87722,
+   "lon": -96.78944,
+   "place": "Fargo",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Gorman_dogfight",
+   "wikidata": "https://www.wikidata.org/wiki/Q1521925"
+  },
+  {
+   "id": "Q2940740",
+   "name": "Carson Sink UFO incident",
+   "description": null,
+   "kinds": [
+    "ufo"
+   ],
+   "date": "1952-07-24",
+   "lat": 39.75,
+   "lon": -118.6275,
+   "place": null,
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q2940740"
+  },
+  {
+   "id": "Q2656375",
+   "name": "1952 Washington, D.C. UFO incident",
+   "description": "UFO incident in the United States",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1952-07-26",
+   "lat": 38.895,
+   "lon": -77.03667,
+   "place": "Washington, D.C.",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/1952_Washington,_D.C.,_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q2656375"
+  },
+  {
+   "id": "Q1970057",
+   "name": "Kelly–Hopkinsville encounter",
+   "description": "alleged close encounter with extraterrestrial beings in Kentucky in 1955",
+   "kinds": [
+    "close-encounter"
+   ],
+   "date": "1955-08-21",
+   "lat": 36.9,
+   "lon": -87.49,
+   "place": "Christian County",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Kelly%E2%80%93Hopkinsville_encounter",
+   "wikidata": "https://www.wikidata.org/wiki/Q1970057"
+  },
+  {
+   "id": "Q3631268",
+   "name": "The Trindade Island's UFO",
+   "description": "fraudulent UFO sighting in Brazil, 1958",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1958-01-16",
+   "lat": -20.50833,
+   "lon": -29.32611,
+   "place": "Trindade",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q3631268"
+  },
+  {
+   "id": "Q850529",
+   "name": "Betty and Barney Hill incident",
+   "description": "alleged UFO abduction event",
+   "kinds": [
+    "abduction"
+   ],
+   "date": "1961-09-19",
+   "lat": 43.9086,
+   "lon": -71.6639,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Barney_and_Betty_Hill_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q850529"
+  },
+  {
+   "id": "Q111467367",
+   "name": "Lonnie Zamora incident",
+   "description": "alleged UFO sighting",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1964-04-24",
+   "lat": 34.0425,
+   "lon": -106.89778,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Lonnie_Zamora_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q111467367"
+  },
+  {
+   "id": "Q5420149",
+   "name": "Exeter incident",
+   "description": "UFO sighting in New Hampshire in 1965",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1965-09-03",
+   "lat": 42.94692,
+   "lon": -70.95637,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Exeter_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q5420149"
+  },
+  {
+   "id": "Q2280708",
+   "name": "Kecksburg UFO incident",
+   "description": "1965 purported UFO sighting in North America",
+   "kinds": [
+    "sighting",
+    "ufo"
+   ],
+   "date": "1965-12-09",
+   "lat": 40.18472,
+   "lon": -79.46139,
+   "place": "Kecksburg",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Kecksburg_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q2280708"
+  },
+  {
+   "id": "Q6477655",
+   "name": "Westall UFO",
+   "description": "1966 UFO incident in Melbourne, Victoria, Australia",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1966-04-06",
+   "lat": -37.9411,
+   "lon": 145.134,
+   "place": "Victoria",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Westall_UFO",
+   "wikidata": "https://www.wikidata.org/wiki/Q6477655"
+  },
+  {
+   "id": "Q25402017",
+   "name": "Malmstrom UFO incident",
+   "description": "alleged paranormal event",
+   "kinds": [
+    "ufo"
+   ],
+   "date": "1967-03-16",
+   "lat": 47.48361,
+   "lon": -109.34917,
+   "place": "Malmstrom Air Force Base",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Malmstrom_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q25402017"
+  },
+  {
+   "id": "Q3149880",
+   "name": "Falcon Lake incident",
+   "description": "alleged UFO sighting in 1967",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1967-05-20",
+   "lat": 49.7031,
+   "lon": -95.2483,
+   "place": "Falcon Lake",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Falcon_Lake_Incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q3149880"
+  },
+  {
+   "id": "Q2985541",
+   "name": "Shag Harbour UFO incident",
+   "description": "alleged UFO crash off the coast of Nova Scotia",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1967-10-04",
+   "lat": 43.5,
+   "lon": -65.7,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Shag_Harbour_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q2985541"
+  },
+  {
+   "id": "Q18662539",
+   "name": "UFOs of Pudasjärvi",
+   "description": "Finnish UFO sightings between 1960s and 1970s",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1967-11-13",
+   "lat": 65.64222,
+   "lon": 27.71528,
+   "place": "North Ostrobothnia",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/UFOs_of_Pudasj%C3%A4rvi",
+   "wikidata": "https://www.wikidata.org/wiki/Q18662539"
+  },
+  {
+   "id": "Q16850258",
+   "name": "Jimmy Carter UFO incident",
+   "description": "incident regarding sighting of a UFO",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1969-01-01",
+   "lat": 31.4856,
+   "lon": -84.5133,
+   "place": "Leary",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Jimmy_Carter_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q16850258"
+  },
+  {
+   "id": "Q59921931",
+   "name": "Finnish Air Force UFO sighting",
+   "description": "1969 UFO observation",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1969-04-12",
+   "lat": 61.48667,
+   "lon": 21.7975,
+   "place": "Pori",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Finnish_Air_Force_UFO_sighting",
+   "wikidata": "https://www.wikidata.org/wiki/Q59921931"
+  },
+  {
+   "id": "Q112957853",
+   "name": "Labor Day 1969 UFO Incident",
+   "description": "1969 UFO incident in Berkshire County, Massachusetts, US",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1969-09-01",
+   "lat": 42.39639,
+   "lon": -73.21,
+   "place": "Berkshire County",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/September_1,_1969,_Berkshire_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q112957853"
+  },
+  {
+   "id": "Q96631084",
+   "name": "Travis Walton UFO incident",
+   "description": "American alleged alien abduction",
+   "kinds": [
+    "abduction"
+   ],
+   "date": "1975-11-05",
+   "lat": 33.6372,
+   "lon": -109.288,
+   "place": "Apache–Sitgreaves National Forests",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Travis_Walton_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q96631084"
+  },
+  {
+   "id": "Q4730283",
+   "name": "Allagash Abductions",
+   "description": "Maine alien abduction",
+   "kinds": [
+    "abduction"
+   ],
+   "date": "1976-08-20",
+   "lat": 47.08337,
+   "lon": -69.04115,
+   "place": "Allagash",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q4730283"
+  },
+  {
+   "id": "Q132186625",
+   "name": "1976 Allagash alien abduction incident",
+   "description": "claimed alien abduction incident",
+   "kinds": [
+    "abduction"
+   ],
+   "date": "1976-08-26",
+   "lat": 34.54806,
+   "lon": -91.27861,
+   "place": "Big Eagle Lake",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q132186625"
+  },
+  {
+   "id": "Q99472391",
+   "name": "Zanfretta UFO Incident",
+   "description": "alleged 1978 alien abduction in Italy",
+   "kinds": [
+    "sighting",
+    "abduction"
+   ],
+   "date": "1978-12-06",
+   "lat": 44.5056,
+   "lon": 9.13965,
+   "place": "Marzano",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Zanfretta_UFO_Incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q99472391"
+  },
+  {
+   "id": "Q1112256",
+   "name": "Kaikoura lights",
+   "description": "1978 New Zealand UFO sightings",
+   "kinds": [
+    "ufo"
+   ],
+   "date": "1978-12-21",
+   "lat": -42,
+   "lon": 173.66667,
+   "place": "Kaikōura Ranges",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Kaik%C5%8Dura_lights",
+   "wikidata": "https://www.wikidata.org/wiki/Q1112256"
+  },
+  {
+   "id": "Q3149884",
+   "name": "Val Johnson incident",
+   "description": "alleged 1979 UFO encounter in the United States",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1979-08-27",
+   "lat": 48.4369,
+   "lon": -97.1075,
+   "place": "Marshall County",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Val_Johnson_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q3149884"
+  },
+  {
+   "id": "Q4891378",
+   "name": "Manises UFO incident",
+   "description": "flight incident in Spain",
+   "kinds": [
+    "ufo"
+   ],
+   "date": "1979-11-11",
+   "lat": 39.4833,
+   "lon": -0.45,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Manises_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q4891378"
+  },
+  {
+   "id": "Q5617395",
+   "name": "Gulf Breeze UFO incident",
+   "description": "1987 UFO sighting in Gulf Breeze, Florida",
+   "kinds": [
+    "sighting",
+    "ufo"
+   ],
+   "date": "1980-01-01",
+   "lat": 30.44333,
+   "lon": -87.21139,
+   "place": "Gulf Breeze",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Gulf_Breeze_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q5617395"
+  },
+  {
+   "id": "Q117416952",
+   "name": "Arequipa UFO incident",
+   "description": "1980 UFO sighting in La Joya Base, Arequipa, Peru",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1980-04-11",
+   "lat": -16.79139,
+   "lon": -71.88667,
+   "place": "La Joya District",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Arequipa_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q117416952"
+  },
+  {
+   "id": "Q2271637",
+   "name": "Rendlesham Forest incident",
+   "description": "Reported UFO sighting in England in 1980",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1980-12-01",
+   "lat": 52.088,
+   "lon": 1.45514,
+   "place": "Suffolk",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Rendlesham_Forest_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q2271637"
+  },
+  {
+   "id": "Q2377371",
+   "name": "Cash-Landrum incident",
+   "description": "alleged unidentified flying object sighting",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1980-12-29",
+   "lat": 30.15722,
+   "lon": -95.18583,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Cash%E2%80%93Landrum_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q2377371"
+  },
+  {
+   "id": "Q375409",
+   "name": "Trans-en-Provence Case",
+   "description": "UFO sighting",
+   "kinds": [
+    "ufo"
+   ],
+   "date": "1981-01-08",
+   "lat": 43.50333,
+   "lon": 6.48611,
+   "place": "Trans-en-Provence",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Trans-en-Provence_case",
+   "wikidata": "https://www.wikidata.org/wiki/Q375409"
+  },
+  {
+   "id": "Q2891775",
+   "name": "Japan Air Lines flight 1628 incident",
+   "description": "Reported UFO sighting",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1986-11-17",
+   "lat": 65.48389,
+   "lon": -145.975,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Japan_Air_Lines_Cargo_Flight_1628",
+   "wikidata": "https://www.wikidata.org/wiki/Q2891775"
+  },
+  {
+   "id": "Q17032043",
+   "name": "Voronezh UFO incident",
+   "description": "1989 alleged sighting in the Soviet Union",
+   "kinds": [
+    "ufo"
+   ],
+   "date": "1989-09-27",
+   "lat": 51.67167,
+   "lon": 39.21056,
+   "place": "Voronezh",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Voronezh_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q17032043"
+  },
+  {
+   "id": "Q108803795",
+   "name": "Ruwa UFO incident",
+   "description": "1994 sighting in Zimbabwe",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1994-09-16",
+   "lat": -17.86352,
+   "lon": 31.29114,
+   "place": "Ruwa",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Ariel_School_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q108803795"
+  },
+  {
+   "id": "Q3313678",
+   "name": "Varginha UFO incident",
+   "description": "alleged capture of an extraterrestrial being in Brazil in 1996",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "1996-01-26",
+   "lat": -21.56636,
+   "lon": -45.43449,
+   "place": "Varginha",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Varginha_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q3313678"
+  },
+  {
+   "id": "Q129848",
+   "name": "Phoenix Lights",
+   "description": "light phenomenon that occurred on March 13 1997 over Arizona and Nevada, United States",
+   "kinds": [
+    "sighting",
+    "ufo"
+   ],
+   "date": "1997-03-13",
+   "lat": 34.28667,
+   "lon": -111.65694,
+   "place": "Arizona",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Phoenix_Lights",
+   "wikidata": "https://www.wikidata.org/wiki/Q129848"
+  },
+  {
+   "id": "Q48805044",
+   "name": "USS Nimitz UFO incident",
+   "description": "encounter between US Navy fighters and unknown object",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "2004-11-14",
+   "lat": 28.91,
+   "lon": -118.26,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/USS_Nimitz_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q48805044"
+  },
+  {
+   "id": "Q4607864",
+   "name": "2007 Alderney UFO sighting",
+   "description": "alleged UFO sighting",
+   "kinds": [
+    "sighting"
+   ],
+   "date": "2007-04-23",
+   "lat": 49.7,
+   "lon": -2.36667,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/2007_Alderney_UFO_sighting",
+   "wikidata": "https://www.wikidata.org/wiki/Q4607864"
+  },
+  {
+   "id": "Q4327279",
+   "name": "2009 Norwegian spiral anomaly",
+   "description": "Spiral-like light observed in December 2009 in the night sky over Norway",
+   "kinds": [
+    "ufo"
+   ],
+   "date": "2009-12-09",
+   "lat": 63.42694,
+   "lon": 10.39306,
+   "place": "Trøndelag",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/2009_Norwegian_spiral_anomaly",
+   "wikidata": "https://www.wikidata.org/wiki/Q4327279"
+  },
+  {
+   "id": "Q130551608",
+   "name": "Discoporto de Barra do Garças",
+   "description": null,
+   "kinds": [
+    "ufo"
+   ],
+   "date": null,
+   "lat": -15.85417,
+   "lon": -52.26944,
+   "place": "Barra do Garças",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q130551608"
+  },
+  {
+   "id": "Q5371519",
+   "name": "Emilcin Abduction",
+   "description": "close encounter with aliens that was supposed to have taken place in 1978 in Polish village Emilcin",
+   "kinds": [
+    "abduction"
+   ],
+   "date": null,
+   "lat": 51.13406,
+   "lon": 22.03782,
+   "place": "Emilcin",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Emilcin_Abduction",
+   "wikidata": "https://www.wikidata.org/wiki/Q5371519"
+  },
+  {
+   "id": "Q2419149",
+   "name": "Flatwoods monster",
+   "description": "Folklore creature",
+   "kinds": [
+    "close-encounter"
+   ],
+   "date": null,
+   "lat": 38.72139,
+   "lon": -80.65306,
+   "place": "Flatwoods",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Flatwoods_monster",
+   "wikidata": "https://www.wikidata.org/wiki/Q2419149"
+  },
+  {
+   "id": "Q2485665",
+   "name": "Green fireballs",
+   "description": "Unidentified flying objects",
+   "kinds": [
+    "ufo"
+   ],
+   "date": null,
+   "lat": 37,
+   "lon": -111.2,
+   "place": "Southwestern United States",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Green_fireballs",
+   "wikidata": "https://www.wikidata.org/wiki/Q2485665"
+  },
+  {
+   "id": "Q2733023",
+   "name": "Height 611 UFO incident",
+   "description": "an alleged UFO crash in the Soviet Union, on January 29, 1986",
+   "kinds": [
+    "ufo"
+   ],
+   "date": null,
+   "lat": 44.55389,
+   "lon": 135.56611,
+   "place": "Primorsky Krai",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q2733023"
+  },
+  {
+   "id": "Q110127847",
+   "name": "Ilkley Moor UFO incident",
+   "description": "supposed alien abduction on December 1 1987",
+   "kinds": [
+    "sighting"
+   ],
+   "date": null,
+   "lat": 53.915,
+   "lon": -1.815,
+   "place": "Ilkley Moor",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Ilkley_Moor_UFO_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q110127847"
+  },
+  {
+   "id": "Q6762072",
+   "name": "Mariana UFO incident",
+   "description": "1950 UFO sighting",
+   "kinds": [
+    "sighting"
+   ],
+   "date": null,
+   "lat": 47.42,
+   "lon": -111.26,
+   "place": "Great Falls",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Mariana_UFO_film",
+   "wikidata": "https://www.wikidata.org/wiki/Q6762072"
+  },
+  {
+   "id": "Q1998677",
+   "name": "Pascagoula Abduction",
+   "description": "alleged 1973 alien abduction in Mississippi",
+   "kinds": [
+    "abduction"
+   ],
+   "date": null,
+   "lat": 30.36528,
+   "lon": -88.5675,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Pascagoula_incident",
+   "wikidata": "https://www.wikidata.org/wiki/Q1998677"
+  },
+  {
+   "id": "Q130749215",
+   "name": "The Calvine UFO",
+   "description": "Sighting of an UFO in Calvine, 1990",
+   "kinds": [
+    "sighting",
+    "ufo"
+   ],
+   "date": null,
+   "lat": 56.768,
+   "lon": -3.958,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Calvine_UFO_photograph",
+   "wikidata": "https://www.wikidata.org/wiki/Q130749215"
+  }
+ ]
+}
