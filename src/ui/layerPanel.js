@@ -64,6 +64,7 @@ const PANEL_GROUPS = [
       'transmission-lines',
       'oil-gas',
       'offshore-platforms',
+      'us-pipelines',
     ],
   },
   {

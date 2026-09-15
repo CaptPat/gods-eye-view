@@ -1192,6 +1192,19 @@
     ],
     "external": ["cesium"]
   },
+  "us-pipelines-layer": {
+    "exports": ["./layers/us-pipelines"],
+    "modules": [
+      "src/layers/catalog-points/bundled.js",
+      "src/layers/catalog-points/index.js",
+      "src/layers/catalog-points/points.js",
+      "src/layers/catalog-lines/lines.js",
+      "src/layers/us-pipelines/bundledSource.js",
+      "src/layers/us-pipelines/index.js",
+      "src/layers/us-pipelines/model.js"
+    ],
+    "external": ["cesium"]
+  },
   "weather-overlays-layer": {
     "exports": ["./layers/weather-overlays"],
     "modules": [
@@ -1837,6 +1850,10 @@
       "src/layers/offshore-platforms/bundledSource.js",
       "src/layers/offshore-platforms/index.js",
       "src/layers/offshore-platforms/model.js",
+      "src/layers/catalog-lines/lines.js",
+      "src/layers/us-pipelines/bundledSource.js",
+      "src/layers/us-pipelines/index.js",
+      "src/layers/us-pipelines/model.js",
       "src/layers/traffic/animation.js",
       "src/layers/traffic/controls.js",
       "src/layers/traffic/flow.js",
@@ -2050,6 +2067,7 @@
       "src/app/layers/heritage.js",
       "src/app/layers/osmInfrastructure.js",
       "src/app/layers/offshorePlatforms.js",
+      "src/app/layers/usPipelines.js",
       "src/app/layers/weatherOverlays.js",
       "src/search/coordinateGeocoder.js",
       "src/search/coordinateParser.js",
@@ -2430,6 +2448,7 @@
       "src/app/layers/heritage.js",
       "src/app/layers/osmInfrastructure.js",
       "src/app/layers/offshorePlatforms.js",
+      "src/app/layers/usPipelines.js",
       "src/app/layers/weatherOverlays.js",
       "src/app/layers/weatherRadar.js",
       "src/weatherReport/groundPick.js",
@@ -2503,6 +2522,10 @@
       "src/layers/offshore-platforms/bundledSource.js",
       "src/layers/offshore-platforms/index.js",
       "src/layers/offshore-platforms/model.js",
+      "src/layers/catalog-lines/lines.js",
+      "src/layers/us-pipelines/bundledSource.js",
+      "src/layers/us-pipelines/index.js",
+      "src/layers/us-pipelines/model.js",
       "src/layers/weather-overlays/palette.js",
       "src/layers/weather-overlays/controls.js",
       "src/layers/weather-overlays/index.js",
