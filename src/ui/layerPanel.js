@@ -47,6 +47,8 @@ const PANEL_GROUPS = [
       'aurora-forecast',
       'day-night',
       'meteor-showers',
+      'night-sky',
+      'sky-objects',
       'fireballs',
       'ufo-incidents',
     ],
