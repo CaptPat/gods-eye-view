@@ -122,9 +122,12 @@ export function createWeatherReport({
       coordinates: coordinates(picked),
     };
     pin.show(picked, LOADING_PIN);
+    // A new panel starts collapsed (the map pin carries the summary); an open
+    // one keeps whatever state the user left it in.
+    const isNewPanel = !panel;
     const activePanel = ensurePanel();
     activePanel?.showLoading(header);
-    if (activePanel) applyCollapsed(false);
+    if (activePanel && isNewPanel) applyCollapsed(true);
     try {
       const params = new URLSearchParams({
         lat: picked.lat.toFixed(4),

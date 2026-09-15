@@ -279,13 +279,34 @@ test('refresh re-requests the same point, pin activation reveals the panel, dest
   assert.equal(s.requests.length, 2, 'no request after destroy');
 });
 
-test('a pick expands the panel through the injected disclosure before it loads', (t) => {
+test('a pick opens a new panel collapsed through the injected disclosure', (t) => {
   const s = setup(t);
   s.menuOptions().onPick(POINT);
-  assert.deepEqual(s.collapseCalls[0], [
-    'weather-report-panel',
-    false,
-    DISCLOSURE,
+  assert.deepEqual(s.collapseCalls, [
+    ['weather-report-panel', true, DISCLOSURE],
+  ]);
+});
+
+test('a second pick leaves the open panel collapsed or expanded as the user left it', (t) => {
+  const s = setup(t);
+  s.menuOptions().onPick(POINT);
+  s.panels[0].options.onToggleCollapsed(false);
+  s.collapseCalls.length = 0;
+  s.menuOptions().onPick({ lat: 30.25, lon: -97.75 });
+  assert.equal(s.panels.length, 1, 'the open panel is reused');
+  assert.deepEqual(s.collapseCalls, []);
+});
+
+test('after closing, the next pick opens its new panel collapsed again', (t) => {
+  const s = setup(t);
+  s.menuOptions().onPick(POINT);
+  s.panels[0].options.onToggleCollapsed(false);
+  s.panels[0].options.onClose();
+  s.collapseCalls.length = 0;
+  s.menuOptions().onPick(POINT);
+  assert.equal(s.panels.length, 2);
+  assert.deepEqual(s.collapseCalls, [
+    ['weather-report-panel', true, DISCLOSURE],
   ]);
 });
 
@@ -311,10 +332,12 @@ test("the pin's onActivate expands the panel through the disclosure before revea
   ]);
 });
 
-test('without an injected disclosure, opening the panel clears the collapsed classes directly', (t) => {
+test('without an injected disclosure, a new panel starts collapsed and drops the auto-collapse class', (t) => {
   const s = setup(t, { withCollapseSpy: false });
   s.menuOptions().onPick(POINT);
   const { element } = s.panels[0];
-  assert.equal(element.classList.contains('collapsed'), false);
+  assert.equal(element.classList.contains('collapsed'), true);
   assert.equal(element.classList.contains('layout-auto-collapsed'), false);
+  s.pinOptions().onActivate();
+  assert.equal(element.classList.contains('collapsed'), false);
 });
