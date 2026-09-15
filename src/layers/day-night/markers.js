@@ -1,8 +1,7 @@
 import * as Cesium from 'cesium';
+import { trackHorizonDepthTest } from '../catalog-points/horizonDepth.js';
 
 const HEIGHT_M = 5;
-/** Inside this camera distance the markers draw through terrain and 3D tiles. */
-const DEPTH_TEST_DISTANCE_M = 50_000;
 const LABEL_FONT = '12px "JetBrains Mono", "SF Mono", monospace';
 const OUTLINE = Cesium.Color.BLACK.withAlpha(0.7);
 
@@ -25,6 +24,15 @@ export function createBodyMarkers(
   viewer.scene.primitives.add(points);
   viewer.scene.primitives.add(labels);
   let bodies = null;
+  // The markers draw through terrain and 3D tiles out to the horizon.
+  const horizon = trackHorizonDepthTest(
+    viewer,
+    (distanceM) => {
+      for (const primitive of Object.values(bodies ?? {}))
+        primitive.disableDepthTestDistance = distanceM;
+    },
+    { isActive: () => points.show },
+  );
 
   function create() {
     const point = (id, pixelSize, color) =>
@@ -34,7 +42,7 @@ export function createBodyMarkers(
         color: Cesium.Color.fromCssColorString(color),
         outlineColor: OUTLINE,
         outlineWidth: 1,
-        disableDepthTestDistance: DEPTH_TEST_DISTANCE_M,
+        disableDepthTestDistance: horizon.distanceM(),
       });
     const label = (id, text) =>
       labels.add({
@@ -46,7 +54,7 @@ export function createBodyMarkers(
         outlineWidth: 3,
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         pixelOffset: new Cesium.Cartesian2(0, -18),
-        disableDepthTestDistance: DEPTH_TEST_DISTANCE_M,
+        disableDepthTestDistance: horizon.distanceM(),
       });
     return {
       sunPoint: point('day-night:sun', 12, '#ffd23f'),
@@ -73,6 +81,7 @@ export function createBodyMarkers(
       labels.show = Boolean(show);
     },
     destroy() {
+      horizon.destroy();
       viewer.scene.primitives.remove(points);
       viewer.scene.primitives.remove(labels);
       bodies = null;

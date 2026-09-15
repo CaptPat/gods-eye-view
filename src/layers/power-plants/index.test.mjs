@@ -21,6 +21,7 @@ function scene() {
   const pick = { result: null };
   const viewer = {
     scene: {
+      preRender: { addEventListener: () => () => {} },
       primitives: {
         add: (primitive) => (primitives.push(primitive), primitive),
         remove: (primitive) => (

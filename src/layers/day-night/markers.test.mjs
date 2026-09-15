@@ -7,7 +7,9 @@ function fakeViewer() {
   const primitives = [];
   return {
     primitives,
+    camera: { positionWC: Cesium.Cartesian3.fromDegrees(0, 0, 12_000_000) },
     scene: {
+      preRender: new Cesium.Event(),
       primitives: {
         add(primitive) {
           primitives.push(primitive);

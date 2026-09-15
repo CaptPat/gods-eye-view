@@ -1,10 +1,17 @@
 import * as Cesium from 'cesium';
+import {
+  NEAR_DEPTH_TEST_DISTANCE_M,
+  trackHorizonDepthTest,
+} from '../catalog-points/horizonDepth.js';
 
 export const POINT_PIXEL_SIZE = 7;
 export const SELECTED_PIXEL_SIZE = 13;
 export const POINT_HEIGHT_M = 5;
-/** Inside this camera distance a station draws through terrain and 3D tiles. */
-export const DEPTH_TEST_DISTANCE_M = 50_000;
+/**
+ * A station draws through terrain and 3D tiles out to the horizon, and never
+ * less than this distance (see catalog-points/horizonDepth.js).
+ */
+export const DEPTH_TEST_DISTANCE_M = NEAR_DEPTH_TEST_DISTANCE_M;
 const SCALE_BY_DISTANCE = new Cesium.NearFarScalar(
   50_000,
   1.2,
@@ -39,6 +46,14 @@ export function createStationPoints(
   const base = Cesium.Color.fromCssColorString(color);
   const points = new Map();
   let selectedId = null;
+  const horizon = trackHorizonDepthTest(
+    viewer,
+    (distanceM) => {
+      for (const point of points.values())
+        point.disableDepthTestDistance = distanceM;
+    },
+    { isActive: () => collection.show },
+  );
 
   function applyStyle(point, selected) {
     point.pixelSize = selected ? SELECTED_PIXEL_SIZE : POINT_PIXEL_SIZE;
@@ -60,7 +75,7 @@ export function createStationPoints(
           ),
           color: base,
           scaleByDistance: SCALE_BY_DISTANCE,
-          disableDepthTestDistance: DEPTH_TEST_DISTANCE_M,
+          disableDepthTestDistance: horizon.distanceM(),
         });
         applyStyle(point, false);
         points.set(station.id, point);
@@ -99,6 +114,7 @@ export function createStationPoints(
     },
     count: () => points.size,
     destroy() {
+      horizon.destroy();
       points.clear();
       selectedId = null;
       viewer.scene.primitives.remove(collection);
