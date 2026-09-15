@@ -245,6 +245,36 @@ test('unknown enabled-layer tokens reject the payload instead of becoming an emp
   assert.equal(decodeLayerStateParams(new URLSearchParams('v=2&l=c.y')), null);
 });
 
+test('share-link capacity: uppercase tokens are valid and case-sensitive, and the enabled list holds 62 tokens', () => {
+  assert.equal(
+    validateLayerStateRegistry([
+      ...LAYER_STATE_REGISTRY,
+      { id: 'zz-capacity-probe', token: 'A', disposition: 'enabled-only' },
+    ]),
+    true,
+  );
+  assert.throws(
+    () =>
+      validateLayerStateRegistry([
+        ...LAYER_STATE_REGISTRY,
+        { id: 'zz-capacity-probe', token: 'AA', disposition: 'enabled-only' },
+      ]),
+    /Invalid layer-state token/,
+  );
+  // An unassigned uppercase token is unknown; it is never folded to its lowercase twin.
+  assert.equal(decodeLayerStateParams(new URLSearchParams('v=2&l=Y')), null);
+  // 62 one-character tokens and 61 dots are 123 characters, inside the 128 ceiling.
+  const full = Array.from({ length: 62 }, () => 'a').join('.');
+  assert.equal(full.length, 123);
+  assert.deepEqual(
+    decodeLayerStateParams(new URLSearchParams(`v=2&l=${full}`)).enabledLayerIds,
+    ['ais-live-vessels'],
+  );
+  const overCeiling = `${'a.'.repeat(64)}a`;
+  assert.equal(overCeiling.length, 129);
+  assert.equal(decodeLayerStateParams(new URLSearchParams(`v=2&l=${overCeiling}`)), null);
+});
+
 test('unknown and forbidden option fields are ignored while missing options use codec defaults', () => {
   const decoded = decodeLayerStateParams(new URLSearchParams(
     'v=2&l=c.e&lo=c.c.v_c.z.1_z.c.1_f.e.1_f.m.a_r.f.n_r.v.35',
