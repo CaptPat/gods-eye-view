@@ -59,6 +59,18 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## Night sky, planets and deep sky (fork)
+
+- Add a Night Sky layer: 921 stars to magnitude 4.5, sized by brightness and tinted by colour
+  index, with 91 star names, the IAU constellation figures and all 88 constellation names. Data
+  from d3-celestial (BSD-3-Clause), bundled. Share token `4`.
+- Add a Planets & Deep Sky layer: Mercury to Neptune placed by Astronomy Engine every ten
+  minutes, and the 110 Messier galaxies, nebulae and clusters, coloured by type and named. The
+  ephemeris loads on demand as its own chunk. Share token `5`.
+- Both draw on a camera-centred sky sphere turned from the inertial frame to Earth-fixed every
+  frame. The sky has no parallax at any altitude, the Earth still hides whatever lies behind it,
+  and the sphere grows when the camera zooms far out. Both join the Layers panel "Sky" group.
+
 ## Aurora, day and night, meteor showers (fork)
 
 - Add an Aurora Forecast layer: NOAA SWPC's OVATION forecast drawn as ground bands at 5, 10, 30

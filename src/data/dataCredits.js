@@ -337,6 +337,16 @@ export const IMO_METEOR_SHOWERS_CREDIT = Object.freeze({
   html: 'Meteor showers: <a href="https://www.imo.net/" target="_blank" rel="noopener">International Meteor Organization</a> calendar',
 });
 
+export const D3_CELESTIAL_CREDIT = Object.freeze({
+  key: 'd3-celestial',
+  html: 'Night sky: <a href="https://github.com/ofrohn/d3-celestial" target="_blank" rel="noopener">d3-celestial</a> (BSD-3-Clause; Hipparcos, IAU)',
+});
+
+export const SKY_OBJECTS_CREDIT = Object.freeze({
+  key: 'astronomy-engine',
+  html: 'Planets: <a href="https://github.com/cosinekitty/astronomy" target="_blank" rel="noopener">Astronomy Engine</a> (MIT); Messier catalogue via d3-celestial',
+});
+
 export const NWS_ALERTS_CREDIT = Object.freeze({
   key: 'nws-alerts',
   html: 'US weather alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (NOAA, public domain)',

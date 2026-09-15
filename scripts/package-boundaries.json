@@ -1078,6 +1078,29 @@
     ],
     "external": ["cesium"]
   },
+  "night-sky-layer": {
+    "exports": ["./layers/night-sky"],
+    "modules": [
+      "src/layers/night-sky/bundledSource.js",
+      "src/layers/night-sky/index.js",
+      "src/layers/night-sky/model.js",
+      "src/layers/sky-sphere/celestial.js",
+      "src/layers/sky-sphere/sphere.js"
+    ],
+    "external": ["cesium"]
+  },
+  "sky-objects-layer": {
+    "exports": ["./layers/sky-objects"],
+    "modules": [
+      "src/layers/sky-objects/bundledSource.js",
+      "src/layers/sky-objects/index.js",
+      "src/layers/sky-objects/model.js",
+      "src/layers/sky-objects/planets.js",
+      "src/layers/sky-sphere/celestial.js",
+      "src/layers/sky-sphere/sphere.js"
+    ],
+    "external": ["cesium", "astronomy-engine"]
+  },
   "weather-overlays-layer": {
     "exports": ["./layers/weather-overlays"],
     "modules": [
@@ -1685,6 +1708,15 @@
       "src/layers/grid-bands/rendering.js",
       "src/layers/meteor-showers/index.js",
       "src/layers/meteor-showers/model.js",
+      "src/layers/night-sky/bundledSource.js",
+      "src/layers/night-sky/index.js",
+      "src/layers/night-sky/model.js",
+      "src/layers/sky-objects/bundledSource.js",
+      "src/layers/sky-objects/index.js",
+      "src/layers/sky-objects/model.js",
+      "src/layers/sky-objects/planets.js",
+      "src/layers/sky-sphere/celestial.js",
+      "src/layers/sky-sphere/sphere.js",
       "src/layers/traffic/animation.js",
       "src/layers/traffic/controls.js",
       "src/layers/traffic/flow.js",
@@ -1890,6 +1922,8 @@
       "src/app/layers/auroraForecast.js",
       "src/app/layers/dayNight.js",
       "src/app/layers/meteorShowers.js",
+      "src/app/layers/nightSky.js",
+      "src/app/layers/skyObjects.js",
       "src/app/layers/weatherOverlays.js",
       "src/search/coordinateGeocoder.js",
       "src/search/coordinateParser.js",
@@ -1915,7 +1949,8 @@
       "egm96-universal",
       "mgrs",
       "pbf",
-      "satellite.js"
+      "satellite.js",
+      "astronomy-engine"
     ]
   },
   "application-catalog": {
@@ -2261,6 +2296,8 @@
       "src/app/layers/auroraForecast.js",
       "src/app/layers/dayNight.js",
       "src/app/layers/meteorShowers.js",
+      "src/app/layers/nightSky.js",
+      "src/app/layers/skyObjects.js",
       "src/app/layers/weatherOverlays.js",
       "src/app/layers/weatherRadar.js",
       "src/weatherReport/groundPick.js",
@@ -2296,6 +2333,15 @@
       "src/layers/grid-bands/rendering.js",
       "src/layers/meteor-showers/index.js",
       "src/layers/meteor-showers/model.js",
+      "src/layers/night-sky/bundledSource.js",
+      "src/layers/night-sky/index.js",
+      "src/layers/night-sky/model.js",
+      "src/layers/sky-objects/bundledSource.js",
+      "src/layers/sky-objects/index.js",
+      "src/layers/sky-objects/model.js",
+      "src/layers/sky-objects/planets.js",
+      "src/layers/sky-sphere/celestial.js",
+      "src/layers/sky-sphere/sphere.js",
       "src/layers/weather-overlays/palette.js",
       "src/layers/weather-overlays/controls.js",
       "src/layers/weather-overlays/index.js",
@@ -2318,7 +2364,8 @@
       "satellite.js",
       "@mapbox/vector-tile",
       "pbf",
-      "mgrs"
+      "mgrs",
+      "astronomy-engine"
     ]
   },
   "application-operations": {
