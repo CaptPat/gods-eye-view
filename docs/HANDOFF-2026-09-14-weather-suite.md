@@ -4,19 +4,30 @@ Fork: `CaptPat/gods-eye-view`, branded Cyclops View in Pinokio. This work is for
 
 ## State at handoff
 
-- `main` is at `7a841cc`, pushed; `origin/main` matches.
+- `main` is at `1b20ba7`, pushed; `origin/main` matches.
 - `main` holds all of `bilawalsidhu/gods-eye-view` main through PR #583 (`1ad565c`), from three syncs: `6462f0a` for #433–#456, `3eab0cc` for #501–#570 and `77a9966` for #571–#583. Every fork layer since then is merged on top.
 - The weather suite was built before the second sync. That merge ported the fork's layers into upstream's new catalog (`src/app/layers/`) and moved the radar token to `z`.
 - CI parity passes on `main`:
   - `npm run format:check`;
   - `npm run check:boundaries`, which now also runs `check-import-directions.mjs`;
-  - `npm test`: 4,147 pass, 0 fail, 9 skips;
+  - `npm test`: 4,151 pass, 0 fail, 9 skips;
   - `npm run build`.
 - **Not browser-tested since the syncs:**
   - the right-click weather report alongside upstream's draw tool and directions, which both claim pointer input;
   - the fork's layer rows alongside #583's camera controls and reorganized layer panel;
-  - every layer added on 2026-09-15 (see the next two sections).
+  - every layer added on 2026-09-15 (see the next three sections).
 - No open branches or worktrees. No dev servers running.
+
+## Point pins on Google 3D (2026-09-15, `1b20ba7`)
+
+- **Symptom:** point pins showed on the Bing and Esri globes but vanished on Google Photorealistic 3D from farther out.
+- **Cause:** pins sit 5 m above the ellipsoid and skipped the depth test only within 50 km of the camera. The globe never depth-tests against terrain, but the Google mesh writes real depth, so it buried every pin on land above sea level.
+- **Fix:** `src/layers/catalog-points/horizonDepth.js` sets `disableDepthTestDistance` to the camera's horizon distance, `sqrt(|C|² − R²)`, with 50 km as a floor. It updates in `preRender`, and only when the value moves by more than 2%. Pins draw over the mesh out to the horizon; pins past it stay depth-tested and hide behind the globe.
+- **Users:** catalog points (every bundled point layer), tide stations (`tides/points.js`) and the Day & Night sun and moon markers (`day-night/markers.js`).
+- **Rejected:** lifting pins above the terrain. A fixed height causes parallax; a per-point elevation lookup costs too much for 30,000+ points; and the mesh sits above the DEM anyway.
+- **Trade-off:** from a low tilted view, a pin behind a ridge or building now draws through out to the horizon, not just 50 km.
+- **Test fakes:** layer test viewers now need `scene.preRender`; a no-op `addEventListener` stub is enough.
+- **Not browser-tested.** Check it on Google 3D over high ground, such as the Rockies or Alps, with Airports or Heritage enabled.
 
 ## Energy, infrastructure, heritage and ice layers (2026-09-15)
 
