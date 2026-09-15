@@ -382,6 +382,11 @@ export const US_PIPELINES_CREDIT = Object.freeze({
   html: 'US pipelines: <a href="https://atlas.eia.gov/" target="_blank" rel="noopener">EIA U.S. Energy Atlas</a> and <a href="https://www.data.bsee.gov/Main/Pipeline.aspx" target="_blank" rel="noopener">BOEM/BSEE</a> offshore segments (public domain)',
 });
 
+export const NASA_GIBS_SEA_ICE_CREDIT = Object.freeze({
+  key: 'nasa-gibs-sea-ice',
+  html: 'Sea ice: <a href="https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api" target="_blank" rel="noopener">NASA GIBS</a> GHRSST MUR sea ice concentration (JPL PO.DAAC)',
+});
+
 export const NWS_ALERTS_CREDIT = Object.freeze({
   key: 'nws-alerts',
   html: 'US weather alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (NOAA, public domain)',

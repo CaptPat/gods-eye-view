@@ -901,5 +901,12 @@
   "src/layers/us-pipelines/model.test.mjs",
   "src/app/layers/usPipelines.js",
   "scripts/build-us-pipelines.mjs",
-  "scripts/zip-entry.mjs"
+  "scripts/zip-entry.mjs",
+  "src/layers/sea-ice/imagery.js",
+  "src/layers/sea-ice/index.js",
+  "src/layers/sea-ice/model.js",
+  "src/layers/sea-ice/imagery.test.mjs",
+  "src/layers/sea-ice/index.test.mjs",
+  "src/layers/sea-ice/model.test.mjs",
+  "src/app/layers/seaIce.js"
 ]

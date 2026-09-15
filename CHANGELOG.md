@@ -59,6 +59,13 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## Sea ice (fork)
+
+- Add a Sea Ice layer (token `I`) to the Events group. It shows daily GHRSST Level 4 MUR sea ice concentration, served by NASA GIBS, as imagery at 80% opacity above the base map.
+- Each refresh, four times a day, probes one GIBS tile to learn the newest day, then pins tiles to that day. The layer row names the day shown.
+- If the probe fails before any day is shown, GIBS's newest day still draws, and the row says the date is unknown.
+- As with Weather Overlays, the imagery follows map-stack changes. It is hidden on the Google 3D map source, and the row says so.
+
 ## US pipelines (fork)
 
 - Add a US Pipelines layer (token `U`) to the Energy group: 20,999 lines drawn as one ground-draped batch. It shows:
