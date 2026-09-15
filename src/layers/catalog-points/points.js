@@ -1,11 +1,18 @@
 import * as Cesium from 'cesium';
+import {
+  NEAR_DEPTH_TEST_DISTANCE_M,
+  trackHorizonDepthTest,
+} from './horizonDepth.js';
 
 export const DEFAULT_PIXEL_SIZE = 7;
 /** A selected point grows by this many pixels over its own size. */
 export const SELECTED_PIXEL_GROWTH = 6;
 export const POINT_HEIGHT_M = 5;
-/** Inside this camera distance a point draws through terrain and 3D tiles. */
-export const DEPTH_TEST_DISTANCE_M = 50_000;
+/**
+ * A point draws through terrain and 3D tiles out to the horizon, and never
+ * less than this distance (see horizonDepth.js).
+ */
+export const DEPTH_TEST_DISTANCE_M = NEAR_DEPTH_TEST_DISTANCE_M;
 const SCALE_BY_DISTANCE = new Cesium.NearFarScalar(
   50_000,
   1.2,
@@ -30,7 +37,9 @@ const isPlaceable = (record) =>
  * One PointPrimitiveCollection per catalog layer (the tide-station pattern):
  * records `{ id, lat, lon, pixelSize?, color? }` become pickable points that
  * cost one draw call. Points sit at a fixed height, never clamped, so they
- * track the globe at every zoom (see severe-weather rendering.js).
+ * track the globe at every zoom (see severe-weather rendering.js). That height
+ * is under the Google 3D mesh wherever the land is above sea level, so the
+ * depth test is lifted out to the horizon rather than a fixed near distance.
  */
 export function createCatalogPoints(
   viewer,
@@ -50,6 +59,14 @@ export function createCatalogPoints(
   /** record id → { point, size } */
   const points = new Map();
   let selectedId = null;
+  const horizon = trackHorizonDepthTest(
+    viewer,
+    (distanceM) => {
+      for (const { point } of points.values())
+        point.disableDepthTestDistance = distanceM;
+    },
+    { isActive: () => collection.show },
+  );
 
   function applyStyle(entry, selected) {
     entry.point.pixelSize = entry.size + (selected ? SELECTED_PIXEL_GROWTH : 0);
@@ -78,7 +95,7 @@ export function createCatalogPoints(
             ? (Cesium.Color.fromCssColorString(record.color) ?? base)
             : base,
           scaleByDistance: SCALE_BY_DISTANCE,
-          disableDepthTestDistance: DEPTH_TEST_DISTANCE_M,
+          disableDepthTestDistance: horizon.distanceM(),
         });
         const entry = { point, size };
         applyStyle(entry, false);
@@ -117,6 +134,7 @@ export function createCatalogPoints(
     },
     count: () => points.size,
     destroy() {
+      horizon.destroy();
       points.clear();
       selectedId = null;
       viewer.scene.primitives.remove(collection);

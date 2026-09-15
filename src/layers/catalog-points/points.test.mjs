@@ -8,6 +8,7 @@ import {
   catalogPickId,
   createCatalogPoints,
 } from './points.js';
+import { horizonDepthTestDistanceM } from './horizonDepth.js';
 
 const RECORDS = [
   { id: 'Q108803795', lat: -17.86352, lon: 31.29114 },
@@ -24,7 +25,9 @@ function fakeViewer() {
   const primitives = [];
   return {
     primitives,
+    camera: { positionWC: Cesium.Cartesian3.fromDegrees(0, 0, 12_000_000) },
     scene: {
+      preRender: new Cesium.Event(),
       primitives: {
         add(primitive) {
           primitives.push(primitive);
@@ -96,6 +99,26 @@ test('records without real coordinates or with a bad size are skipped or default
     1,
   );
   assert.equal(viewer.primitives[0].get(0).pixelSize, DEFAULT_PIXEL_SIZE);
+});
+
+test('shown points draw through the 3D mesh out to the horizon, and new points start there', () => {
+  const viewer = fakeViewer();
+  const points = createCatalogPoints(viewer, {
+    layerId: 'airports',
+    color: '#ffffff',
+  });
+  points.setRecords(RECORDS);
+  const collection = viewer.primitives[0];
+  points.setShow(true);
+  viewer.scene.preRender.raiseEvent(viewer.scene);
+  const horizon = horizonDepthTestDistanceM(viewer.camera.positionWC);
+  assert.ok(horizon > 10_000_000);
+  assert.equal(collection.get(0).disableDepthTestDistance, horizon);
+  assert.equal(collection.get(1).disableDepthTestDistance, horizon);
+  points.setRecords(RECORDS.slice(1));
+  assert.equal(collection.get(0).disableDepthTestDistance, horizon);
+  points.destroy();
+  assert.equal(viewer.scene.preRender.numberOfListeners, 0);
 });
 
 test("picks resolve only this layer's records, from either pick path", () => {

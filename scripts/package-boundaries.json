@@ -1022,7 +1022,8 @@
     "modules": [
       "src/layers/tides/index.js",
       "src/layers/tides/model.js",
-      "src/layers/tides/points.js"
+      "src/layers/tides/points.js",
+      "src/layers/catalog-points/horizonDepth.js"
     ],
     "external": ["cesium"]
   },
@@ -1031,6 +1032,7 @@
     "modules": [
       "src/layers/catalog-points/index.js",
       "src/layers/catalog-points/points.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/ufo-incidents/bundledSource.js",
       "src/layers/ufo-incidents/index.js",
       "src/layers/ufo-incidents/model.js"
@@ -1042,6 +1044,7 @@
     "modules": [
       "src/layers/catalog-points/index.js",
       "src/layers/catalog-points/points.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/fireballs/index.js",
       "src/layers/fireballs/model.js"
     ],
@@ -1062,6 +1065,7 @@
       "src/layers/day-night/bodies.js",
       "src/layers/day-night/index.js",
       "src/layers/day-night/markers.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/day-night/solar.js",
       "src/layers/grid-bands/bands.js",
       "src/layers/grid-bands/rendering.js"
@@ -1073,6 +1077,7 @@
     "modules": [
       "src/layers/catalog-points/index.js",
       "src/layers/catalog-points/points.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/meteor-showers/index.js",
       "src/layers/meteor-showers/model.js"
     ],
@@ -1106,6 +1111,7 @@
     "modules": [
       "src/layers/catalog-points/index.js",
       "src/layers/catalog-points/points.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/nuclear/bundledSource.js",
       "src/layers/nuclear/index.js",
       "src/layers/nuclear/model.js"
@@ -1118,6 +1124,7 @@
       "src/layers/catalog-points/bundled.js",
       "src/layers/catalog-points/index.js",
       "src/layers/catalog-points/points.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/csv-points/csv.js",
       "src/layers/power-plants/bundledSource.js",
       "src/layers/power-plants/index.js",
@@ -1132,6 +1139,7 @@
       "src/layers/catalog-points/bundled.js",
       "src/layers/catalog-points/index.js",
       "src/layers/catalog-points/points.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/csv-points/csv.js",
       "src/layers/airports/bundledSource.js",
       "src/layers/airports/index.js",
@@ -1146,6 +1154,7 @@
       "src/layers/catalog-points/bundled.js",
       "src/layers/catalog-points/index.js",
       "src/layers/catalog-points/points.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/heritage/bundledSource.js",
       "src/layers/heritage/index.js",
       "src/layers/heritage/model.js"
@@ -1186,6 +1195,7 @@
       "src/layers/catalog-points/bundled.js",
       "src/layers/catalog-points/index.js",
       "src/layers/catalog-points/points.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/offshore-platforms/bundledSource.js",
       "src/layers/offshore-platforms/index.js",
       "src/layers/offshore-platforms/model.js"
@@ -1198,6 +1208,7 @@
       "src/layers/catalog-points/bundled.js",
       "src/layers/catalog-points/index.js",
       "src/layers/catalog-points/points.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/catalog-lines/lines.js",
       "src/layers/us-pipelines/bundledSource.js",
       "src/layers/us-pipelines/index.js",
@@ -1804,6 +1815,7 @@
       "src/layers/tides/index.js",
       "src/layers/tides/model.js",
       "src/layers/tides/points.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/catalog-points/index.js",
       "src/layers/catalog-points/points.js",
       "src/layers/fireballs/index.js",
@@ -2477,6 +2489,7 @@
       "src/layers/weather-radar/controls.js",
       "src/layers/weather-radar/index.js",
       "src/layers/tides/points.js",
+      "src/layers/catalog-points/horizonDepth.js",
       "src/layers/weather-overlays/modes.js",
       "src/layers/weather-overlays/imagery.js",
       "src/layers/tides/model.js",

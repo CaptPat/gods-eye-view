@@ -75,6 +75,7 @@ function harness({ load } = {}) {
   const documentTarget = new EventTarget();
   const viewer = {
     scene: {
+      preRender: { addEventListener: () => () => {} },
       primitives: {
         add: (primitive) => {
           primitives.push(primitive);
