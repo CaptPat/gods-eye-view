@@ -59,6 +59,20 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## US pipelines (fork)
+
+- Add a US Pipelines layer (token `U`) to the Energy group: 20,999 lines drawn as one ground-draped batch. It shows:
+  - natural gas pipelines from the EIA U.S. Energy Atlas (interstate and intrastate);
+  - crude oil trunk pipelines (EIA);
+  - hydrocarbon gas liquids pipelines (EIA);
+  - active and out-of-service offshore oil and gas segments from BOEM/BSEE.
+- Cards show:
+  - the pipeline name or operator, and its kind;
+  - for offshore segments: product, size, route between platforms, operator and service state.
+- `scripts/build-us-pipelines.mjs` rebuilds the snapshot. It simplifies geometry, joins BSEE Pipeline Masters and chains connected segments, which cuts instances from 36,377 to 20,999.
+- Add `catalog-lines`, a line renderer with the catalog-points interface, so bundled line catalogues reuse the catalog-points layer.
+- Add a `README.md` for the offshore platforms data folder, and share the build scripts' zip reader.
+
 ## Offshore platforms (fork)
 
 - Add an Offshore Platforms layer (token `O`) in the Energy group. It shows 1,321 standing structures in U.S. federal

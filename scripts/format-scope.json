@@ -889,5 +889,17 @@
   "src/layers/offshore-platforms/bsee.test.mjs",
   "src/layers/offshore-platforms/model.test.mjs",
   "src/app/layers/offshorePlatforms.js",
-  "scripts/build-bsee-platforms.mjs"
+  "scripts/build-bsee-platforms.mjs",
+  "src/layers/catalog-lines/lines.js",
+  "src/layers/us-pipelines/bundledSource.js",
+  "src/layers/us-pipelines/index.js",
+  "src/layers/us-pipelines/model.js",
+  "src/layers/catalog-lines/lines.test.mjs",
+  "src/layers/us-pipelines/sources.js",
+  "src/layers/us-pipelines/sources.test.mjs",
+  "src/layers/us-pipelines/chains.test.mjs",
+  "src/layers/us-pipelines/model.test.mjs",
+  "src/app/layers/usPipelines.js",
+  "scripts/build-us-pipelines.mjs",
+  "scripts/zip-entry.mjs"
 ]

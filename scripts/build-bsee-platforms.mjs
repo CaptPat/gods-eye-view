@@ -7,7 +7,7 @@
 // the company list (delimited): U.S. Government work, public domain. Only
 // standing structures (no removal date) with a location are kept.
 import { mkdir, writeFile } from 'node:fs/promises';
-import { inflateRawSync } from 'node:zlib';
+import { firstZipEntry } from './zip-entry.mjs';
 import {
   PLATFORM_LOCATION_LAYOUT,
   PLATFORM_MASTER_LAYOUT,
@@ -34,27 +34,6 @@ const FILES = Object.freeze({
   masters: '/Platform/Files/platmastfixed.zip',
   companies: '/Company/Files/compalldelimit.zip',
 });
-
-/** The first entry of a zip archive, read through its central directory. */
-function firstZipEntry(buffer) {
-  const end = buffer.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
-  if (end < 0) throw new Error('not a zip archive');
-  const central = buffer.readUInt32LE(end + 16);
-  if (buffer.readUInt32LE(central) !== 0x02014b50)
-    throw new Error('zip central directory not found');
-  const method = buffer.readUInt16LE(central + 10);
-  const compressedSize = buffer.readUInt32LE(central + 20);
-  const local = buffer.readUInt32LE(central + 42);
-  const start =
-    local +
-    30 +
-    buffer.readUInt16LE(local + 26) +
-    buffer.readUInt16LE(local + 28);
-  const data = buffer.subarray(start, start + compressedSize);
-  if (method === 0) return data;
-  if (method === 8) return inflateRawSync(data);
-  throw new Error(`unsupported zip compression method ${method}`);
-}
 
 async function download(path) {
   const response = await fetch(`${BSEE}${path}`, {

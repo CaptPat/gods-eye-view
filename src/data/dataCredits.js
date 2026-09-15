@@ -377,6 +377,11 @@ export const BSEE_PLATFORMS_CREDIT = Object.freeze({
   html: 'Offshore platforms: <a href="https://www.data.bsee.gov/Main/Platform.aspx" target="_blank" rel="noopener">BSEE Data Center</a> (public domain)',
 });
 
+export const US_PIPELINES_CREDIT = Object.freeze({
+  key: 'us-pipelines',
+  html: 'US pipelines: <a href="https://atlas.eia.gov/" target="_blank" rel="noopener">EIA U.S. Energy Atlas</a> and <a href="https://www.data.bsee.gov/Main/Pipeline.aspx" target="_blank" rel="noopener">BOEM/BSEE</a> offshore segments (public domain)',
+});
+
 export const NWS_ALERTS_CREDIT = Object.freeze({
   key: 'nws-alerts',
   html: 'US weather alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (NOAA, public domain)',

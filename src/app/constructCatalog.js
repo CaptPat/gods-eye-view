@@ -47,6 +47,7 @@ import {
   createApplicationTransmissionLines,
 } from './layers/osmInfrastructure.js';
 import { createApplicationOffshorePlatforms } from './layers/offshorePlatforms.js';
+import { createApplicationUsPipelines } from './layers/usPipelines.js';
 import { createApplicationCables } from './layers/submarineCables.js';
 import { createInfrastructureLayers } from '../data/infrastructure.js';
 import { localGeoJsonServices } from './localGeojsonServices.js';
@@ -159,6 +160,7 @@ export function createApplicationCatalog({
         createApplicationTransmissionLines(),
         createApplicationOilGas(),
         createApplicationOffshorePlatforms(),
+        createApplicationUsPipelines(),
         createApplicationAlpr({ surface, source: sources.alpr }),
         satellites,
         createApplicationLaunches({ source: sources.launches, satellites }),

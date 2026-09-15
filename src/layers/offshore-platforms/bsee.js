@@ -78,7 +78,8 @@ export function parseFixedWidth(text, layout) {
   return records;
 }
 
-function splitQuoted(line) {
+/** Fields of one comma-separated line with double-quoted values. */
+export function splitQuoted(line) {
   const fields = [];
   let field = '';
   let quoted = false;
