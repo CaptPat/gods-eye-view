@@ -4,30 +4,24 @@ Fork: `CaptPat/gods-eye-view`, branded Cyclops View in Pinokio. This work is for
 
 ## State at handoff
 
-- `main` is at `3eab0cc`, pushed; `origin/main` matches. It holds all of `bilawalsidhu/gods-eye-view` main through PR #570, from two syncs: `6462f0a` for #433–#456 and `3eab0cc` for #501–#570.
+- `main` is at `77a9966`, pushed; `origin/main` matches. It holds all of `bilawalsidhu/gods-eye-view` main through PR #583 (`1ad565c`), from three syncs: `6462f0a` for #433–#456, `3eab0cc` for #501–#570 and `77a9966` for #571–#583.
 - The weather suite was built before the second sync. That merge ported the fork's layers into upstream's new catalog (`src/app/layers/`) and moved the radar token to `z`.
-- CI parity passes on `main`: `npm run format:check`, `npm run check:boundaries`, `npm test` (3,857 pass, 0 fail, 9 Windows-only skips) and `npm run build`.
-- The right-click weather report has not been browser-tested alongside upstream's new draw tool and directions, which claim pointer input.
+- CI parity passes on `main`: `npm run format:check`, `npm run check:boundaries` (now also runs `check-import-directions.mjs`), `npm test` (3,929 pass, 0 fail, 9 skips) and `npm run build`.
+- Not browser-tested since the syncs: the right-click weather report alongside upstream's draw tool and directions (both claim pointer input), and the fork's layer rows alongside #583's camera controls and reorganized layer panel.
 - No open branches or worktrees. No dev servers running.
 
-## Upstream since the last sync (checked 2026-09-15)
+## Third sync: upstream #571–#583 (2026-09-15)
 
-Upstream `main` is at `8bfce90`, 13 commits ahead of the fork; the fork has 82 of its own.
+**Geocoder overlap resolved as pure upstream.** Keyless place search is upstream's #573/#582 chain: coordinates and bundled presets, then Google, then Photon, then Nominatim through `/api/geocode` (upstream's bounded, cached queue in `server/providers/regional/place.js`, shared with the regional briefing's reverse lookups). Removed from the fork:
 
-- **Features:** Nominatim as the last-resort geocoder (#573); keyless coordinates and bundled presets (#572); tilt and north-up compass controls (#571).
-- **UI fix:** a key-gated layer row names its missing provider key (#575).
-- **Refactors:** voice sessions separated from protocol adapters; enforced import directions; portable source record protocols.
+- the `/api/geocode/search` route (`server/providers/geocode.js`);
+- `src/geocodeOsm.js`, with its minimum-span framing and extent-based typing of administrative boundaries;
+- the fork's exclusion of Photon, which from an Austin view placed Dubai in Kenya and the Eiffel Tower in Alberta;
+- their tests and the `nominatim-search.json` fixture.
 
-**Overlap to resolve on the next sync.** Upstream #573 adds its own Nominatim fallback geocoder, which duplicates the fork's keyless Nominatim search (`src/search/nominatim.js`, `/api/geocode/search`, the shared queue in `server/providers/regional/place.js`).
-- Prefer upstream's implementation.
-- Keep only what the fork still needs: the one-request-per-second queue shared with the regional briefing, and the `GEV_OVERPASS_UPSTREAMS` Overpass list.
-- Drop the rest of the fork's duplicate.
+Known consequence: without a Google key, Photon misplacements and rooftop-height framing of single-node Nominatim hits can return. That was accepted as upstream behavior.
 
-Files changed on both sides:
-- the usual shared lists: `CHANGELOG`, `DATA_SOURCES`, boundaries, format scope, `package.json`, `dataCredits`, `local.js`;
-- `src/app/constructCatalog.js`;
-- `src/search/defaults.js` and `src/search/index.js`;
-- `server/providers/regional/place.js`.
+**Boundary fixes.** Upstream moved response readers into `src/sources/httpBody.js` (imported by `server/providers/common/http.js`), so all five fork `*-provider` groups own it now; `weather-report-provider` also owns `src/nominatimGeocode.js` through `regional/place.js`.
 
 No new layer tokens upstream.
 
