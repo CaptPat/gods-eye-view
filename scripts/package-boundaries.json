@@ -176,6 +176,18 @@
     ],
     "external": []
   },
+  "fireballs-provider": {
+    "runtime": "node",
+    "exports": ["./server/providers/fireballs"],
+    "modules": [
+      "server/providers/fireballs.js",
+      "server/providers/fireballs/normalize.js",
+      "server/providers/common/rate-limit.js",
+      "server/providers/common/http.js",
+      "src/sources/httpBody.js"
+    ],
+    "external": []
+  },
   "weather-overlays-provider": {
     "runtime": "node",
     "exports": ["./server/providers/weather-overlays"],
@@ -999,6 +1011,27 @@
     ],
     "external": ["cesium"]
   },
+  "ufo-incidents-layer": {
+    "exports": ["./layers/ufo-incidents"],
+    "modules": [
+      "src/layers/catalog-points/index.js",
+      "src/layers/catalog-points/points.js",
+      "src/layers/ufo-incidents/bundledSource.js",
+      "src/layers/ufo-incidents/index.js",
+      "src/layers/ufo-incidents/model.js"
+    ],
+    "external": ["cesium"]
+  },
+  "fireballs-layer": {
+    "exports": ["./layers/fireballs"],
+    "modules": [
+      "src/layers/catalog-points/index.js",
+      "src/layers/catalog-points/points.js",
+      "src/layers/fireballs/index.js",
+      "src/layers/fireballs/model.js"
+    ],
+    "external": ["cesium"]
+  },
   "weather-overlays-layer": {
     "exports": ["./layers/weather-overlays"],
     "modules": [
@@ -1589,6 +1622,13 @@
       "src/layers/tides/index.js",
       "src/layers/tides/model.js",
       "src/layers/tides/points.js",
+      "src/layers/catalog-points/index.js",
+      "src/layers/catalog-points/points.js",
+      "src/layers/fireballs/index.js",
+      "src/layers/fireballs/model.js",
+      "src/layers/ufo-incidents/bundledSource.js",
+      "src/layers/ufo-incidents/index.js",
+      "src/layers/ufo-incidents/model.js",
       "src/layers/traffic/animation.js",
       "src/layers/traffic/controls.js",
       "src/layers/traffic/flow.js",
@@ -1788,6 +1828,9 @@
       "src/app/layers/severeWeather.js",
       "src/app/layers/weatherRadar.js",
       "src/app/layers/tides.js",
+      "src/app/layers/catalogPointServices.js",
+      "src/app/layers/fireballs.js",
+      "src/app/layers/ufoIncidents.js",
       "src/app/layers/weatherOverlays.js",
       "src/search/coordinateGeocoder.js",
       "src/search/coordinateParser.js",
@@ -2153,6 +2196,9 @@
       "src/app/layers/directions.js",
       "src/app/layers/severeWeather.js",
       "src/app/layers/tides.js",
+      "src/app/layers/catalogPointServices.js",
+      "src/app/layers/fireballs.js",
+      "src/app/layers/ufoIncidents.js",
       "src/app/layers/weatherOverlays.js",
       "src/app/layers/weatherRadar.js",
       "src/weatherReport/groundPick.js",
@@ -2171,6 +2217,13 @@
       "src/layers/weather-overlays/imagery.js",
       "src/layers/tides/model.js",
       "src/layers/tides/index.js",
+      "src/layers/catalog-points/index.js",
+      "src/layers/catalog-points/points.js",
+      "src/layers/fireballs/index.js",
+      "src/layers/fireballs/model.js",
+      "src/layers/ufo-incidents/bundledSource.js",
+      "src/layers/ufo-incidents/index.js",
+      "src/layers/ufo-incidents/model.js",
       "src/layers/weather-overlays/palette.js",
       "src/layers/weather-overlays/controls.js",
       "src/layers/weather-overlays/index.js",

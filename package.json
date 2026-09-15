@@ -105,6 +105,9 @@
     "./server/providers/tides": {
       "node": "./server/providers/tides.js"
     },
+    "./server/providers/fireballs": {
+      "node": "./server/providers/fireballs.js"
+    },
     "./server/providers/firms": {
       "node": "./server/providers/firms.js"
     },
@@ -173,6 +176,8 @@
     "./layers/weather-radar": "./src/layers/weather-radar/index.js",
     "./layers/weather-overlays": "./src/layers/weather-overlays/index.js",
     "./layers/tides": "./src/layers/tides/index.js",
+    "./layers/ufo-incidents": "./src/layers/ufo-incidents/index.js",
+    "./layers/fireballs": "./src/layers/fireballs/index.js",
     "./weather-report": "./src/weatherReport/index.js",
     "./layers/severe-weather": "./src/layers/severe-weather/index.js",
     "./layers/bikeshare": "./src/layers/bikeshare/index.js",

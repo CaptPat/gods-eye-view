@@ -59,6 +59,20 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## UFO incidents and fireballs (fork)
+
+- Add a UFO Incidents layer: about 50 notable incidents from Wikidata (CC0), including sightings,
+  close encounters and abduction claims, each with date, kind and place. Click one for a card and
+  click the card for its Wikipedia article. Where Wikidata only names a region, the point sits
+  there and the card says it is approximate. Bundled snapshot, rebuilt by
+  `scripts/build-ufo-incidents.mjs`; NUFORC reports are not used because their terms forbid
+  redistribution. Share token `j`.
+- Add a Fireballs layer: NASA/JPL CNEOS bright-meteor detections since 1988, sized by impact
+  energy, with time, altitude, speed and energy on the card. Served by a new `/api/fireballs`
+  proxy cached for six hours, which keeps the last good list if CNEOS fails. Share token `l`.
+- Both sit in a new "Sky" group in the Layers panel and share one clickable-point layer
+  (`src/layers/catalog-points`).
+
 ## Severe weather layer (fork)
 
 - Add a Severe Weather layer: National Weather Service active alerts across the US, drawn over

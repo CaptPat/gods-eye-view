@@ -1,0 +1,211 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "itemLabel",
+   "itemDescription",
+   "clsLabel",
+   "coord",
+   "placeCoord",
+   "placeLabel",
+   "date",
+   "article"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q111467273"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Flight_105_UFO_sighting"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1947-07-04T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-120.32227 45.8288)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Flight 105 UFO sighting"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "UFO sighting in 1947"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "UFO sighting"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Pacific Northwest"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q108803795"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Ariel_School_UFO_incident"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1994-09-16T00:00:00Z"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(31.244722222 -17.889722222)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Ruwa UFO incident"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "1994 sighting in Zimbabwe"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "UFO sighting"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Ruwa"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(31.29114 -17.86352)"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q5371519"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Emilcin_Abduction"
+    },
+    "placeCoord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(22.03916667 51.13666667)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Emilcin Abduction"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "close encounter with aliens that was supposed to have taken place in 1978 in Polish village Emilcin"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "alien abduction"
+    },
+    "placeLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Emilcin"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(22.037822 51.134064)"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q4999929"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1957-11-04T00:00:00Z"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Burning on Fort Itaipu Sentinels"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "unidentified flying object"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q5756529"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1977-04-25T00:00:00Z"
+    },
+    "itemLabel": {
+     "type": "literal",
+     "value": "Q5756529"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "alien abduction"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q2940740"
+    },
+    "date": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1952-07-24T00:00:00Z"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Carson Sink UFO incident"
+    },
+    "clsLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "unidentified flying object"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-118.6275 39.75)"
+    }
+   }
+  ]
+ }
+}
