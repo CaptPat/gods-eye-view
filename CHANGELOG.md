@@ -59,6 +59,16 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## Offshore platforms (fork)
+
+- Add an Offshore Platforms layer (token `O`) in the Energy group. It shows 1,321 standing structures in U.S. federal
+  offshore waters, from the BSEE Data Center (public domain).
+- Floating production systems (SPAR, TLP, semi-submersible, FPSO) stand out in magenta. Fixed platforms and compliant
+  towers are cyan, and caissons, well protectors and subsea structures are smaller.
+- Cards give area, block and structure name, type, water depth, operator, products, whether the platform is manned,
+  distance offshore and installation year.
+- `scripts/build-bsee-platforms.mjs` rebuilds the snapshot from BSEE's fixed-width platform files and company list.
+
 ## Transmission lines and oil & gas (fork)
 
 - Add two OpenStreetMap layers to the Energy group, loaded per view through the shared Overpass proxy.

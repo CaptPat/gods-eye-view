@@ -881,5 +881,13 @@
   "src/layers/osm-infrastructure/source.test.mjs",
   "src/layers/transmission-lines/model.test.mjs",
   "src/layers/oil-gas/model.test.mjs",
-  "src/app/layers/osmInfrastructure.js"
+  "src/app/layers/osmInfrastructure.js",
+  "src/layers/offshore-platforms/bundledSource.js",
+  "src/layers/offshore-platforms/index.js",
+  "src/layers/offshore-platforms/model.js",
+  "src/layers/offshore-platforms/bsee.js",
+  "src/layers/offshore-platforms/bsee.test.mjs",
+  "src/layers/offshore-platforms/model.test.mjs",
+  "src/app/layers/offshorePlatforms.js",
+  "scripts/build-bsee-platforms.mjs"
 ]
