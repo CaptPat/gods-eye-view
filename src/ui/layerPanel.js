@@ -54,6 +54,10 @@ const PANEL_GROUPS = [
     ],
   },
   {
+    label: 'Energy',
+    ids: ['nuclear-power-plants', 'nuclear-waste-sites', 'nuclear-accidents'],
+  },
+  {
     label: 'Utilities',
     ids: ['directions', 'radio'],
   },

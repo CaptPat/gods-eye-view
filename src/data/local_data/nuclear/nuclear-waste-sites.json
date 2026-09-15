@@ -1,0 +1,1064 @@
+{
+ "source": "Wikidata",
+ "license": "CC0-1.0",
+ "retrievedAt": "2026-09-15",
+ "records": [
+  {
+   "id": "Q126948634",
+   "name": "Abfall-Zwischenlager Biblis 1",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Biblis",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.70934,
+   "lon": 8.41145,
+   "place": "Biblis Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q126948634",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q127155785",
+   "name": "Abfall-Zwischenlager Biblis 2",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Biblis",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.70742,
+   "lon": 8.41156,
+   "place": "Biblis Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q127155785",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q130365600",
+   "name": "Abfall-Zwischenlager Brunsbüttel",
+   "description": "radioactive waste repository in Brunsbüttel, Germany",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.89332,
+   "lon": 9.20534,
+   "place": "Brunsbüttel",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q130365600",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q130262116",
+   "name": "Abfall-Zwischenlager Grafenrheinfeld",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Grafenrheinfeld",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.98399,
+   "lon": 10.18822,
+   "place": "Grafenrheinfeld",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q130262116",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q130296532",
+   "name": "Abfall-Zwischenlager Neckarwestheim",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Neckarwestheim",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.0411,
+   "lon": 9.175,
+   "place": "Neckarwestheim Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q130296532",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q130382295",
+   "name": "Abfall-Zwischenlager Obrigheim",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Obrigheim",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.35222,
+   "lon": 9.09278,
+   "place": "Obrigheim",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q130382295",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q130382372",
+   "name": "Abfall-Zwischenlager Philippsburg",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Philippsburg",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.23694,
+   "lon": 8.45472,
+   "place": "Philippsburg",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q130382372",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q127425824",
+   "name": "Abfall-Zwischenlager Stade",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Stade",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.62312,
+   "lon": 9.52949,
+   "place": "Stade Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q127425824",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q127271487",
+   "name": "Abfall-Zwischenlager Unterweser 1",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Unterweser",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.43071,
+   "lon": 8.47927,
+   "place": "Stadland",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q127271487",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q127163734",
+   "name": "Abfall-Zwischenlager Unterweser 2",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Unterweser",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.43089,
+   "lon": 8.4762,
+   "place": "Stadland",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q127163734",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q129349121",
+   "name": "Abfall-Zwischenlager Würgassen",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Würgassen",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 51.63917,
+   "lon": 9.39361,
+   "place": "Beverungen",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q129349121",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q319930",
+   "name": "Abfallzwischenlager Gorleben",
+   "description": "Zwischenlager für radioaktive Abfälle",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.0333,
+   "lon": 11.342,
+   "place": "Gorleben",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q319930",
+   "operator": "BGZ Gesellschaft für Zwischenlagerung",
+   "country": "Germany"
+  },
+  {
+   "id": "Q4992465",
+   "name": "Äspö Hard Rock Laboratory",
+   "description": "underground research laboratory located in the Misterhult Archipelago, north of Oskarshamn in Sweden",
+   "kinds": [
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": 57.4329,
+   "lon": 16.6613,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/%C3%84sp%C3%B6_Hard_Rock_Laboratory",
+   "wikidata": "https://www.wikidata.org/wiki/Q4992465",
+   "operator": null,
+   "country": "Sweden"
+  },
+  {
+   "id": "Q316980",
+   "name": "Asse II mine",
+   "description": "former salt mine; deep geological repository in Lower Saxony, Germany",
+   "kinds": [
+    "deep-geological",
+    "repository"
+   ],
+   "date": null,
+   "lat": 52.12889,
+   "lon": 10.67083,
+   "place": "Remlingen-Semmenstedt",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Asse_II_mine",
+   "wikidata": "https://www.wikidata.org/wiki/Q316980",
+   "operator": "Bundesgesellschaft für Endlagerung",
+   "country": "Germany"
+  },
+  {
+   "id": "Q757630",
+   "name": "Atommülllager Gorleben",
+   "description": "Zwischenlager für radioaktiven Abfall in Niedersachsen",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.0262,
+   "lon": 11.3505,
+   "place": "Gorleben",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q757630",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q125886973",
+   "name": "Brennelement-Zwischenlager Biblis",
+   "description": "Lager für hochradioaktive Abfälle am Standort des Kernkraftwerks Biblis",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.70857,
+   "lon": 8.41173,
+   "place": "Biblis Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q125886973",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q125927711",
+   "name": "Brennelemente-Zwischenlager Brokdorf",
+   "description": "Lager für hochradioaktive Abfälle am Standort des Kernkraftwerks Brokdorf",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.85295,
+   "lon": 9.34357,
+   "place": "Brokdorf Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q125927711",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q125929778",
+   "name": "Brennelemente-Zwischenlager Grafenrheinfeld",
+   "description": "Lager für hochradioaktive Abfälle am Standort des Kernkraftwerks Grafenrheinfeld",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.98409,
+   "lon": 10.18467,
+   "place": "Grafenrheinfeld Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q125929778",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q125929511",
+   "name": "Brennelemente-Zwischenlager Grohnde",
+   "description": "Lager für hochradioaktive Abfälle am Standort des Kernkraftwerks Grohnde",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 52.0353,
+   "lon": 9.41333,
+   "place": "Grohnde Nuclear Power Plant",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q125929511",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q125941801",
+   "name": "Brennelemente-Zwischenlager Gundremmingen",
+   "description": "Lager für hochradioaktive Abfälle am Standort des Kernkraftwerks Gundremmingen",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 48.51676,
+   "lon": 10.4021,
+   "place": "Gundremmingen Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q125941801",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q125941810",
+   "name": "Brennelemente-Zwischenlager Isar",
+   "description": "Lager für hochradioaktive Abfälle am Standort des Kernkraftwerks Isar",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 48.60554,
+   "lon": 12.29951,
+   "place": "Isar Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q125941810",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q126456832",
+   "name": "Brennelemente-Zwischenlager Krümmel",
+   "description": "Lager für hochradioaktive Abfälle am Standort des Kernkraftwerks Krümmel",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.40942,
+   "lon": 10.41116,
+   "place": "Krümmel Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q126456832",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q126813480",
+   "name": "Brennelemente-Zwischenlager Lingen",
+   "description": "Lager für hochradioaktive Abfälle am Standort des Kernkraftwerks Lingen",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 52.52333,
+   "lon": 7.31722,
+   "place": "Lingen",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q126813480",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q126814513",
+   "name": "Brennelemente-Zwischenlager Neckarwestheim",
+   "description": "storage facility for high-level radioactive waste at the Neckarwestheim nuclear power plant site, Heilbronn district, Baden-Württemberg, Germany",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.05,
+   "lon": 9.18333,
+   "place": "Neckarwestheim",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q126814513",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q126816229",
+   "name": "Brennelemente-Zwischenlager Philippsburg",
+   "description": "Lager für hochradioaktive Abfälle am Standort des Kernkraftwerks Philippsburg",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.23694,
+   "lon": 8.45472,
+   "place": "Philippsburg",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q126816229",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q125927284",
+   "name": "Brennelemente-Zwischenlager Unterweser",
+   "description": "Lager für hochradioaktive Abfälle am Standort des Kernkraftwerks Unterweser",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.4308,
+   "lon": 8.47796,
+   "place": "Lower Saxony",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q125927284",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q12786789",
+   "name": "Central Interim Storage for Radioactive Waste at Brinje",
+   "description": "radioactive waste storage in Slovenia",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 46.08846,
+   "lon": 14.5968,
+   "place": "Brinje",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q12786789",
+   "operator": "Radioactive Waste Management Agency",
+   "country": "Slovenia"
+  },
+  {
+   "id": "Q141444838",
+   "name": "Centralized Storage Facility",
+   "description": "Zwischenlager für radioaktiven Abfall am Standort der Jordan Atomic Energy Commission in der Nähe von Amman in Jordanien",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 32.03534,
+   "lon": 35.94833,
+   "place": null,
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q141444838",
+   "operator": null,
+   "country": "Jordan"
+  },
+  {
+   "id": "Q1054187",
+   "name": "Centre de stockage de l’Aube",
+   "description": "radioactive waste repository",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 48.39581,
+   "lon": 4.67315,
+   "place": null,
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q1054187",
+   "operator": "National Agency for Radioactive Waste Management",
+   "country": "France"
+  },
+  {
+   "id": "Q2945505",
+   "name": "centre de stockage de Morvilliers",
+   "description": "radioactive waste repository",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 48.3733,
+   "lon": 4.66667,
+   "place": null,
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q2945505",
+   "operator": "National Agency for Radioactive Waste Management",
+   "country": "France"
+  },
+  {
+   "id": "Q29015944",
+   "name": "Centre de stockage de Richard",
+   "description": "hlubinné úložiště na území Předměstí",
+   "kinds": [
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": 50.54368,
+   "lon": 14.10414,
+   "place": "Předměstí",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q29015944",
+   "operator": null,
+   "country": "Czech Republic"
+  },
+  {
+   "id": "Q133733429",
+   "name": "Centro de Almacenamiento de Desechos Radiactivos",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 19.7935,
+   "lon": -98.8363,
+   "place": null,
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q133733429",
+   "operator": null,
+   "country": "Mexico"
+  },
+  {
+   "id": "Q130475354",
+   "name": "Chernobyl of Izmir",
+   "description": null,
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 38.32583,
+   "lon": 27.13722,
+   "place": "Gaziemir district",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q130475354",
+   "operator": null,
+   "country": "Turkey"
+  },
+  {
+   "id": "Q16539793",
+   "name": "Cigeo",
+   "description": "deep geological disposal facility for radioactive waste in Heuse/Haute-Marne, France",
+   "kinds": [
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": 48.50472,
+   "lon": 5.35667,
+   "place": "Bure",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/Cig%C3%A9o",
+   "wikidata": "https://www.wikidata.org/wiki/Q16539793",
+   "operator": "National Agency for Radioactive Waste Management",
+   "country": "France"
+  },
+  {
+   "id": "Q899724",
+   "name": "Důl Bratrství",
+   "description": "Bergwerk in Tschechien",
+   "kinds": [
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": 50.37444,
+   "lon": 12.94,
+   "place": "Jáchymov",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q899724",
+   "operator": null,
+   "country": "Czech Republic"
+  },
+  {
+   "id": "Q1340497",
+   "name": "Endlager Dukovany",
+   "description": "Endlager für radioaktiven Abfall",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.08611,
+   "lon": 16.15556,
+   "place": "Dukovany",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q1340497",
+   "operator": null,
+   "country": "Czech Republic"
+  },
+  {
+   "id": "Q139715196",
+   "name": "Endlager für flüssige und feste radioaktive Abfälle Rheinsberg",
+   "description": "Endlager für radioaktiven Abfall am Standort des Kernkraftwerks Rheinsberg (KKR)",
+   "kinds": [
+    "deep-geological",
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.14884,
+   "lon": 12.9905,
+   "place": "Rheinsberg Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q139715196",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q1421805",
+   "name": "Final repository for short-lived radioactive waste",
+   "description": "deep geological repository",
+   "kinds": [
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": 60.4072,
+   "lon": 18.2069,
+   "place": "Forsmark Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Final_repository_for_short-lived_radioactive_waste",
+   "wikidata": "https://www.wikidata.org/wiki/Q1421805",
+   "operator": null,
+   "country": "Sweden"
+  },
+  {
+   "id": "Q1284526",
+   "name": "Hanford Site",
+   "description": "decommissioned nuclear production complex in Washington, United States",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 46.6475,
+   "lon": -119.59861,
+   "place": "Benton County",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Hanford_Site",
+   "wikidata": "https://www.wikidata.org/wiki/Q1284526",
+   "operator": null,
+   "country": "United States"
+  },
+  {
+   "id": "Q137657440",
+   "name": "Interim Storage Facility",
+   "description": "Lager für mittelradioaktive Abfälle am Standort des Nuklearkomplexes Sellafield",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 54.41083,
+   "lon": -3.49389,
+   "place": null,
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q137657440",
+   "operator": null,
+   "country": "United Kingdom"
+  },
+  {
+   "id": "Q2229618",
+   "name": "Konrad mine",
+   "description": "mine in Germany",
+   "kinds": [
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": 52.1836,
+   "lon": 10.4028,
+   "place": "Salzgitter",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Konrad_mine",
+   "wikidata": "https://www.wikidata.org/wiki/Q2229618",
+   "operator": "Bundesgesellschaft für Endlagerung",
+   "country": "Germany"
+  },
+  {
+   "id": "Q136968163",
+   "name": "Lager für schwach- und mittelradioaktive Abfälle am Zwischenlager",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Krümmel",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.41024,
+   "lon": 10.41207,
+   "place": "Krümmel Nuclear Power Plant",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q136968163",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q827202",
+   "name": "Lake Karachay",
+   "description": "former lake in the southern Ural mountains in Russia, used as a disposal site for high-radioactive waste",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 55.67722,
+   "lon": 60.79944,
+   "place": "Ozyorsk",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Lake_Karachay",
+   "wikidata": "https://www.wikidata.org/wiki/Q827202",
+   "operator": null,
+   "country": "Russia"
+  },
+  {
+   "id": "Q896093",
+   "name": "Leitmeritz concentration camp",
+   "description": "subcamp of Flossenbürg concentration camp",
+   "kinds": [
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": 50.5425,
+   "lon": 14.1125,
+   "place": "Litoměřice",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Leitmeritz_concentration_camp",
+   "wikidata": "https://www.wikidata.org/wiki/Q896093",
+   "operator": null,
+   "country": "Czech Republic"
+  },
+  {
+   "id": "Q556851",
+   "name": "Lepse",
+   "description": "Russian (formerly Soviet) ship used as nuclear waste storage",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 69.24861,
+   "lon": 33.23333,
+   "place": "Sayda Bay",
+   "approximate": true,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q556851",
+   "operator": "Atomflot",
+   "country": "Russia"
+  },
+  {
+   "id": "Q1726774",
+   "name": "Lop Nor / Malan nuclear test site",
+   "description": "Chinese nuclear test site",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 41.54482,
+   "lon": 88.712,
+   "place": null,
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q1726774",
+   "operator": null,
+   "country": "People's Republic of China"
+  },
+  {
+   "id": "Q1340495",
+   "name": "Loviisa deep geological repository",
+   "description": "deep geological repository for nuclear waste in Finland",
+   "kinds": [
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": 60.3751,
+   "lon": 26.32702,
+   "place": null,
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q1340495",
+   "operator": null,
+   "country": "Finland"
+  },
+  {
+   "id": "Q1340500",
+   "name": "Low Level Waste Repository",
+   "description": "radioactive waste repository on the on the West Cumbrian coast of England",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 54.3794,
+   "lon": -3.45694,
+   "place": "Cumbria",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Low_Level_Waste_Repository",
+   "wikidata": "https://www.wikidata.org/wiki/Q1340500",
+   "operator": null,
+   "country": "United Kingdom"
+  },
+  {
+   "id": "Q1054179",
+   "name": "Manche storage centre",
+   "description": "radioactive waste repository",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 49.67778,
+   "lon": -1.86222,
+   "place": null,
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Manche_storage_centre",
+   "wikidata": "https://www.wikidata.org/wiki/Q1054179",
+   "operator": "National Agency for Radioactive Waste Management",
+   "country": "France"
+  },
+  {
+   "id": "Q6795480",
+   "name": "Maxey Flats",
+   "description": "radioactive waste dump site in Kentucky",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 38.2583,
+   "lon": -83.5694,
+   "place": "Kentucky",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Maxey_Flats",
+   "wikidata": "https://www.wikidata.org/wiki/Q6795480",
+   "operator": null,
+   "country": "United States"
+  },
+  {
+   "id": "Q896064",
+   "name": "Morsleben radioactive waste repository",
+   "description": "deep geological repository in Saxony-Anhalt, Germany",
+   "kinds": [
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": 52.2239,
+   "lon": 11.1022,
+   "place": "Börde District",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Morsleben_radioactive_waste_repository",
+   "wikidata": "https://www.wikidata.org/wiki/Q896064",
+   "operator": "Bundesgesellschaft für Endlagerung",
+   "country": "Germany"
+  },
+  {
+   "id": "Q139551826",
+   "name": "National Radioactive Waste Repository in Belarus",
+   "description": "planned radioactive waste repository storage in Belarus for Astravets Nuclear Power Plant",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 54.61361,
+   "lon": 25.95528,
+   "place": "Astraviec District",
+   "approximate": true,
+   "wikipedia": "https://en.wikipedia.org/wiki/National_Radioactive_Waste_Repository",
+   "wikidata": "https://www.wikidata.org/wiki/Q139551826",
+   "operator": "Belarusian Organization for Radioactive Waste Management",
+   "country": "Belarus"
+  },
+  {
+   "id": "Q4413020",
+   "name": "Onkalo spent nuclear fuel repository",
+   "description": "deep geological repository for radioactive waste in Finland",
+   "kinds": [
+    "repository",
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": 61.23513,
+   "lon": 21.4821,
+   "place": "Olkiluoto",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Onkalo_spent_nuclear_fuel_repository",
+   "wikidata": "https://www.wikidata.org/wiki/Q4413020",
+   "operator": null,
+   "country": "Finland"
+  },
+  {
+   "id": "Q136647194",
+   "name": "Radioactive waste repository Alberschwende",
+   "description": "planned but not realized project for a radioactive waste repository in Alberschwende. Vorarlberg, Austria",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 47.45828,
+   "lon": 9.85773,
+   "place": "Alberschwende",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q136647194",
+   "operator": null,
+   "country": "Austria"
+  },
+  {
+   "id": "Q2126501",
+   "name": "Radium Hill",
+   "description": "former mine in South Australia",
+   "kinds": [
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": -32.3,
+   "lon": 140.667,
+   "place": "South Australia",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Radium_Hill",
+   "wikidata": "https://www.wikidata.org/wiki/Q2126501",
+   "operator": null,
+   "country": "Australia"
+  },
+  {
+   "id": "Q16821679",
+   "name": "Site A / Plot M Disposal Site",
+   "description": "Nuclear disposal site in Cook County, Illinois, US",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 41.7022,
+   "lon": -87.91216,
+   "place": "Cook County",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Site_A",
+   "wikidata": "https://www.wikidata.org/wiki/Q16821679",
+   "operator": null,
+   "country": "United States"
+  },
+  {
+   "id": "Q126891126",
+   "name": "Standort-Zwischenlager Brunsbüttel",
+   "description": "radioactive waste repository in Brunsbüttel, Germany",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.89155,
+   "lon": 9.20535,
+   "place": "Brunsbüttel",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q126891126",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q137051708",
+   "name": "Technologie- und Logistikgebäude Emsland",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerk Emsland",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 52.46961,
+   "lon": 7.32291,
+   "place": "Lingen",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q137051708",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q137852345",
+   "name": "Transportbereitstellungshalle Brokdorf",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Brokdorf",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 53.85371,
+   "lon": 9.34298,
+   "place": null,
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q137852345",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q137909382",
+   "name": "Transportbereitstellungshalle Grohnde",
+   "description": "Lager für schwach- und mittelradioaktive Abfälle am Standort des Kernkraftwerks Grohnde",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": 52.03263,
+   "lon": 9.40823,
+   "place": "Emmerthal",
+   "approximate": false,
+   "wikipedia": null,
+   "wikidata": "https://www.wikidata.org/wiki/Q137909382",
+   "operator": null,
+   "country": "Germany"
+  },
+  {
+   "id": "Q7907817",
+   "name": "Vaalputs",
+   "description": "radioactive waste repository in Northern Cape, South Africa",
+   "kinds": [
+    "repository"
+   ],
+   "date": null,
+   "lat": -30.13139,
+   "lon": 18.57,
+   "place": "Northern Cape",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Vaalputs",
+   "wikidata": "https://www.wikidata.org/wiki/Q7907817",
+   "operator": null,
+   "country": "South Africa"
+  },
+  {
+   "id": "Q2142173",
+   "name": "Yucca Mountain nuclear waste repository",
+   "description": "deep geological repository storage facility which was never used for storage",
+   "kinds": [
+    "deep-geological"
+   ],
+   "date": null,
+   "lat": 36.85278,
+   "lon": -116.42667,
+   "place": "Nye County",
+   "approximate": false,
+   "wikipedia": "https://en.wikipedia.org/wiki/Yucca_Mountain_nuclear_waste_repository",
+   "wikidata": "https://www.wikidata.org/wiki/Q2142173",
+   "operator": null,
+   "country": "United States"
+  }
+ ]
+}

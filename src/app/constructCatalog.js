@@ -30,6 +30,11 @@ import { createApplicationDayNight } from './layers/dayNight.js';
 import { createApplicationMeteorShowers } from './layers/meteorShowers.js';
 import { createApplicationNightSky } from './layers/nightSky.js';
 import { createApplicationSkyObjects } from './layers/skyObjects.js';
+import {
+  createApplicationNuclearAccidents,
+  createApplicationNuclearPowerPlants,
+  createApplicationNuclearWasteSites,
+} from './layers/nuclear.js';
 import { createApplicationCables } from './layers/submarineCables.js';
 import { createInfrastructureLayers } from '../data/infrastructure.js';
 import { localGeoJsonServices } from './localGeojsonServices.js';
@@ -131,6 +136,9 @@ export function createApplicationCatalog({
         createApplicationMeteorShowers(),
         createApplicationNightSky(),
         createApplicationSkyObjects(),
+        createApplicationNuclearPowerPlants(),
+        createApplicationNuclearWasteSites(),
+        createApplicationNuclearAccidents(),
         createApplicationAlpr({ surface, source: sources.alpr }),
         satellites,
         createApplicationLaunches({ source: sources.launches, satellites }),

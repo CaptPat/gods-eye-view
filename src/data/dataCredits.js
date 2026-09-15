@@ -347,6 +347,11 @@ export const SKY_OBJECTS_CREDIT = Object.freeze({
   html: 'Planets: <a href="https://github.com/cosinekitty/astronomy" target="_blank" rel="noopener">Astronomy Engine</a> (MIT); Messier catalogue via d3-celestial',
 });
 
+export const WIKIDATA_NUCLEAR_CREDIT = Object.freeze({
+  key: 'wikidata-nuclear',
+  html: 'Nuclear sites: <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a> (CC0), linked to Wikipedia',
+});
+
 export const NWS_ALERTS_CREDIT = Object.freeze({
   key: 'nws-alerts',
   html: 'US weather alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (NOAA, public domain)',
