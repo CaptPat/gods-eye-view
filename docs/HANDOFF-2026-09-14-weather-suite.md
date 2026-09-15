@@ -1,0 +1,86 @@
+# Handoff: weather suite (2026-09-14)
+
+Fork: `CaptPat/gods-eye-view`, branded Cyclops View in Pinokio. This work is fork-only: never open upstream PRs or issues, and remember that `gh pr create` defaults to the parent repo.
+
+## State at handoff
+
+- `main` is at `7124efd`, pushed; `origin/main` matches.
+- `main` holds all of `bilawalsidhu/gods-eye-view` main through PR #456 (merged at `6462f0a`) and is 79 commits ahead of it.
+- CI parity passes on `main`: `npm run format:check`, `npm run check:boundaries`, `npm test` (3,664 pass, 0 fail, 7 skipped Node-24 benchmarks on Node 26) and `npm run build`.
+- No open branches or worktrees. No dev servers running.
+
+## What the weather suite added
+
+| # | Feature | Merge | Share token | Sources |
+|---|---|---|---|---|
+| 1 | Weather Radar layer | `c91acea` | `n` (was `p` before the upstream sync) | RainViewer worldwide, IEM NEXRAD US detail |
+| 2 | Right-click weather report | `6c17f1d` | — | Google Weather API, Open-Meteo marine/solar |
+| 3 | Tide Stations and Current Stations layers | `9ec8930` | `h`, `k` | NOAA CO-OPS |
+| 4 | Weather Overlays layer (clouds, temperature, air quality, pollen) | `3c71064` | `o` | NOAA nowCOAST GMGSI, NOAA GFS via PacIOOS ERDDAP, Google Air Quality and Pollen heatmap tiles |
+| 5 | Severe Weather layer | `02c84f7`, then `7124efd` | `v` | NWS active alerts plus zone shapes; GDACS events, cyclone tracks and cones |
+
+Each feature has a design spec in `docs/superpowers/specs/2026-09-14-*-design.md` and a plan in `docs/superpowers/plans/2026-09-14-*.md`. `CHANGELOG.md` and `DATA_SOURCES.md` describe user-visible behaviour and data terms.
+
+## Server routes added (Vite provider plugins, `server/providers/local.js`)
+
+`keySetupEndpoint()` must stay last in `localProviderPlugins()`.
+
+- **`/api/radar`:** radar manifest and tile proxy with a disk cache.
+- **`/api/weather-report`:** in-memory 10-minute cache, stale report for up to 60 minutes.
+- **`/api/tides`:** station lists cached 24 hours; reports cached 10 minutes.
+  - Rate limits: 60 per minute per client, 150 per minute globally. NOAA's gateway blocks bursts of about 620 requests a minute.
+- **`/api/weather-overlays`:**
+  - Separate manifest and tile rate limiters.
+  - NOAA tiles are cached in memory.
+  - **Google tiles are never cached** (Pollen policy; `Cache-Control: no-store`). A daily Google tile budget applies instead, set by `GEV_GOOGLE_OVERLAY_TILES_PER_DAY` (default 25000).
+- **`/api/severe-weather`:**
+  - NWS fresh for 5 minutes, GDACS for 15; stale data served for up to 60 minutes.
+  - Zone shapes are cached on disk in `.gev-cache/severe-weather/zones/` (git-ignored) for 7 days.
+  - A source that already has data is served immediately and refreshed in the background.
+  - Cold sources get a 25-second response budget. The server keeps waiting past it until at least one source can answer.
+
+## Operational notes
+
+- **GDACS was down at handoff.** gdacs.org accepted TCP connections but sent no HTTP response, even for its homepage. The Severe Weather row shows `NWS n · GDACS unavailable` until it recovers, and NWS alerts still display.
+- **Google billing.** The weather report and the Air Quality and Pollen overlays use the Google Maps key, and every overlay tile is a billed request. Set per-API daily quotas in Google Cloud Console as well as the app budget.
+- **Keys.** The app reads `GOOGLE_MAPS_API_KEY` from the Pinokio `ENVIRONMENT` file (`E:\pinokio\api\cyclops-view\pinokio\ENVIRONMENT`). Never print or commit keys.
+- **Not browser-verified.** Nobody opened the new layers in a browser. Still unchecked:
+  - the cloud clear-sky threshold (0.3);
+  - card layout at 400 px;
+  - the real-world look of alert polygons.
+
+## Known issues and follow-ups
+
+1. **Clicking a world-overlay card can end flight tracking** (pre-existing). `src/layers/flights/tracking.js` does not check overlay hit rects, so it affects FIRMS, tides, vessels and severe weather cards alike.
+2. **Temperature tile render takes about 16 ms per tile.** `temperatureRgb` allocates per pixel. The fix is an in-place `temperatureRgbInto`.
+3. **Google daily tile budget can overshoot** by a burst of concurrent requests. It is a soft limit.
+4. **Severe Weather row age** (`Nm ago`) shows client fetch time, not data age; the row marks `(stale)`.
+5. **Tides cards.** Some lines are 43–48 characters (the plan said 42). A click can open a second card from the other tides layer. Open cards don't re-render on a units change.
+6. **Weather overlays and radar** share two small quirks:
+   - `update()` returns `false` when disabled;
+   - a swap can stall until the next refresh after a hidden tab returns.
+7. **Earlier deferred items:**
+   - the Nominatim User-Agent names the upstream contact;
+   - the WEATHER panel collapse button styling differs from other panels;
+   - the keyless weather report pin shows "Weather unavailable";
+   - refreshing a report within 10 minutes returns the cached one.
+
+The build ledgers (archived in the session scratchpad, not the repo) list every deferred minor finding. Git history and the specs are the durable record.
+
+## Traps for the next weather or overlay layer
+
+Lessons are kept in Claude memory (`weather-layer-plan-lessons`, `upstream-sync-hazards`). In short:
+
+- **Render governor.** The app idles in `requestRenderMode`. Every async scene change must call `governorRequestRender`, injected from `src/data/*.js`.
+- **Manager contract.** `update() === false` only on a manager abort. Failures surface through `getStats().error`, and row text is checked through `layerPanel._buildMetaText`.
+- **Clickable layers** must `registerPickOwner` and `unregisterPickOwner`. Otherwise their clicks end aircraft, satellite and vessel tracking.
+- **Imagery insert index** must be resolved at add time. The photoreal stack has no base imagery layer.
+- **Multi-source proxies** must not make one source wait on another, must abort in-flight fetches at deadlines, and must never 502 while a source is still legitimately resolving.
+- **Cesium entity property writes** rebuild static ground-polyline batches, so restyle only what changed.
+- **After merges touching `src/app/*`**, check that the `application-components` boundary group lists every transitive import.
+- **Upstream syncs.** Diff `LAYER_STATE_REGISTRY` tokens from both sides first; the radar token collided with ALPR.
+
+## Environment gotchas
+
+- Windows with Git Bash and Node 26. A backgrounded `npx vite` job PID is not the port listener; stop it with `netstat -ano | grep :<port>` then `taskkill //PID <pid> //F`.
+- Worktrees here use a `node_modules` junction to the main repo. Unlink the junction (`cmd //c rmdir <worktree>\node_modules`) **before** `git worktree remove`. Windows may leave an empty locked folder behind, which is harmless.
