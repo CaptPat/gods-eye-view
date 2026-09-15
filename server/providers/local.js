@@ -7,7 +7,7 @@ import { adsbdbProxy } from './aircraft/enrichment.js';
 import { overpassProxy } from './overpass.js';
 import { militaryInstallationsProxy } from './military-installations.js';
 import { regionalBriefProxy } from './regional/briefing.js';
-import { geocodeSearchProxy } from './geocode.js';
+import { geocodeProxy } from './regional/place.js';
 import { weatherEffectsProxy } from './regional/weather-effects.js';
 import { weatherRadarProxy } from './weather-radar.js';
 import { weatherReportProxy } from './weather-report.js';
@@ -38,7 +38,7 @@ function localProviderPlugins() {
     overpassProxy(),
     militaryInstallationsProxy(),
     regionalBriefProxy(),
-    geocodeSearchProxy(),
+    geocodeProxy(),
     weatherRadarProxy(),
     weatherReportProxy(),
     weatherOverlaysProxy(),
@@ -113,7 +113,6 @@ export { OVERPASS_UPSTREAMS } from './overpass/constants.js';
 export { isPrivateOverpassHost } from './overpass/constants.js';
 export { overpassUpstreams } from './overpass/constants.js';
 export { parseOverpassUpstreamsEnv } from './overpass/constants.js';
-export { geocodeSearchProxy } from './geocode.js';
 export { openAiRealtimeProxy } from './openai.js';
 export { MILITARY_INSTALLATION_ELEMENT_CAP } from './military-installations/constants.js';
 export { quantizeMilitaryInstallationBox } from './military-installations/query.js';

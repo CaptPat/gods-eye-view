@@ -1,134 +1,194 @@
-// NOMINATIM PLACE PROVIDER — the keyless geocoder behind Google.
-//
-// Upstream's keyless provider is Photon. Measured 2026-09-13 from an Austin
-// view with the app's own bias string, it placed Dubai in Kenya, Muscat in the
-// West Bank and the Eiffel Tower on a mountain in Alberta. The same six queries
-// through /api/geocode/search (Nominatim) all resolved correctly, so that route
-// is the keyless provider. It answers with the { place, answered } outcome every
-// provider composed by createPlaceSearch shares. No live providers.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createNominatimGeocoder } from './index.js';
-import { createStandalonePlaceSearch } from '../standalone/placeSearch.js';
+import { createNominatimProvider } from './nominatim.js';
+import { createDefaultPlaceSearch } from './defaults.js';
+import { createPlaceSearch } from './placeSearch.js';
+import { createGeospatialServices } from './geospatial.js';
+import { readResponseTextCapped } from '../sources/httpBody.js';
 
-const AUSTIN_BIAS = '30.1500,-97.9000|30.4000,-97.6000';
-
-// What /api/geocode/search answers.
-const ROUTE_DUBAI = {
-  status: 'OK',
-  source: 'openstreetmap',
-  results: [
-    {
-      formatted_address: 'Dubai, Dubai Emirate, United Arab Emirates',
-      geometry: {
-        location: { lat: 25.0742823, lng: 55.1885624 },
-        viewport: {
-          southwest: { lat: 24.6230801, lng: 54.7153981 },
-          northeast: { lat: 25.5250676, lng: 56.205298 },
-        },
-      },
-      types: ['locality', 'political'],
-      place_id: 'osm:relation/4479752',
-      source: 'openstreetmap',
-    },
-  ],
+const hit = {
+  lat: '51.5',
+  lon: '-0.12',
+  name: 'London',
+  display_name: 'London, England',
+  category: 'place',
+  type: 'city',
+  addresstype: 'city',
+  boundingbox: ['51', '52', '-1', '0'],
+  address: {
+    city: 'London',
+    state: 'England',
+    country: 'United Kingdom',
+    road: 'Whitehall',
+  },
 };
-const ROUTE_ZERO = { status: 'ZERO_RESULTS', source: 'openstreetmap', results: [] };
-const ROUTE_DOWN = { status: 'UNAVAILABLE', source: 'openstreetmap', results: [] };
+const endpoints = {
+  searchEndpoint: 'https://places.example/search',
+  reverseEndpoint: 'https://places.example/reverse',
+};
 
-/** Answer every request with one fixed reply; record each URL. */
-function route(answer) {
-  const urls = [];
-  const fetchImpl = async (url, init = {}) => {
-    urls.push(String(url));
-    init.signal?.throwIfAborted();
-    if (answer instanceof Error) throw answer;
-    return Response.json(answer.body, { status: answer.status ?? 200 });
-  };
-  return { urls, fetchImpl };
-}
-const params = (href) => new URL(href, 'http://localhost').searchParams;
-
-test('a found place comes back in the shared place shape, named for the annotation resolver', async () => {
-  // The resolver matches OSM features on `name`. Google fills it from
-  // address_components, which an OpenStreetMap result does not have.
-  const net = route({ body: ROUTE_DUBAI });
-  const outcome = await createNominatimGeocoder({ fetchImpl: net.fetchImpl }).geocode('Dubai', { bias: AUSTIN_BIAS });
-  assert.equal(outcome.answered, true);
-  assert.deepEqual(outcome.place, {
-    lat: 25.0742823,
-    lng: 55.1885624,
-    name: 'Dubai',
-    label: 'Dubai, Dubai Emirate, United Arab Emirates',
-    types: ['locality', 'political'],
-    viewport: {
-      southwest: { lat: 24.6230801, lng: 54.7153981 },
-      northeast: { lat: 25.5250676, lng: 56.205298 },
+test('Nominatim normalizes framing and reverse context through independent configured endpoints', async () => {
+  const calls = [];
+  const adapter = createNominatimProvider({
+    ...endpoints,
+    fetchImpl: async (url, init) => {
+      calls.push({ url: new URL(url), init });
+      return Response.json(url.includes('/search?') ? [hit] : hit);
     },
   });
+  const answer = await adapter.geocode('London', { bias: '50,-2|53,1' });
+  assert.equal(answer.answered, true);
+  assert.equal(answer.place.name, 'London');
+  assert.deepEqual(answer.place.types, ['locality', 'political']);
+  assert.deepEqual(answer.place.viewport, {
+    southwest: { lat: 51, lng: -1 },
+    northeast: { lat: 52, lng: 0 },
+  });
+  const reverse = await adapter.reverseGeocode(51.5, -0.12);
+  assert.equal(reverse.locality, 'London');
+  assert.deepEqual(reverse.streetLabels, ['Whitehall']);
+  assert.equal(calls[0].url.searchParams.get('viewbox'), '-2,53,1,50');
+  assert.equal(calls[0].url.searchParams.get('bounded'), '0');
+  assert.equal(calls[0].url.searchParams.get('format'), 'jsonv2');
+  assert.equal(calls[1].url.pathname, '/reverse');
+  assert.equal(calls[1].init.redirect, 'error');
+  assert.equal(calls[1].init.headers, undefined);
+  assert.deepEqual(
+    createGeospatialServices({ providers: adapter }).capabilities,
+    { reverseGeocode: true, textSearch: false, nearby: false, route: false },
+  );
 });
 
-test('the view bias reaches the route as a Nominatim viewbox, and a missing bias sends none', async () => {
-  // Without the viewbox, "6th Street Austin" resolves to Sealy, in Austin County.
-  const biased = route({ body: ROUTE_DUBAI });
-  await createNominatimGeocoder({ fetchImpl: biased.fetchImpl }).geocode('6th Street Austin', { bias: AUSTIN_BIAS });
-  assert.equal(new URL(biased.urls[0], 'http://localhost').pathname, '/api/geocode/search');
-  assert.equal(params(biased.urls[0]).get('q'), '6th Street Austin');
-  assert.equal(params(biased.urls[0]).get('viewbox'), '-97.9000,30.1500,-97.6000,30.4000');
-
-  const unbiased = route({ body: ROUTE_DUBAI });
-  await createNominatimGeocoder({ fetchImpl: unbiased.fetchImpl }).geocode('Dubai');
-  assert.equal(params(unbiased.urls[0]).has('viewbox'), false);
+test('explicit Nominatim choice retains offline coordinates and bypasses the default geocoder chain', async () => {
+  const calls = [];
+  const search = createDefaultPlaceSearch({
+    geocoding: { provider: 'nominatim', ...endpoints },
+    resolveApiKey: () => {
+      throw new Error('must not request a Google key');
+    },
+    fetchImpl: async (url) => {
+      calls.push(url);
+      return Response.json(url.includes('/search?') ? [hit] : hit);
+    },
+  });
+  assert.equal((await search.geocode('London')).place.name, 'London');
+  await search.reverseGeocode(51.5, -0.12);
+  assert.equal(calls.length, 2);
+  assert(calls.every((url) => new URL(url).hostname === 'places.example'));
+  assert.equal(search.attribution.reverseGeocode, 'OpenStreetMap / Nominatim');
+  assert.equal(search.attribution.route, 'OpenStreetMap / OSRM');
+  await search.geocode('51.5, -0.12');
+  assert.equal(calls.length, 2);
+  assert.throws(() =>
+    createDefaultPlaceSearch({ geocoding: { provider: 'unknown' } }),
+  );
+  assert.throws(() =>
+    createDefaultPlaceSearch({ geocoding: { provider: 'nominatim' } }),
+  );
 });
 
-test('a definitive miss is answered; an outage or a network failure is not', async () => {
-  // createPlaceSearch caches answered misses; caching an outage would keep a
-  // real place "not found" after the network recovers.
-  const miss = await createNominatimGeocoder({ fetchImpl: route({ body: ROUTE_ZERO }).fetchImpl }).geocode('Qwxzyv Nowhereville');
-  assert.deepEqual(miss, { place: null, answered: true });
-  const outage = await createNominatimGeocoder({ fetchImpl: route({ status: 502, body: ROUTE_DOWN }).fetchImpl }).geocode('Dubai');
-  assert.deepEqual(outage, { place: null, answered: false });
-  const offline = await createNominatimGeocoder({ fetchImpl: route(new Error('ECONNRESET')).fetchImpl }).geocode('Dubai');
-  assert.deepEqual(offline, { place: null, answered: false });
+test('outages and malformed answers are retryable; only an explicit empty array is a cached miss', async () => {
+  for (const makeResponse of [
+    () => Response.json({}, { status: 429 }),
+    () => Response.json({ error: 'bad' }),
+    () => Response.json([{ ...hit, lat: '' }]),
+    () => new Response('{'),
+    () =>
+      Response.json([hit], { headers: { 'content-length': String(600000) } }),
+  ]) {
+    let count = 0;
+    const adapter = createNominatimProvider({
+      ...endpoints,
+      fetchImpl: async () => {
+        count++;
+        return makeResponse();
+      },
+    });
+    const service = createPlaceSearch({ providers: [adapter] });
+    assert.equal((await service.geocode('missing')).place, null);
+    assert.equal((await service.geocode('missing')).place, null);
+    assert.equal(count, 2);
+  }
+  let count = 0;
+  const adapter = createNominatimProvider({
+    ...endpoints,
+    fetchImpl: async () => {
+      count++;
+      return Response.json([]);
+    },
+  });
+  const service = createPlaceSearch({ providers: [adapter] });
+  await service.geocode('missing');
+  await service.geocode('missing');
+  assert.equal(count, 1);
 });
 
-test('a cancelled lookup throws instead of reporting a miss, and makes no request', async () => {
+test('aborting a pending Nominatim body cancels its stream and rejects instead of caching a miss', async () => {
   const controller = new AbortController();
-  controller.abort();
-  const net = route({ body: ROUTE_DUBAI });
+  let cancelled = false;
+  const adapter = createNominatimProvider({
+    ...endpoints,
+    fetchImpl: async () =>
+      new Response(
+        new ReadableStream({
+          start() {
+            setTimeout(() => controller.abort(), 10);
+          },
+          cancel() {
+            cancelled = true;
+          },
+        }),
+      ),
+  });
   await assert.rejects(
-    createNominatimGeocoder({ fetchImpl: net.fetchImpl }).geocode('Dubai', { signal: controller.signal }),
+    adapter.geocode('London', { signal: controller.signal }),
     { name: 'AbortError' },
   );
-  assert.equal(net.urls.length, 0);
+  assert.equal(cancelled, true);
 });
 
-test('the standalone service falls back from a refusing Google to Nominatim, never to Photon', async () => {
-  const urls = [];
-  const service = createStandalonePlaceSearch({
-    resolveApiKey: () => 'fixture',
-    fetchImpl: async (url) => {
-      const href = String(url);
-      urls.push(href);
-      if (href.includes('maps.googleapis.com')) return Response.json({ status: 'REQUEST_DENIED', results: [] });
-      if (href.startsWith('/api/geocode/search')) return Response.json(ROUTE_DUBAI);
-      throw new Error(`unexpected request ${href}`);
-    },
+test('portable response cap counts UTF-8 bytes and cancels oversized streams', async () => {
+  await assert.rejects(
+    readResponseTextCapped(
+      { headers: new Headers(), text: async () => 'éé' },
+      3,
+    ),
+    { code: 'RESPONSE_TOO_LARGE' },
+  );
+  let cancelled = false;
+  const response = new Response(
+    new ReadableStream({
+      start(c) {
+        c.enqueue(new Uint8Array(4));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    }),
+  );
+  await assert.rejects(readResponseTextCapped(response, 3), {
+    code: 'RESPONSE_TOO_LARGE',
   });
-  const result = await service.geocode('Dubai');
-  assert.equal(result.place.label, 'Dubai, Dubai Emirate, United Arab Emirates');
-  assert.equal(result.fallbackUsed, true);
-  assert.equal(urls.some((href) => href.includes('photon.komoot.io')), false);
+  assert.equal(cancelled, true);
 });
 
-test('a keyless standalone service asks Nominatim and issues no Google request', async () => {
-  const urls = [];
-  const service = createStandalonePlaceSearch({
-    fetchImpl: async (url) => {
-      urls.push(String(url));
-      return Response.json(ROUTE_DUBAI);
+test('unconfigured operations stay absent and invalid coordinates do not make requests', async () => {
+  assert.equal(createNominatimProvider().geocode, undefined);
+  let calls = 0;
+  const adapter = createNominatimProvider({
+    ...endpoints,
+    fetchImpl: async () => {
+      calls++;
+      return Response.json(hit);
     },
   });
-  assert.equal((await service.geocode('Dubai')).place.lat, 25.0742823);
-  assert.deepEqual(urls.map((href) => new URL(href, 'http://localhost').pathname), ['/api/geocode/search']);
+  assert.equal(await adapter.reverseGeocode(100, 0), null);
+  assert.equal(calls, 0);
+  for (const searchEndpoint of [
+    'https://u:p@example.com/search',
+    'https://example.com/search?key=x',
+    '//example.com/search',
+    'file:///search',
+  ])
+    assert.throws(() => createNominatimProvider({ searchEndpoint }));
 });

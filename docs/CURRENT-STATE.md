@@ -1,5 +1,17 @@
 # God's Eye View Current State
 
+Place search accepts an explicit Nominatim provider with independently configured search and reverse endpoints. The default offline/Google/Photon/local-fallback order is unchanged when no provider is selected. Provider adapters share normalized coordinates, viewport framing and reverse labels; roads and boundary geometry remain separate services. Portable capped-response and Overpass lexical helpers are exported independently of the Node server.
+
+Reference feed construction is exported through `sources/reference`; the cable source also has a dedicated `layers/submarine-cables/source` entry. Standalone catalog compatibility remains available. Source choices, data and attribution are unchanged.
+
+Source factories have dedicated `layers/<family>/source` exports. ALPR and earthquake record normalization and CCTV source policy no longer pull rendering into source consumers. Catalog construction and voice feed reads use their focused owners; compatibility entries remain available. Settings filesystem hardening lives under `server/standalone/`. Import-direction checks complement export ownership checks; source behavior, settings policy and rendering are unchanged.
+
+Voice controls bind to a protocol-independent session factory. The default WebRTC adapter preserves the existing Realtime connection, push-to-talk, cost controls and radio handoff. Session subscriptions expose state, transcript, action call/result, interruption and completion events; stopping or replacing a session cancels pending actions. Alternate adapters can use the same controls and action runner.
+
+Voice action argument schemas have one portable owner under `src/voice/actionSchemas.js`. The Realtime provider builds the same 28 tools using separate description-only metadata. Description customization cannot replace argument types, enum values or required fields.
+
+Portable source exports provide Radio Browser station normalization, CCTV feed types and regional records independently of HTTP middleware. Radio normalization accepts an explicit URL policy; the standalone directory retains its existing HTTPS rules. Tile coordinate validation accepts explicit zoom bounds with unchanged traffic defaults. Cache, request and rendering owners remain unchanged.
+
 Vessels separate plain, stable MMSI records and source acquisition from scene
 resources. The renderer owns geometry and billboards; cards, picking and trails
 resolve those resources through it. Partial-feed retention, selected-vessel
@@ -787,7 +799,13 @@ fetching, trailing-24-hour filtering and partial-success caching are unchanged.
 > is present — everyone gets the same tile.
 >
 > Keyless, the honest surface is the **layer row**, which reads
-> `UNAVAILABLE · NASA FIRMS · LIVE · KEY REQUIRED`, and the earthquakes half
+> `UNAVAILABLE · NASA FIRMS · LIVE · KEY REQUIRED`. Its control also names the
+> key: hovering it, and its accessible name, read
+> `Needs FIRMS_MAP_KEY — add it in Provider Settings`. A layer declares which
+> key it needs as a key-registry id and reports `stats.keyRequired` while that
+> key is absent; the panel builds the text from the pair, and produces none for
+> a layer that needs no key, already holds one, or names a key the registry does
+> not recognise. The earthquakes half
 > still delivers in full. The shared loading reducer now treats an explicitly
 > declared missing optional key as a configured terminal state rather than a
 > failed multi-layer mission, so the global chip completes without showing
@@ -1450,7 +1468,15 @@ This is the current runtime/source-of-truth snapshot for the project.
 >   user intent.
 >   Display orders 3D immediately above Celestial and Clean UI immediately
 >   below it. The top-center action group places Clear Layers to the left of
->   Share and Reset Globe to the right. Clear Layers turns off the currently
+>   Share, then Tilt Map and North Up, and Reset Globe to the right. Tilt Map
+>   swings the camera between a straight-down map and a 35-degree oblique around
+>   the point under the centre of the view, keeping that point and the distance
+>   to it; North Up rotates around the same point until north is at the top,
+>   keeping the pitch. Its needle shows the current bearing. Both decline
+>   without moving the camera when nothing is under the centre of the view (a
+>   camera facing the sky), and both are explicit camera actions, so either one
+>   releases a followed aircraft the way the other camera controls do. They
+>   follow Reset Globe out of Clean UI, recording, Scene playback and Cockpit. Clear Layers turns off the currently
 >   selected manager-owned data layers, including an active Context choice,
 >   while retaining visual, HUD, map, and panel settings. A disabled layer may
 >   still release camera work that it owns through its normal teardown.
@@ -1496,8 +1522,9 @@ This is the current runtime/source-of-truth snapshot for the project.
 >   the Cockpit HUD at 145), scrolling internally when the layer list is longer than
 >   the corridor. Cesium's credit line is never passable and still bounds the
 >   corridor. Layer toggles stay live from there, and collapsing returns the
->   plain launcher. The map-only Clear, Share, and Reset Globe actions are hidden
->   for the duration of Cockpit, both as a group and as individual controls.
+>   plain launcher. The map-only Clear, Share, Tilt Map, North Up, and Reset
+>   Globe actions are hidden for the duration of Cockpit, both as a group and as
+>   individual controls.
 >   It uses the `radar` symbol; both tabs are reachable with Tab and Left/Right arrows switch between them. Its action row
 >   places the single Cockpit entry before Search Nearby Sites. Cockpit removes
 >   the duplicate floating map entry and topline exit; the bottom-center
@@ -1607,9 +1634,9 @@ This is the current runtime/source-of-truth snapshot for the project.
 >   tray inside the screen.
 >   Adaptive remeasurement preserves the user's
 >   scroll position across Tactical, Minimal, and HUD Off layouts.
->   During an active Scene run, Clear Selected Layers and Reset Globe remain
->   hidden until playback stops or completes because the Scene transport owns
->   layer and camera sequencing for that interval.
+>   During an active Scene run, Clear Selected Layers, Tilt Map, North Up and
+>   Reset Globe remain hidden until playback stops or completes because the
+>   Scene transport owns layer and camera sequencing for that interval.
 >   The Cockpit Contact summary exposes Previous and Next contact navigation
 >   plus its collapse control; it does not offer a Focus action because the
 >   first-person Cockpit camera remains owned by the tracked aircraft.
@@ -3059,8 +3086,28 @@ silently demoting every later lookup for the session.
 
 Location search/fly-to, annotations and Radio location lookup receive one
 `placeSearch.geocode(query, { bias, signal })` service. `src/standalone` composes
-Google first when configured and Photon/OpenStreetMap as fallback, including
-Google transport failures or declined requests. The portable `./search` export
+two offline providers first — a strict decimal-degree coordinate reader and an
+exact-match reader over the bundled city and landmark names — then Google when
+configured and Photon/OpenStreetMap as fallback, including Google transport
+failures or declined requests. The offline pair answer with no request and no
+key, and decline everything they are not certain of: a coordinate must be a
+decimal-degree pair (either order when N/S/E/W fix the axes), and a bundled name
+must match exactly, so `12junk, 34oops` and `austin, tx` both reach the
+geocoders instead of being answered from the bundle. Degrees/minutes/seconds and
+grid references are not parsed. An answer either provider gives is exact, so
+nearby-landmark recovery stands aside for it — otherwise a typed coordinate
+could be replaced by whatever Places finds near the current view. The portable `./search` export
+Google first when configured, Photon/OpenStreetMap as fallback (including Google
+transport failures or declined requests), and the local `/api/geocode` route
+over Nominatim as a last resort when neither answers. That route keeps to the
+public instance's usage policy: an identifying `User-Agent` and `Referer`, at
+most one request per second shared with the cockpit's reverse lookups, answers
+cached for five minutes, one upstream call shared between identical searches
+already in flight, a queue bounded at four waiting searches (a burst past it is
+refused with 429 and `Retry-After`, never held), and a queued search dropped
+once its caller has given up rather than spending a slot on an answer nobody
+will read. A hit whose coordinates or bounding box are missing or out of range
+is discarded rather than coerced. The portable `./search` export
 provides the service and adapters; it reads no environment or application state.
 Existing browser/server key setup is unchanged.
 

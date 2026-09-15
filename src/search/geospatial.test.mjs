@@ -162,19 +162,17 @@ test('HTTP refusal cancels its response and does not retry another destination',
   assert.equal(cancelled, 1);
 });
 
-test('Nominatim configuration changes its endpoint without changing its normalized result', async () => {
+test('Photon configuration changes its endpoint without changing its normalized result', async () => {
   const service = createDefaultPlaceSearch({
-    endpoints: { nominatim: 'https://search.example/api/geocode/search' },
+    endpoints: { photon: 'https://search.example/api/' },
     fetchImpl: async (url) => {
       assert.equal(new URL(url).origin, 'https://search.example');
       return json({
-        status: 'OK',
-        source: 'openstreetmap',
-        results: [
+        features: [
           {
-            formatted_address: 'Town, Country',
-            geometry: { location: { lat: 30, lng: -97 }, viewport: null },
-            types: ['locality', 'political'],
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [-97, 30] },
+            properties: { name: 'Town' },
           },
         ],
       });

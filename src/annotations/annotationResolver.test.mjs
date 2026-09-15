@@ -439,20 +439,16 @@ test('a genuine geocoded feature name still canonicalizes an alternate user name
 // `geocodePlace` was Google-only: no key returned null, and so did a key whose
 // Geocoding API is not enabled (Google answers HTTP 200 with REQUEST_DENIED).
 // Either way the annotation silently failed to place. Both now fall through to
-// Nominatim, through the local /api/geocode/search route. These drive the second case, because it reaches the SAME fallback
+// Photon. These drive the second case, because it reaches the SAME fallback
 // through a running Google branch — the no-key branch cannot be driven from
 // `node --test`, since the key expression reads `import.meta.env`, which only
 // Vite defines.
 
-/** What /api/geocode/search answers: a Nominatim hit in Google's result shape. */
-function osmRouteAnswer({ label, lat, lng, types = ['point_of_interest', 'establishment'], viewport = null }) {
+/** Photon's GeoJSON shape, trimmed to the properties the adapter consumes. */
+function photonFeature({ name, lat, lon, tags = {}, extent = null, ...rest }) {
   return {
-    ok: true,
-    json: async () => ({
-      status: 'OK',
-      source: 'openstreetmap',
-      results: [{ formatted_address: label, geometry: { location: { lat, lng }, viewport }, types, source: 'openstreetmap' }],
-    }),
+    geometry: { type: 'Point', coordinates: [lon, lat] },
+    properties: { name, ...tags, ...rest, ...(extent ? { extent } : {}) },
   };
 }
 
@@ -463,14 +459,23 @@ test('keyless: a key that geocodes to nothing still anchors the annotation', asy
   installGoogleMocks(t, async (url) => {
     requests.push(String(url));
     if (String(url).startsWith('https://maps.googleapis.com/')) return GOOGLE_FOUND_NOTHING;
-    assert.match(String(url), /^\/api\/geocode\/search\?/);
-    return osmRouteAnswer({
-      label: 'Lady Bird Lake, Austin, Travis County, Texas, United States',
-      lat: 30.25,
-      lng: -97.73,
-      types: ['natural_feature'],
-      viewport: { southwest: { lat: 30.24, lng: -97.8 }, northeast: { lat: 30.28, lng: -97.68 } },
-    });
+    return {
+      ok: true,
+      json: async () => ({
+        features: [photonFeature({
+          name: 'Lady Bird Lake',
+          lat: 30.25,
+          lon: -97.73,
+          city: 'Austin',
+          state: 'Texas',
+          country: 'United States',
+          tags: { osm_key: 'natural', osm_value: 'water' },
+          // Photon orders extent [west, north, east, south] — a naive [w,s,e,n]
+          // read would invert the box and still look like a valid viewport.
+          extent: [-97.8, 30.28, -97.68, 30.24],
+        })],
+      }),
+    };
   });
 
   const resolved = await resolveAnnotationTarget({
@@ -483,25 +488,23 @@ test('keyless: a key that geocodes to nothing still anchors the annotation', asy
   assert.deepEqual([resolved.lat, resolved.lon], [30.25, -97.73]);
   // The label is shortened the same way a Google `formatted_address` is.
   assert.equal(resolved.label, 'Lady Bird Lake');
-  // The route's viewport reaches the framing code in the Places `{low,high}`
-  // shape — this is what sizes a grounds disc and the flyTo box.
+  // Photon's extent reaches the framing code in the Places `{low,high}` shape,
+  // right way up — this is what sizes a grounds disc and the flyTo box.
   assert.deepEqual(resolved.viewport, {
     low: { latitude: 30.24, longitude: -97.8 },
     high: { latitude: 30.28, longitude: -97.68 },
   });
-  // Google is asked first and exactly once; one route call answers it, and
-  // Photon is never consulted.
+  // Google is asked first and exactly once; one Photon call answers it.
   assert.equal(requests.filter((url) => url.includes('maps.googleapis.com')).length, 1);
-  assert.equal(requests.filter((url) => url.startsWith('/api/geocode/search')).length, 1);
-  assert.equal(requests.filter((url) => url.includes('photon.komoot.io')).length, 0);
+  assert.equal(requests.filter((url) => url.includes('photon.komoot.io')).length, 1);
 });
 
 test('keyless: OSM matching uses the feature\'s canonical name, not the user\'s words', async (t) => {
-  // The reason the provider fills `name` at all. The ask names a landmark AND
-  // its surroundings; the geocoded feature is called just "Tejano Monument".
-  // Score the OSM candidates on the raw utterance and the locality tokens win —
-  // this is the Thompson-Austin bug (field test 7) reached through the keyless
-  // path. Score them on the canonical name and the monument wins.
+  // The reason `primaryName` is carried out of Photon at all. The ask names a
+  // landmark AND its surroundings; the geocoded feature is called just "Tejano
+  // Monument". Score the OSM candidates on the raw utterance and the locality
+  // tokens win — this is the Thompson-Austin bug (field test 7) reached through
+  // the keyless path. Score them on the canonical name and the monument wins.
   const decoy = squareWay(ANCHOR, -250, -250, 3000, {
     building: 'yes', tourism: 'hotel', name: 'Texas Capitol Austin Visitor Center',
   });
@@ -511,12 +514,19 @@ test('keyless: OSM matching uses the feature\'s canonical name, not the user\'s 
     const href = String(url);
     if (href.startsWith('https://maps.googleapis.com/')) return GOOGLE_FOUND_NOTHING;
     if (href.startsWith('/api/google/text-search')) return { ok: true, json: async () => ({ places: [] }) };
-    if (href.startsWith('/api/geocode/search')) {
-      return osmRouteAnswer({
-        label: 'Tejano Monument, Congress Avenue, Downtown, Austin, Travis County, Texas, United States',
-        lat: ANCHOR.lat,
-        lng: ANCHOR.lon,
-      });
+    if (href.startsWith('https://photon.komoot.io/')) {
+      return {
+        ok: true,
+        json: async () => ({
+          features: [photonFeature({
+            name: 'Tejano Monument',
+            lat: ANCHOR.lat,
+            lon: ANCHOR.lon,
+            city: 'Austin',
+            tags: { osm_key: 'historic', osm_value: 'memorial' },
+          })],
+        }),
+      };
     }
     assert.equal(href, '/api/overpass');
     assert.equal(init?.method, 'POST');
@@ -546,32 +556,35 @@ function approximateMetres(lat1, lon1, lat2, lon2) {
   return Math.hypot(dx, dy);
 }
 
-test('keyless: a Nominatim outage is not remembered as "no such place"', async (t) => {
-  // Google answering ZERO_RESULTS is a verdict about GOOGLE. OpenStreetMap holds
+test('keyless: a Photon outage is not remembered as "no such place"', async (t) => {
+  // Google answering ZERO_RESULTS is a verdict about GOOGLE. Photon holds
   // plenty of places Google does not — that asymmetry is why this fallback
-  // exists — so a Google verdict plus a route outage must leave the query open.
-  // Caching it would keep an annotation unplaceable for the rest of the session,
-  // on a network that has since recovered.
-  const routeUp = osmRouteAnswer({
-    label: 'Waller Creek, Austin, Travis County, Texas, United States',
-    lat: 30.2665,
-    lng: -97.7385,
-    types: ['natural_feature'],
-  });
-  let routeReachable = false;
+  // exists — so a Google verdict plus a Photon timeout must leave the query
+  // open. Caching it would keep an annotation unplaceable for the rest of the
+  // session, on a network that has since recovered.
+  const photonUp = {
+    ok: true,
+    json: async () => ({
+      features: [photonFeature({
+        name: 'Waller Creek', lat: 30.2665, lon: -97.7385, city: 'Austin',
+        tags: { osm_key: 'waterway', osm_value: 'stream' },
+      })],
+    }),
+  };
+  let photonReachable = false;
   const requests = [];
   installGoogleMocks(t, async (url) => {
     requests.push(String(url));
     if (String(url).startsWith('https://maps.googleapis.com/')) return GOOGLE_FOUND_NOTHING;
-    if (!routeReachable) throw new Error('network down');
-    return routeUp;
+    if (!photonReachable) throw new Error('network down');
+    return photonUp;
   });
 
   const target = 'Waller Creek';
   assert.equal(await resolveAnnotationTarget({ viewer: closeViewportViewer(), target }), null);
   const duringOutage = requests.length;
 
-  routeReachable = true;
+  photonReachable = true;
   const retried = await resolveAnnotationTarget({ viewer: closeViewportViewer(), target });
 
   assert.ok(retried, 'the same target must resolve once the network is back');

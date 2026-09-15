@@ -25,7 +25,7 @@ import {
 } from './layers/tides.js';
 import { createApplicationCables } from './layers/submarineCables.js';
 import { createInfrastructureLayers } from '../data/infrastructure.js';
-import { localGeoJsonServices } from '../data/localGeojson.js';
+import { localGeoJsonServices } from './localGeojsonServices.js';
 
 const SOURCE_METHODS = Object.freeze({
   flights: ['getSnapshot'],

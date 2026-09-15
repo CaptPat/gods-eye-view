@@ -3024,21 +3024,16 @@ test('front5: 0.99 km due EAST is the subject, though a degree box rejects it', 
 //
 // `resolveRadioLocation` used to be Google-only: no key threw, and a key that
 // geocoded to nothing returned null, which the caller reports as "Could not
-// resolve Radio location". Both now fall through to Nominatim, through the
-// local /api/geocode/search route. These drive the
+// resolve Radio location". Both now fall through to Photon. These drive the
 // second case, because it reaches the SAME fallback through a running Google
 // branch — the no-key branch cannot be driven here, since the key expression
 // reads `import.meta.env`, which only Vite defines.
 
-/** What /api/geocode/search answers: a Nominatim hit in Google's result shape. */
-function osmRouteAnswer({ label, lat, lng }) {
+/** Photon's GeoJSON shape, trimmed to the properties the adapter consumes. */
+function photonFeature({ name, lat, lon, city = '', country = '' }) {
   return {
-    ok: true,
-    json: async () => ({
-      status: 'OK',
-      source: 'openstreetmap',
-      results: [{ formatted_address: label, geometry: { location: { lat, lng }, viewport: null }, types: ['locality', 'political'] }],
-    }),
+    geometry: { type: 'Point', coordinates: [lon, lat] },
+    properties: { name, city, country, osm_key: 'place', osm_value: 'city' },
   };
 }
 
@@ -3090,44 +3085,56 @@ test('voice Radio: a key that geocodes to nothing still places the station, keyl
     if (String(url).startsWith('https://maps.googleapis.com/')) {
       return { ok: true, json: async () => ({ status: 'ZERO_RESULTS', results: [] }) };
     }
-    assert.match(String(url), /^\/api\/geocode\/search\?/);
-    return osmRouteAnswer({ label: 'Muscat, Oman', lat: 23.5882, lng: 58.3829 });
+    assert.match(String(url), /^https:\/\/photon\.komoot\.io\/api\/\?/);
+    return {
+      ok: true,
+      json: async () => ({
+        features: [photonFeature({
+          name: 'Hạ Long Bay', lat: 20.9101, lon: 107.1839, city: 'Hạ Long', country: 'Việt Nam',
+        })],
+      }),
+    };
   });
 
   const result = await controlRadio({}, dataManager, {
-    action: 'select', locationQuery: 'Muscat',
+    action: 'select', locationQuery: 'Hạ Long Bay',
   });
 
   // Before the fallback existed this was `ok: false, "Could not resolve Radio location"`.
   assert.equal(result.ok, true);
-  assert.equal(result.requestedLocation, 'Muscat, Oman');
+  assert.equal(result.requestedLocation, 'Hạ Long Bay, Hạ Long, Việt Nam');
   assert.equal(calls.length, 1);
-  assert.ok(Math.abs(calls[0].criteria.anchor.lat - 23.5882) < 1e-9);
-  assert.ok(Math.abs(calls[0].criteria.anchor.lon - 58.3829) < 1e-9);
-  // Google is asked first and exactly once; the route answers unbiased, in one call.
+  assert.ok(Math.abs(calls[0].criteria.anchor.lat - 20.9101) < 1e-9);
+  assert.ok(Math.abs(calls[0].criteria.anchor.lon - 107.1839) < 1e-9);
+  // Google is asked first and exactly once; Photon answers unbiased, in one call.
   assert.equal(requests.filter((url) => url.includes('maps.googleapis.com')).length, 1);
-  assert.equal(requests.filter((url) => url.startsWith('/api/geocode/search')).length, 1);
-  assert.match(requests.at(-1), /[?&]q=Muscat(&|$)/);
-  assert.doesNotMatch(requests.at(-1), /[?&]viewbox=/, 'a named radio location is not viewport-biased');
+  assert.equal(requests.filter((url) => url.includes('photon.komoot.io')).length, 1);
+  assert.match(requests.at(-1), /[?&]q=H%E1%BA%A1\+Long\+Bay/);
+  assert.doesNotMatch(requests.at(-1), /[?&](lat|lon|bbox)=/, 'a named radio location is not viewport-biased');
 });
 
 test('voice Radio: the keyless path applies no country filter the keyed path would not', async (t) => {
-  // An OpenStreetMap result carries no address_components, so no structured
-  // country reaches `rankRadioStationsForRequest` — which fails CLOSED on a
-  // country it cannot map, returning NO stations. Guessing one from the label
-  // would risk exactly that ("Polska" matches nothing). The label may name the
-  // country; the filter may not.
+  // Photon reports the country in the feature's own language ("Việt Nam"), and
+  // `rankRadioStationsForRequest` fails CLOSED on a country it cannot map —
+  // returning NO stations. Forwarding it would make a keyless install answer
+  // "No Radio station matched" for exactly the places it just resolved, while a
+  // keyed install placed a station. The label may carry it; the filter may not.
   const { calls, dataManager } = radioSelectionHarness();
   installKeyedFetch(t, async (url) => (String(url).startsWith('https://maps.googleapis.com/')
     ? { ok: true, json: async () => ({ status: 'ZERO_RESULTS', results: [] }) }
-    : osmRouteAnswer({ label: 'Kraków, Lesser Poland Voivodeship, Poland', lat: 50.0614, lng: 19.9366 })));
+    : {
+      ok: true,
+      json: async () => ({
+        features: [photonFeature({ name: 'Kraków', lat: 50.0614, lon: 19.9366, country: 'Polska' })],
+      }),
+    }));
 
   const result = await controlRadio({}, dataManager, { action: 'select', locationQuery: 'Kraków' });
 
   assert.equal(result.ok, true);
-  assert.equal(calls[0].criteria.country, '', 'a label-derived country must never reach the station filter');
-  assert.equal(normalizeRadioCountryInput('Polska').valid, false, 'and this is why: a guess can match nothing');
-  assert.equal(result.requestedLocation, 'Kraków, Lesser Poland Voivodeship, Poland', 'the label still names the country honestly');
+  assert.equal(calls[0].criteria.country, '', 'a localized country name must never reach the station filter');
+  assert.equal(normalizeRadioCountryInput('Polska').valid, false, 'and this is why: it would match nothing');
+  assert.equal(result.requestedLocation, 'Kraków, Polska', 'the label still names the country honestly');
 });
 
 const testPlaceSearch = () => createStandalonePlaceSearch({ resolveApiKey: () => globalThis.window?.__GOOGLE_MAPS_API_KEY__ });

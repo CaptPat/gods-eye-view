@@ -5,12 +5,6 @@ import { createStandalonePlaceSearch } from '../standalone/placeSearch.js';
 import { photonExtentToBounds } from '../keylessGeocoder.js';
 const feature = { geometry: { type: 'Point', coordinates: [105.85, 21.03] }, properties: { name: 'Hà Nội', type: 'city' } };
 const hit = () => Response.json({ features: [feature] });
-// What /api/geocode/search answers for the same place.
-const routeHit = () => Response.json({
-  status: 'OK',
-  source: 'openstreetmap',
-  results: [{ formatted_address: 'Hà Nội, Vietnam', geometry: { location: { lat: 21.03, lng: 105.85 }, viewport: null }, types: ['locality', 'political'] }],
-});
 
 test('malformed successful Photon responses remain retryable', async () => {
   for (const malformed of [{ error: 'temporary failure' }, { features: {} }, { features: [{ geometry: { coordinates: [null, 1] } }] }]) {
@@ -26,7 +20,7 @@ test('standalone geocoding falls back after Google connection, JSON and refusal 
   for (const fail of [() => { throw new Error('offline'); }, () => new Response('invalid json'), () => Response.json({ status: 'REQUEST_DENIED' })]) {
     const urls = [];
     const service = createStandalonePlaceSearch({ resolveApiKey: () => 'fixture', fetchImpl: async (url) => {
-      urls.push(url); return url.includes('maps.googleapis.com') ? fail() : routeHit();
+      urls.push(url); return url.includes('maps.googleapis.com') ? fail() : hit();
     } });
     const result = await service.geocode('Hanoi');
     assert.equal(result.place.name, 'Hà Nội');
@@ -37,7 +31,7 @@ test('standalone geocoding falls back after Google connection, JSON and refusal 
 
 test('a keyless service does not issue any Google request', async () => {
   const service = createStandalonePlaceSearch({ fetchImpl: async (url) => {
-    assert.equal(new URL(url, 'http://localhost').pathname, '/api/geocode/search'); return routeHit();
+    assert.equal(new URL(url).hostname, 'photon.komoot.io'); return hit();
   } });
   assert.equal((await service.geocode('Hanoi')).place.lat, 21.03);
 });

@@ -1,5 +1,16 @@
 # Changelog
 
+- Add an optional Nominatim geocoding adapter with configurable search/reverse endpoints, cancellation, bounded responses and retryable upstream errors. Extract portable response-reading and Overpass lexical helpers while retaining existing server exports.
+
+- Expose reference feed factories independently of standalone catalog construction; preserve source choices and asset attribution.
+
+- Add source-only layer exports and enforce source, browser, standalone and voice import directions. Move plain record/feed helpers and settings filesystem hardening to their owners while preserving compatibility and behavior.
+
+- Separate voice session lifetime and common controls from the default Realtime protocol adapter.
+- Separate canonical voice action arguments from descriptive wording, preserving the existing Realtime tool inventory.
+
+- Expose portable radio, camera-type and regional source helpers; keep HTTP transport separate from record normalization.
+
 - Separate vessel records and feed acquisition from rendering while preserving selection, partial-feed retention, sea-surface placement and request cancellation.
 
 - Separate military-flight records and acquisition from rendering while preserving ground-model ownership, source units and follow behavior.
@@ -111,9 +122,9 @@
 
 ## Keyless place search and self-hosted Overpass (fork)
 
-- Resolve place names through Nominatim (`/api/geocode/search`) when Google has no key or
-  declines. Requests are biased to the current view, labelled in English and share the
-  regional briefing's one-per-second Nominatim queue; Photon is no longer composed.
+- Keyless place search now follows upstream (#573, #582): Google, then Photon, then
+  Nominatim through `/api/geocode`. The fork's own `/api/geocode/search` route and its
+  OpenStreetMap framing rules were removed in the upstream #583 sync.
 - Try endpoints from `GEV_OVERPASS_UPSTREAMS` before the public Overpass mirrors; plaintext
   is accepted only for private addresses.
 - Do not cache an empty Overpass element list, so a partial-coverage mirror cannot pin a
@@ -215,6 +226,34 @@ of current runtime behavior, see [`docs/CURRENT-STATE.md`](docs/CURRENT-STATE.md
   skip, so this affects every Overpass-backed layer: Mapped Installations,
   traffic roads and annotation geometry. Mirror rotation, cooldown and cache
   admission are unchanged (#420 — thanks @GladiatorrX9).
+- Place search has a last resort. With no Google Maps key, and when Photon does
+  not answer, a named-place search now falls back to OpenStreetMap's Nominatim
+  through `/api/geocode`, so search and voice fly-to still work on a keyless
+  globe. The route keeps to the service's usage policy: an identifying
+  User-Agent and Referer, at most one request per second, answers cached, one
+  upstream call shared between identical searches in flight, a bounded queue so
+  a burst is refused rather than held, and a queued search dropped once its
+  caller has given up (#350 — thanks @sendmebits).
+
+- Regional upstream reads now hold their deadline through the response body. The
+  abort timer was cleared as soon as the headers arrived, so an upstream that
+  answered and then stalled mid-body had no deadline at all. Redirect policy is
+  now stated per call rather than inherited, and the fixed Nominatim endpoints
+  refuse to be redirected.
+
+- The location search box answers two kinds of query without a network request
+  or an API key. A decimal-degree coordinate — `43.1731, -79.0384`, or either
+  order when N/S/E/W say which is which — flies straight there; a bundled city
+  or landmark name typed exactly (`paris`, `sf`, `Golden Gate Bridge`) flies to
+  the bundled place. Anything else, including anything malformed, goes to the
+  existing geocoders unchanged. Degrees/minutes/seconds and grid references are
+  not parsed and fall through the same way (#388 — thanks @KuraPiee).
+- A data-layer control a provider key is holding back now names that key. With
+  no FIRMS key the fire layer's control read KEY REQUIRED without saying which
+  key or where to put it; it now reads "Needs FIRMS_MAP_KEY — add it in Provider
+  Settings", on the control and in its accessible name. A layer that needs no
+  key, or already holds one, carries no such text, and an unrecognised key name
+  produces none rather than a guess (#296 — thanks @Matthew-Selvam).
 
 - Draped annotation geometry — area fills and outlines, routes and arrows —
   classifies onto terrain as well as 3D tiles. On a keyless boot, where Cesium's
@@ -233,6 +272,22 @@ of current runtime behavior, see [`docs/CURRENT-STATE.md`](docs/CURRENT-STATE.md
   and superseded requests cannot keep a newer view loading.
 
 ### Added
+
+- Two map-orientation controls sit beside Share in the top-center globe
+  actions. Tilt Map swings between a straight-down map and a 35-degree oblique
+  around the point under the centre of the view, keeping that point and the
+  distance to it. North Up rotates around the same point until north is at the
+  top, keeping the pitch, and its needle shows the current bearing. Both decline
+  without moving the camera when nothing is under the centre of the view, and
+  both follow Reset Globe out of Clean UI, recording, Scene playback and Cockpit
+  (#442 — thanks @yashveeeeeeer).
+- The location search box answers two kinds of query without a network request
+  or an API key. A decimal-degree coordinate — `43.1731, -79.0384`, or either
+  order when N/S/E/W say which is which — flies straight there; a bundled city
+  or landmark name typed exactly (`paris`, `sf`, `Golden Gate Bridge`) flies to
+  the bundled place. Anything else, including anything malformed, goes to the
+  existing geocoders unchanged. Degrees/minutes/seconds and grid references are
+  not parsed and fall through the same way (#388 — thanks @KuraPiee).
 
 - Add Open Calgary traffic cameras as a keyless CCTV source pack (thanks
   @rileygramlich): the public City of Calgary catalog, frames pinned to the

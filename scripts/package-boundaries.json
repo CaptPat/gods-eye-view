@@ -44,7 +44,8 @@
       "server/providers/vessels/ais-live.js",
       "src/data/adsbLolFallback.js",
       "src/data/aisStreamAdapter.js",
-      "src/data/aisWatchdog.js"
+      "src/data/aisWatchdog.js",
+      "src/sources/httpBody.js"
     ],
     "external": ["ws"]
   },
@@ -66,7 +67,8 @@
       "server/providers/common/http.js",
       "scripts/google-server-key.mjs",
       "src/data/placeProviderPayloads.js",
-      "src/data/routeSteps.js"
+      "src/data/routeSteps.js",
+      "src/sources/httpBody.js"
     ],
     "external": []
   },
@@ -83,7 +85,8 @@
       "server/providers/space/celestrak.js",
       "server/providers/space/launch-library.js",
       "server/providers/common/http.js",
-      "src/data/spaceProviderRequests.js"
+      "src/data/spaceProviderRequests.js",
+      "src/sources/httpBody.js"
     ],
     "external": []
   },
@@ -124,7 +127,8 @@
       "server/providers/weather-radar.js",
       "server/providers/weather-radar/sources.js",
       "server/providers/common/rate-limit.js",
-      "server/providers/common/http.js"
+      "server/providers/common/http.js",
+      "src/sources/httpBody.js"
     ],
     "external": []
   },
@@ -140,7 +144,9 @@
       "server/providers/regional/http.js",
       "src/data/regionalModel.js",
       "server/providers/common/rate-limit.js",
-      "server/providers/common/http.js"
+      "server/providers/common/http.js",
+      "src/sources/httpBody.js",
+      "src/nominatimGeocode.js"
     ],
     "external": []
   },
@@ -153,7 +159,8 @@
       "server/providers/severe-weather/geometry.js",
       "server/providers/severe-weather/nws.js",
       "server/providers/common/rate-limit.js",
-      "server/providers/common/http.js"
+      "server/providers/common/http.js",
+      "src/sources/httpBody.js"
     ],
     "external": []
   },
@@ -164,7 +171,8 @@
       "server/providers/tides.js",
       "server/providers/tides/normalize.js",
       "server/providers/common/rate-limit.js",
-      "server/providers/common/http.js"
+      "server/providers/common/http.js",
+      "src/sources/httpBody.js"
     ],
     "external": []
   },
@@ -180,7 +188,8 @@
       "server/providers/places/google-key.js",
       "scripts/google-server-key.mjs",
       "server/providers/common/rate-limit.js",
-      "server/providers/common/http.js"
+      "server/providers/common/http.js",
+      "src/sources/httpBody.js"
     ],
     "external": []
   },
@@ -201,7 +210,8 @@
     "modules": [
       "server/providers/gbfs.js",
       "server/providers/common/http.js",
-      "src/data/gbfsSource.js"
+      "src/data/gbfsSource.js",
+      "src/sources/httpBody.js"
     ],
     "external": []
   },
@@ -228,7 +238,9 @@
       "server/providers/common/geo.js",
       "server/providers/places/google-key.js",
       "scripts/google-server-key.mjs",
-      "src/data/cctvFootprint.js"
+      "src/data/cctvFootprint.js",
+      "src/sources/cctvTypes.js",
+      "src/sources/httpBody.js"
     ],
     "external": []
   },
@@ -242,7 +254,9 @@
       "server/providers/radio/stations.js",
       "server/providers/radio/transport.js",
       "src/data/radioCountry.js",
-      "server/providers/common/http.js"
+      "server/providers/common/http.js",
+      "src/sources/radioBrowser.js",
+      "src/sources/httpBody.js"
     ],
     "external": []
   },
@@ -262,7 +276,9 @@
       "server/providers/overpass/transport.js",
       "server/providers/places/routes.js",
       "src/data/placeProviderPayloads.js",
-      "src/data/routeSteps.js"
+      "src/data/routeSteps.js",
+      "src/sources/httpBody.js",
+      "src/sources/overpass.js"
     ],
     "external": []
   },
@@ -279,7 +295,8 @@
       "server/providers/military-installations/query.js",
       "server/providers/overpass/constants.js",
       "server/providers/overpass/geometry.js",
-      "server/providers/overpass/transport.js"
+      "server/providers/overpass/transport.js",
+      "src/sources/httpBody.js"
     ],
     "external": []
   },
@@ -298,7 +315,9 @@
       "server/providers/regional/query.js",
       "server/providers/regional/weather-effects.js",
       "server/providers/regional/weather.js",
-      "src/data/regionalModel.js"
+      "src/data/regionalModel.js",
+      "src/nominatimGeocode.js",
+      "src/sources/httpBody.js"
     ],
     "external": []
   },
@@ -318,7 +337,9 @@
       "server/providers/openai/realtime.js",
       "server/providers/openai/tools.js",
       "src/hudSummaryResponse.js",
-      "src/voice/voiceCost.js"
+      "src/voice/voiceCost.js",
+      "src/voice/actionSchemas.js",
+      "server/providers/openai/toolDescriptions.js"
     ],
     "external": []
   },
@@ -330,7 +351,7 @@
       "server/providers/common/source-root.js",
       "server/standalone/key-setup.js",
       "src/keySetupCore.mjs",
-      "src/keySetupHardening.mjs"
+      "server/standalone/key-setup-hardening.mjs"
     ],
     "external": []
   },
@@ -341,11 +362,18 @@
       "src/search/placeSearch.js",
       "src/search/google.js",
       "src/search/nominatim.js",
-      "src/geocodeOsm.js",
       "src/keylessGeocoder.js",
       "src/search/geospatial.js",
       "src/search/http.js",
-      "src/search/defaults.js"
+      "src/search/defaults.js",
+      "src/search/coordinateGeocoder.js",
+      "src/search/coordinateParser.js",
+      "src/search/presetGeocoder.js",
+      "src/search/nominatim.js",
+      "src/nominatimGeocode.js",
+      "src/data/regionalModel.js",
+      "src/sources/httpBody.js",
+      "src/sources/nominatim.js"
     ],
     "external": []
   },
@@ -418,7 +446,9 @@
       "src/ui/layerPanel.js",
       "src/ui/clearLayersControl.js",
       "src/loadingFeedback.js",
-      "src/data/installationFeedback.js"
+      "src/data/installationFeedback.js",
+      "src/keySetupCore.mjs",
+      "src/data/feedState.js"
     ],
     "external": []
   },
@@ -527,6 +557,7 @@
       "src/data/installationFeedback.js",
       "src/data/layerState.js",
       "src/data/militaryAwarenessEngine.js",
+      "src/data/scenePick.js",
       "src/keySetupCore.mjs",
       "src/loadingFeedback.js",
       "src/locationStatus.js",
@@ -542,6 +573,7 @@
       "src/styles/surveillance.js",
       "src/styles/thermal.js",
       "src/ui/applicationShell.js",
+      "src/ui/cameraOrientationControls.js",
       "src/ui/applicationShortcuts.js",
       "src/ui/cctv.js",
       "src/ui/cctvBindings.js",
@@ -610,7 +642,8 @@
       "src/ui/visualInput.js",
       "src/ui/visualPresets.js",
       "src/ui/visualSettings.js",
-      "src/worldFocus.js"
+      "src/worldFocus.js",
+      "src/data/feedState.js"
     ],
     "external": ["cesium"]
   },
@@ -794,7 +827,8 @@
     "modules": [
       "src/layers/earthquakes/index.js",
       "src/layers/earthquakes/model.js",
-      "src/layers/earthquakes/source.js"
+      "src/layers/earthquakes/source.js",
+      "src/layers/earthquakes/records.js"
     ],
     "external": ["cesium"]
   },
@@ -1058,7 +1092,8 @@
       "src/layers/cctv/testing.js",
       "src/overlays/worldOverlayTokens.js",
       "src/data/cctvFootprint.js",
-      "src/data/inputOwnership.js"
+      "src/data/inputOwnership.js",
+      "src/layers/cctv/sourcePolicy.js"
     ],
     "external": ["cesium"]
   },
@@ -1072,7 +1107,8 @@
       "src/layers/alpr/visuals.js",
       "src/layers/alpr/overlay.js",
       "src/layers/alpr/source.js",
-      "src/data/inputOwnership.js"
+      "src/data/inputOwnership.js",
+      "src/layers/alpr/records.js"
     ],
     "external": ["cesium"]
   },
@@ -1176,7 +1212,8 @@
       "./voice/control",
       "./voice/realtime-backend",
       "./voice/commands",
-      "./voice/cost"
+      "./voice/cost",
+      "./voice/realtime-session"
     ],
     "modules": [
       "src/voice/realtimeController.js",
@@ -1184,7 +1221,11 @@
       "src/voice/control.js",
       "src/voice/layerSummary.js",
       "src/voice/voiceCost.js",
-      "src/voice/commands.js"
+      "src/voice/commands.js",
+      "src/voice/session.js",
+      "src/voice/sessionCommands.js",
+      "src/voice/realtimeSession.js",
+      "src/voice/realtimeEvents.js"
     ],
     "external": []
   },
@@ -1239,7 +1280,7 @@
       "src/app/layers/traffic.js",
       "src/app/operations.js",
       "src/app/scene.js",
-      "src/app/sourceSlot.js",
+      "src/sources/sourceSlot.js",
       "src/app/sources.js",
       "src/app/startupChrome.js",
       "src/app/stateChannel.js",
@@ -1357,7 +1398,6 @@
       "src/data/weatherOverlays.js",
       "src/data/weatherRadar.js",
       "src/firstRunExperience.js",
-      "src/geocodeOsm.js",
       "src/hud.js",
       "src/hudLocality.js",
       "src/hudSummaryResponse.js",
@@ -1643,6 +1683,7 @@
       "src/styles/surveillance.js",
       "src/styles/thermal.js",
       "src/ui/applicationShell.js",
+      "src/ui/cameraOrientationControls.js",
       "src/ui/applicationShortcuts.js",
       "src/ui/cctv.js",
       "src/ui/cctvBindings.js",
@@ -1747,7 +1788,24 @@
       "src/app/layers/severeWeather.js",
       "src/app/layers/weatherRadar.js",
       "src/app/layers/tides.js",
-      "src/app/layers/weatherOverlays.js"
+      "src/app/layers/weatherOverlays.js",
+      "src/search/coordinateGeocoder.js",
+      "src/search/coordinateParser.js",
+      "src/search/presetGeocoder.js",
+      "src/voice/session.js",
+      "src/voice/sessionCommands.js",
+      "src/voice/realtimeSession.js",
+      "src/voice/realtimeEvents.js",
+      "src/app/localGeojsonServices.js",
+      "src/data/feedState.js",
+      "src/layers/alpr/records.js",
+      "src/layers/earthquakes/records.js",
+      "src/layers/cctv/sourcePolicy.js",
+      "src/sources/reference.js",
+      "src/search/nominatim.js",
+      "src/nominatimGeocode.js",
+      "src/sources/httpBody.js",
+      "src/sources/nominatim.js"
     ],
     "external": [
       "@mapbox/vector-tile",
@@ -1786,7 +1844,7 @@
       "src/app/layers/satellites.js",
       "src/app/layers/submarineCables.js",
       "src/app/layers/traffic.js",
-      "src/app/sourceSlot.js",
+      "src/sources/sourceSlot.js",
       "src/cctvFocusRequest.js",
       "src/celestialRing.js",
       "src/cockpitMath.js",
@@ -2116,8 +2174,18 @@
       "src/layers/weather-overlays/palette.js",
       "src/layers/weather-overlays/controls.js",
       "src/layers/weather-overlays/index.js",
-      "src/geocodeOsm.js",
-      "src/search/nominatim.js"
+      "src/search/nominatim.js",
+      "src/search/coordinateGeocoder.js",
+      "src/search/coordinateParser.js",
+      "src/search/presetGeocoder.js",
+      "src/app/localGeojsonServices.js",
+      "src/layers/alpr/records.js",
+      "src/layers/earthquakes/records.js",
+      "src/layers/cctv/sourcePolicy.js",
+      "src/nominatimGeocode.js",
+      "src/data/regionalModel.js",
+      "src/sources/httpBody.js",
+      "src/sources/nominatim.js"
     ],
     "external": [
       "cesium",
@@ -2134,7 +2202,7 @@
       "src/annotations/annotationResolver.js",
       "src/annotations/resolver.js",
       "src/app/operations.js",
-      "src/app/sourceSlot.js",
+      "src/sources/sourceSlot.js",
       "src/app/surfaceServices.js",
       "src/data/dataCredits.js",
       "src/data/geoid.js",
@@ -2159,8 +2227,14 @@
       "src/services/meshFloorSampler.js",
       "src/services/requests.js",
       "src/services/terrainHeights.js",
-      "src/geocodeOsm.js",
-      "src/search/nominatim.js"
+      "src/search/nominatim.js",
+      "src/search/coordinateGeocoder.js",
+      "src/search/coordinateParser.js",
+      "src/search/presetGeocoder.js",
+      "src/nominatimGeocode.js",
+      "src/data/regionalModel.js",
+      "src/sources/httpBody.js",
+      "src/sources/nominatim.js"
     ],
     "external": [
       "cesium",
@@ -2292,5 +2366,145 @@
     "exports": ["./layers/directions"],
     "modules": ["src/layers/directions/index.js", "src/data/routeSteps.js"],
     "external": ["cesium"]
+  },
+  "radio-browser-source": {
+    "exports": ["./sources/radio-browser"],
+    "modules": ["src/sources/radioBrowser.js", "src/data/radioCountry.js"],
+    "external": []
+  },
+  "cctv-types-source": {
+    "exports": ["./sources/cctv-types"],
+    "modules": ["src/sources/cctvTypes.js"],
+    "external": []
+  },
+  "regional-source": {
+    "exports": ["./sources/regional"],
+    "modules": ["src/data/regionalModel.js"],
+    "external": []
+  },
+  "voice-action-schemas": {
+    "exports": ["./voice/action-schemas"],
+    "modules": ["src/voice/actionSchemas.js"],
+    "external": []
+  },
+  "voice-session": {
+    "exports": ["./voice/session"],
+    "modules": ["src/voice/session.js"],
+    "external": []
+  },
+  "voice-session-controls": {
+    "exports": ["./voice/session-controls"],
+    "modules": [
+      "src/voice/sessionCommands.js",
+      "src/voice/session.js",
+      "src/voice/control.js"
+    ],
+    "external": []
+  },
+  "alpr-source": {
+    "exports": ["./layers/alpr/source"],
+    "modules": [
+      "src/layers/alpr/policy.js",
+      "src/layers/alpr/records.js",
+      "src/layers/alpr/source.js"
+    ],
+    "external": []
+  },
+  "bikeshare-source": {
+    "exports": ["./layers/bikeshare/source"],
+    "modules": ["src/layers/bikeshare/source.js"],
+    "external": []
+  },
+  "cctv-source": {
+    "exports": ["./layers/cctv/source"],
+    "modules": ["src/layers/cctv/source.js", "src/layers/cctv/sourcePolicy.js"],
+    "external": []
+  },
+  "earthquakes-source": {
+    "exports": ["./layers/earthquakes/source"],
+    "modules": [
+      "src/layers/earthquakes/records.js",
+      "src/layers/earthquakes/source.js"
+    ],
+    "external": []
+  },
+  "firms-source": {
+    "exports": ["./layers/firms/source"],
+    "modules": ["src/layers/firms/source.js"],
+    "external": []
+  },
+  "installations-source": {
+    "exports": ["./layers/installations/source"],
+    "modules": ["src/layers/installations/source.js"],
+    "external": []
+  },
+  "launches-source": {
+    "exports": ["./layers/launches/source"],
+    "modules": ["src/layers/launches/source.js"],
+    "external": []
+  },
+  "radio-source": {
+    "exports": ["./layers/radio/source"],
+    "modules": ["src/layers/radio/policy.js", "src/layers/radio/source.js"],
+    "external": []
+  },
+  "satellites-source": {
+    "exports": ["./layers/satellites/source"],
+    "modules": ["src/layers/satellites/source.js"],
+    "external": []
+  },
+  "traffic-source-factory": {
+    "exports": ["./layers/traffic/source"],
+    "modules": [
+      "src/data/tomtomTiles.js",
+      "src/layers/traffic/flowDecode.js",
+      "src/layers/traffic/flowSource.js",
+      "src/layers/traffic/source.js"
+    ],
+    "external": ["@mapbox/vector-tile", "pbf"]
+  },
+  "reference-sources": {
+    "exports": ["./sources/reference", "./layers/submarine-cables/source"],
+    "modules": [
+      "src/sources/reference.js",
+      "src/layers/earthquakes/source.js",
+      "src/layers/earthquakes/records.js",
+      "src/layers/submarineCables/bundledSource.js"
+    ],
+    "external": []
+  },
+  "nominatim-provider": {
+    "exports": ["./search/nominatim"],
+    "modules": [
+      "src/search/nominatim.js",
+      "src/nominatimGeocode.js",
+      "src/search/google.js",
+      "src/search/geospatial.js",
+      "src/data/regionalModel.js",
+      "src/sources/httpBody.js",
+      "src/sources/nominatim.js"
+    ],
+    "external": []
+  },
+  "source-http-body": {
+    "exports": ["./sources/http-body"],
+    "modules": ["src/sources/httpBody.js"],
+    "external": []
+  },
+  "overpass-lexer": {
+    "exports": ["./sources/overpass"],
+    "modules": ["src/sources/overpass.js"],
+    "external": []
+  },
+  "nominatim-source": {
+    "exports": ["./sources/nominatim"],
+    "modules": [
+      "src/sources/nominatim.js",
+      "src/nominatimGeocode.js",
+      "src/search/geospatial.js",
+      "src/data/regionalModel.js",
+      "src/sources/httpBody.js"
+    ],
+    "external": []
   }
 }

@@ -318,8 +318,7 @@ test('forward geocoding is composed once and consumers do not call a source dire
   assert.match(standalone, /createDefaultPlaceSearch as createStandalonePlaceSearch/);
   const setup = fs.readFileSync(path.join(ROOT, 'src/search/defaults.js'), 'utf8');
   assert.match(setup, /createGoogleGeocoder/);
-  assert.match(setup, /createNominatimGeocoder\(/);
-  assert.doesNotMatch(setup, /createPhotonGeocoder\(/);
+  assert.match(setup, /createPhotonGeocoder/);
 });
 
 test('a missing key is never a thrown error on the client', () => {
