@@ -1,21 +1,10 @@
-import { createWeatherRadarLayer as createLayer } from '../layers/weather-radar/index.js';
-import {
-  IEM_NEXRAD_CREDIT,
-  RAINVIEWER_CREDIT,
-  registerDynamicCredit,
-} from './dataCredits.js';
-import { governorRequestRender } from '../renderGovernor.js';
+import { createApplicationWeatherRadar } from '../app/layers/weatherRadar.js';
 
 export * from '../layers/weather-radar/index.js';
 
 /** Wire real credits; everything else uses the layer's browser defaults. */
 export function createWeatherRadarLayer(options = {}) {
-  return createLayer({
-    registerCredit: registerDynamicCredit,
-    credits: { rainviewer: RAINVIEWER_CREDIT, iem: IEM_NEXRAD_CREDIT },
-    requestRender: governorRequestRender,
-    ...options,
-  });
+  return createApplicationWeatherRadar(options);
 }
 
 export default createWeatherRadarLayer();

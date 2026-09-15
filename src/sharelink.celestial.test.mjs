@@ -1,3 +1,5 @@
+import { VisualSettings } from './ui/visualSettings.js';
+import { readShellSource, shellMethod } from './testSupport/readShellSource.mjs';
 import { StyleManager } from './ui/applicationShell.js';
 import { _claimContextVisualAuthority, setContextMode } from './ui/contextActions.js';
 import { _initGlobalContextPanel } from './ui/contextBindings.js';
@@ -7,11 +9,11 @@ import fs from 'node:fs';
 import { ShareLinkManager, decodeShareCreatedAtMs } from './sharelink.js';
 import { createDefaultLayerState } from './data/layerState.js';
 
-const uiSource = fs.readFileSync(new URL('./ui/applicationShell.js', import.meta.url), 'utf8');
+const uiSource = readShellSource();
 
 function sourceBlock(start, end) {
   const name = start.trim().match(/^(?:async )?(\w+)\(/)?.[1];
-  if (typeof StyleManager.prototype[name] === 'function') return StyleManager.prototype[name].toString();
+  if (typeof shellMethod(name) === 'function') return shellMethod(name).toString();
   const startIndex = uiSource.indexOf(start);
   const endIndex = uiSource.indexOf(end, startIndex + start.length);
   assert.ok(startIndex >= 0, `missing source block start: ${start}`);
@@ -64,10 +66,10 @@ test('share links parse explicit celestial on and off states', () => {
 });
 
 test('unknown-only v2 layer tokens are invalid, while historical l fields stay inert', () => {
-  const invalid = makeManager('#v=2&lat=10&lon=20&l=z').parseInitialHash();
+  const invalid = makeManager('#v=2&lat=10&lon=20&l=y').parseInitialHash();
   assert.equal(invalid.layerState, null);
   assert.equal(invalid.layerStateInvalid, true);
-  for (const hash of ['#lat=10&lon=20&l=z', '#v=1&lat=10&lon=20&l=z']) {
+  for (const hash of ['#lat=10&lon=20&l=y', '#v=1&lat=10&lon=20&l=y']) {
     const legacy = makeManager(hash).parseInitialHash();
     assert.equal(legacy.layerState, null);
     assert.equal(legacy.layerStateInvalid, false);
@@ -189,7 +191,7 @@ test('incoming state suppresses premature hash replacement until restoration', (
 test('a shared view reserves its own camera without cancelling its saved Follow', () => {
   assert.match(
     uiSource,
-    /_beginDeferredNavigation\(\s*'shared view',\s*\{ cancelPendingSelection: false \},\s*\)/,
+    /_beginDeferredNavigation\(\s*'shared view',\s*\{\s*cancelPendingSelection: false,?\s*\},?\s*\)/,
   );
   const deferred = sourceBlock(
     "  _beginDeferredNavigation(noun = 'location', { cancelPendingSelection = true } = {}) {",
@@ -693,11 +695,12 @@ test('visual input listeners are revoked before asynchronous UI teardown', () =>
   assert.ok(firstAwait > 0);
   const synchronous = disposal.slice(0, firstAwait);
   assert.match(synchronous, /this\._applicationShortcuts\?\.destroy\(\)/);
-  assert.match(synchronous, /this\._visualEffects\.stop\(\)/);
+  assert.match(synchronous, /this\._visualSettings\.stop\(\)/);
   assert.match(synchronous, /this\._mapSourceControls\?\.destroy\(\)/);
   assert.match(synchronous, /this\._clearLayersControl\?\.destroy\(\)/);
   assert.match(synchronous, /this\._locationControls\?\.destroy\(\)/);
   assert.match(synchronous, /this\._locationLookup\?\.destroy\(\)/);
   assert.match(synchronous, /this\._displayControls\?\.destroy\(\)/);
-  assert.match(synchronous, /this\._styleParameters\?\.destroy\(\)/);
+  assert.match(VisualSettings.prototype.stop.toString(), /this\._styleParameters\?\.destroy\(\)/);
+  assert.match(VisualSettings.prototype.stop.toString(), /this\._visualEffects\.stop\(\)/);
 });

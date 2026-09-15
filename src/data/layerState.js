@@ -317,6 +317,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'bikeshare', token: 'b', disposition: 'enabled-only' }),
   Object.freeze({ id: 'cctv', token: 'c', disposition: 'enabled+options', optionOwner: 'cctv' }),
   Object.freeze({ id: 'current-stations', token: 'k', disposition: 'enabled-only' }),
+  Object.freeze({ id: 'directions', token: 'n', disposition: 'enabled-only' }),
   Object.freeze({ id: 'earthquakes', token: 'e', disposition: 'enabled-only' }),
   Object.freeze({ id: 'flights', token: 'f', disposition: 'enabled+options', optionOwner: 'flights' }),
   Object.freeze({ id: 'local-dams', token: 'q', disposition: 'enabled-only' }),
@@ -333,7 +334,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({ id: 'tide-stations', token: 'h', disposition: 'enabled-only' }),
   Object.freeze({ id: 'traffic', token: 't', disposition: 'enabled-only' }),
   Object.freeze({ id: 'weather-overlays', token: 'o', disposition: 'enabled+options', optionOwner: 'weather-overlays' }),
-  Object.freeze({ id: 'weather-radar', token: 'n', disposition: 'enabled+options', optionOwner: 'weather-radar' }),
+  Object.freeze({ id: 'weather-radar', token: 'z', disposition: 'enabled+options', optionOwner: 'weather-radar' }),
 ]);
 
 export const REGISTERED_LAYER_IDS = Object.freeze(LAYER_STATE_REGISTRY.map((entry) => entry.id));

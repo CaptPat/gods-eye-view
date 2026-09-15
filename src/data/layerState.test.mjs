@@ -1,3 +1,4 @@
+import { readShellSource } from '../testSupport/readShellSource.mjs';
 import { expandApplicationHtml } from '../../build/application-html.js';
 import { readLayerSource } from '../testSupport/readLayerSource.mjs';
 import test from 'node:test';
@@ -172,8 +173,8 @@ test('tide and current stations share only their enabled state, as tokens h and 
 
 test('production registry is exact, canonical, and rejects incomplete contracts', async () => {
   assert.equal(validateLayerStateRegistry(), true);
-  assert.equal(REGISTERED_LAYER_IDS.length, 22);
-  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 22);
+  assert.equal(REGISTERED_LAYER_IDS.length, 23);
+  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 23);
   assert.deepEqual(REGISTERED_LAYER_IDS, [...REGISTERED_LAYER_IDS].sort());
   assert.throws(
     () => validateLayerStateRegistry([...LAYER_STATE_REGISTRY, LAYER_STATE_REGISTRY[0]]),
@@ -240,8 +241,8 @@ test('v2 codec distinguishes absent from empty and keeps canonical deterministic
 });
 
 test('unknown enabled-layer tokens reject the payload instead of becoming an empty set', () => {
-  assert.equal(decodeLayerStateParams(new URLSearchParams('v=2&l=z')), null);
-  assert.equal(decodeLayerStateParams(new URLSearchParams('v=2&l=c.z')), null);
+  assert.equal(decodeLayerStateParams(new URLSearchParams('v=2&l=y')), null);
+  assert.equal(decodeLayerStateParams(new URLSearchParams('v=2&l=c.y')), null);
 });
 
 test('unknown and forbidden option fields are ignored while missing options use codec defaults', () => {
@@ -388,7 +389,7 @@ test('a fresh boot starts 3D aircraft ON in proximity — codec, both layers, an
     assert.match(source, /^\s*(?:let |flightState\.)_models3dMode = 'proximity';/m,
       `${name}: and starts in proximity, matching the codec default`);
   }
-  const ui = await readFile(new URL('../ui/applicationShell.js', import.meta.url), 'utf8');
+  const ui = await readShellSource();
   assert.match(ui, /^\s*this\.(?:flightState\.)?_models3dEnabled = true;$/m,
     'ui.js: the DISPLAY rail believes 3D is on before any layer-state sync arrives');
   assert.match(ui, /this\.(?:flightState\.)?_models3dMode = 'proximity';/,
@@ -1619,18 +1620,18 @@ test('weather radar options round-trip through the compact URL and normalize str
   state.enabledLayerIds = ['weather-radar'];
   state.options['weather-radar'] = { usDetail: true, opacity: 0.4 };
   const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(params.get('l'), 'n');
+  assert.equal(params.get('l'), 'z');
   const assignments = String(params.get('lo') || '').split('_');
-  assert.ok(assignments.includes('n.u.1'), assignments.join('_'));
-  assert.ok(assignments.includes('n.o.40'), assignments.join('_'));
+  assert.ok(assignments.includes('z.u.1'), assignments.join('_'));
+  assert.ok(assignments.includes('z.o.40'), assignments.join('_'));
   assert.deepEqual(decodeLayerStateParams(params).options['weather-radar'], { usDetail: true, opacity: 0.4 });
 
   state.options['weather-radar'] = { usDetail: false, opacity: 0.7 };
   const defaults = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(String(defaults.get('lo') || '').split('_').some((entry) => entry.startsWith('n.')), false);
+  assert.equal(String(defaults.get('lo') || '').split('_').some((entry) => entry.startsWith('z.')), false);
 
   assert.deepEqual(
-    decodeLayerStateParams(new URLSearchParams('v=2&l=n&lo=n.o.55')).options['weather-radar'],
+    decodeLayerStateParams(new URLSearchParams('v=2&l=z&lo=z.o.55')).options['weather-radar'],
     { usDetail: false, opacity: 0.7 },
     'an unknown opacity token falls back to the default',
   );
@@ -1647,7 +1648,7 @@ test('weather overlays options round-trip through the compact URL and normalize 
   state.enabledLayerIds = ['weather-overlays', 'weather-radar'];
   state.options['weather-overlays'] = { mode: 'pollen', pollenType: 'weed', opacity: 1 };
   const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(params.get('l'), 'o.n');
+  assert.equal(params.get('l'), 'o.z');
   const assignments = String(params.get('lo') || '').split('_');
   for (const expected of ['o.m.p', 'o.p.w', 'o.o.100']) {
     assert.ok(assignments.includes(expected), assignments.join('_'));

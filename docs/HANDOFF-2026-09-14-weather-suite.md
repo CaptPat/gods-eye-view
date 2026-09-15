@@ -13,7 +13,7 @@ Fork: `CaptPat/gods-eye-view`, branded Cyclops View in Pinokio. This work is for
 
 | # | Feature | Merge | Share token | Sources |
 |---|---|---|---|---|
-| 1 | Weather Radar layer | `c91acea` | `n` (was `p` before the upstream sync) | RainViewer worldwide, IEM NEXRAD US detail |
+| 1 | Weather Radar layer | `c91acea` | `z` (was `p`, then `n`, before upstream syncs) | RainViewer worldwide, IEM NEXRAD US detail |
 | 2 | Right-click weather report | `6c17f1d` | — | Google Weather API, Open-Meteo marine/solar |
 | 3 | Tide Stations and Current Stations layers | `9ec8930` | `h`, `k` | NOAA CO-OPS |
 | 4 | Weather Overlays layer (clouds, temperature, air quality, pollen) | `3c71064` | `o` | NOAA nowCOAST GMGSI, NOAA GFS via PacIOOS ERDDAP, Google Air Quality and Pollen heatmap tiles |
