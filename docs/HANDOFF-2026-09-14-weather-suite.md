@@ -4,9 +4,10 @@ Fork: `CaptPat/gods-eye-view`, branded Cyclops View in Pinokio. This work is for
 
 ## State at handoff
 
-- `main` is at `7124efd`, pushed; `origin/main` matches.
-- `main` holds all of `bilawalsidhu/gods-eye-view` main through PR #456 (merged at `6462f0a`) and is 79 commits ahead of it.
-- CI parity passes on `main`: `npm run format:check`, `npm run check:boundaries`, `npm test` (3,664 pass, 0 fail, 7 skipped Node-24 benchmarks on Node 26) and `npm run build`.
+- `main` is at `3eab0cc`, pushed; `origin/main` matches. It holds all of `bilawalsidhu/gods-eye-view` main through PR #570, from two syncs: `6462f0a` for #433–#456 and `3eab0cc` for #501–#570.
+- The weather suite was built before the second sync. That merge ported the fork's layers into upstream's new catalog (`src/app/layers/`) and moved the radar token to `z`.
+- CI parity passes on `main`: `npm run format:check`, `npm run check:boundaries`, `npm test` (3,857 pass, 0 fail, 9 Windows-only skips) and `npm run build`.
+- The right-click weather report has not been browser-tested alongside upstream's new draw tool and directions, which claim pointer input.
 - No open branches or worktrees. No dev servers running.
 
 ## What the weather suite added
