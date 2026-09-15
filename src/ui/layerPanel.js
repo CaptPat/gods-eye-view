@@ -35,6 +35,7 @@ const PANEL_GROUPS = [
       'local-datacenters',
       'telegeography-submarine-cables',
       'local-dams',
+      'airports',
     ],
   },
   {
@@ -55,7 +56,12 @@ const PANEL_GROUPS = [
   },
   {
     label: 'Energy',
-    ids: ['nuclear-power-plants', 'nuclear-waste-sites', 'nuclear-accidents'],
+    ids: [
+      'nuclear-power-plants',
+      'nuclear-waste-sites',
+      'nuclear-accidents',
+      'power-plants',
+    ],
   },
   {
     label: 'Utilities',

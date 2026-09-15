@@ -1,0 +1,7 @@
+"id","ident","type","name","latitude_deg","longitude_deg","elevation_ft","continent","iso_country","iso_region","municipality","scheduled_service","icao_code","iata_code","gps_code","local_code","home_link","wikipedia_link","keywords"
+3622,"KJFK","large_airport","John F. Kennedy International Airport",40.639447,-73.779317,13,"NA","US","US-NY","New York","yes","KJFK","JFK","KJFK","JFK","https://www.jfkairport.com/","https://en.wikipedia.org/wiki/John_F._Kennedy_International_Airport","Manhattan, New York City, NYC, Idlewild, IDL, KIDL"
+516263,"AE-0221","medium_airport","Sas Al Nakheel Air Base",24.44128,54.51696,14,"AS","AE","AE-AZ","Sas Al Nakheel","no","OMNK",,"OMNK",,,,
+323361,"00AA","small_airport","Aero B Ranch Airport",38.704022,-101.473911,3435,"NA","US","US-KS","Leoti","no",,,"00AA","00AA",,,
+6624,"01TA","closed","Thirty Thirty Matlock Office Center Helistop",32.694867,-97.115964,630,"NA","US","US-TX","Arlington","no",,,,,,,"01TA"
+4258,"LGIR","large_airport","Heraklion International Nikos Kazantzakis Airport",35.339699,25.1803,115,"EU","GR","GR-M","Heraklion","yes","LGIR","HER","LGIR",,"https://www.heraklion-airport.gr/en/","https://en.wikipedia.org/wiki/Heraklion_International_Airport_""Nikos_Kazantzakis""","Crete Island"
+4,"AGGM","medium_airport","Munda Airport",-8.32797,157.263,10,"OC","SB","SB-WE","Munda","yes","AGGM","MUA","AGGM",,,"https://en.wikipedia.org/wiki/Munda_Airport",

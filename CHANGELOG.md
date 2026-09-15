@@ -59,6 +59,17 @@
 - Separate the request adapter, camera model, presentation, and instance lifecycle.
   Source cancellation also guards late response bodies and rejects invalid query bounds.
 
+## Power plants and airports (fork)
+
+- Add a Power Plants layer (token `9`) in the Energy group. It shows 27,780 non-hydro plants from
+  the WRI Global Power Plant Database (CC BY 4.0), coloured by fuel and sized by capacity. Cards give
+  fuel and MW, owner, commissioning year and country.
+- Add an Airports layer (token `0`) in the Infrastructure group. It shows 5,280 large and medium
+  airports from OurAirports (public domain). Cards give ICAO and IATA codes, size and scheduled
+  service, city, country and elevation, and link to Wikipedia or OurAirports.
+- A shared CSV parser (`src/layers/csv-points/csv.js`) and a bundled-JSON loader serve
+  `scripts/build-csv-layers.mjs`.
+
 ## Share-link capacity and nuclear layers (fork)
 
 - Share links now carry up to 62 layers, up from 32. Layer tokens may be any case-sensitive
