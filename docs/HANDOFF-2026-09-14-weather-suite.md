@@ -10,6 +10,27 @@ Fork: `CaptPat/gods-eye-view`, branded Cyclops View in Pinokio. This work is for
 - The right-click weather report has not been browser-tested alongside upstream's new draw tool and directions, which claim pointer input.
 - No open branches or worktrees. No dev servers running.
 
+## Upstream since the last sync (checked 2026-09-15)
+
+Upstream `main` is at `8bfce90`, 13 commits ahead of the fork; the fork has 82 of its own.
+
+- **Features:** Nominatim as the last-resort geocoder (#573); keyless coordinates and bundled presets (#572); tilt and north-up compass controls (#571).
+- **UI fix:** a key-gated layer row names its missing provider key (#575).
+- **Refactors:** voice sessions separated from protocol adapters; enforced import directions; portable source record protocols.
+
+**Overlap to resolve on the next sync.** Upstream #573 adds its own Nominatim fallback geocoder, which duplicates the fork's keyless Nominatim search (`src/search/nominatim.js`, `/api/geocode/search`, the shared queue in `server/providers/regional/place.js`).
+- Prefer upstream's implementation.
+- Keep only what the fork still needs: the one-request-per-second queue shared with the regional briefing, and the `GEV_OVERPASS_UPSTREAMS` Overpass list.
+- Drop the rest of the fork's duplicate.
+
+Files changed on both sides:
+- the usual shared lists: `CHANGELOG`, `DATA_SOURCES`, boundaries, format scope, `package.json`, `dataCredits`, `local.js`;
+- `src/app/constructCatalog.js`;
+- `src/search/defaults.js` and `src/search/index.js`;
+- `server/providers/regional/place.js`.
+
+No new layer tokens upstream.
+
 ## What the weather suite added
 
 | # | Feature | Merge | Share token | Sources |
