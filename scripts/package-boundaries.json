@@ -1226,6 +1226,15 @@
     ],
     "external": ["cesium"]
   },
+  "marine-depths-layer": {
+    "exports": ["./layers/marine-depths"],
+    "modules": [
+      "src/layers/marine-depths/imagery.js",
+      "src/layers/marine-depths/index.js",
+      "src/layers/marine-depths/model.js"
+    ],
+    "external": ["cesium"]
+  },
   "weather-overlays-layer": {
     "exports": ["./layers/weather-overlays"],
     "modules": [
@@ -1879,6 +1888,9 @@
       "src/layers/sea-ice/imagery.js",
       "src/layers/sea-ice/index.js",
       "src/layers/sea-ice/model.js",
+      "src/layers/marine-depths/imagery.js",
+      "src/layers/marine-depths/index.js",
+      "src/layers/marine-depths/model.js",
       "src/layers/traffic/animation.js",
       "src/layers/traffic/controls.js",
       "src/layers/traffic/flow.js",
@@ -2094,6 +2106,7 @@
       "src/app/layers/offshorePlatforms.js",
       "src/app/layers/usPipelines.js",
       "src/app/layers/seaIce.js",
+      "src/app/layers/marineDepths.js",
       "src/app/layers/weatherOverlays.js",
       "src/search/coordinateGeocoder.js",
       "src/search/coordinateParser.js",
@@ -2476,6 +2489,7 @@
       "src/app/layers/offshorePlatforms.js",
       "src/app/layers/usPipelines.js",
       "src/app/layers/seaIce.js",
+      "src/app/layers/marineDepths.js",
       "src/app/layers/weatherOverlays.js",
       "src/app/layers/weatherRadar.js",
       "src/weatherReport/groundPick.js",
@@ -2557,6 +2571,9 @@
       "src/layers/sea-ice/imagery.js",
       "src/layers/sea-ice/index.js",
       "src/layers/sea-ice/model.js",
+      "src/layers/marine-depths/imagery.js",
+      "src/layers/marine-depths/index.js",
+      "src/layers/marine-depths/model.js",
       "src/layers/weather-overlays/palette.js",
       "src/layers/weather-overlays/controls.js",
       "src/layers/weather-overlays/index.js",
