@@ -34,7 +34,7 @@ export function createInfrastructureLayers(services) {
       id: 'local-dams',
       url: damsUrl,
       name: 'Dams',
-      color: '#0088ff', // Blue
+      color: '#ff3b30', // Red
       icon: '▰',
       source: 'USACE',
       labels: true,

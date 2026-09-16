@@ -9,7 +9,8 @@
       "src/data/infrastructure.js",
       "src/data/localGeojsonCore.js",
       "src/data/localGeojsonLod.js",
-      "src/data/inputOwnership.js"
+      "src/data/inputOwnership.js",
+      "src/layers/catalog-points/horizonDepth.js"
     ],
     "external": ["cesium"]
   },

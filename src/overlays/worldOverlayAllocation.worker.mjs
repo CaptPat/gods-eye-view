@@ -345,7 +345,7 @@ function buildLocalInfrastructureWorkload(count) {
         tags: { associated_river: `River ${index % 23}` },
       },
       priority: index % 7,
-      accent: isDatacenter ? '#00ffff' : '#0088ff',
+      accent: isDatacenter ? '#00ffff' : '#ff3b30',
     });
     // The allocation harness uses identity view/projection matrices, so its
     // positions are normalized screen coordinates rather than WGS84 points.
@@ -392,7 +392,7 @@ function buildPhase3FirmsWorkload(count) {
           ? { tags: { name: `DC ${index}`, operator: `Operator ${index % 17}` } }
           : { name: `Dam ${index}`, tags: { associated_river: `River ${index % 23}` } },
         priority: index % 7,
-        accent: isDatacenter ? '#00ffff' : '#0088ff',
+        accent: isDatacenter ? '#00ffff' : '#ff3b30',
       });
       entry.horizonCull = false;
       (isDatacenter ? datacenters : dams).push(entry);
@@ -460,7 +460,7 @@ function buildPhase3VesselsWorkload(count) {
           ? { tags: { name: `DC ${index}`, operator: `Operator ${index % 17}` } }
           : { name: `Dam ${index}`, tags: { associated_river: `River ${index % 23}` } },
         priority: index % 7,
-        accent: isDatacenter ? '#00ffff' : '#0088ff',
+        accent: isDatacenter ? '#00ffff' : '#ff3b30',
       });
       entry.horizonCull = false;
       (isDatacenter ? datacenters : dams).push(entry);

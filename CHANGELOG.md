@@ -1,5 +1,7 @@
 # Changelog
 
+- Draw Datacenters and Dams as surface dots like the catalog layers instead of camera-scaled stems. Every feature keeps its dot at every zoom, dams are red, and building and dam outlines only draw within 20 km.
+
 - Add an optional Nominatim geocoding adapter with configurable search/reverse endpoints, cancellation, bounded responses and retryable upstream errors. Extract portable response-reading and Overpass lexical helpers while retaining existing server exports.
 
 - Expose reference feed factories independently of standalone catalog construction; preserve source choices and asset attribution.

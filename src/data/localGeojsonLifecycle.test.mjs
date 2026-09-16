@@ -32,7 +32,12 @@ function harness(t) {
       async add(source) { sources.add(source); return source; },
       remove(source) { return sources.delete(source); },
     },
-    scene: { canvas: {}, preRender: event, requestRender() {} },
+    scene: {
+      canvas: {},
+      preRender: event,
+      primitives: { add: (p) => p, remove: () => true },
+      requestRender() {},
+    },
     camera: { moveEnd: event },
   };
   const create = () => createLocalGeoJsonLayer({
@@ -123,7 +128,7 @@ test('concurrent enable and disable/re-enable share one pending dataset load', a
   assert.equal(fetchMock.mock.callCount(), 1);
   assert.equal(env.sources.size, 1);
   assert.equal(env.handlers(), 1);
-  assert.equal(env.listeners.size, 2);
+  assert.equal(env.listeners.size, 3, 'occluder walk, horizon depth and moveEnd');
   assert.equal([...env.sources][0].show, true);
 });
 
