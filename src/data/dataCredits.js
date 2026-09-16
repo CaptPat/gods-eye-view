@@ -387,6 +387,11 @@ export const NASA_GIBS_SEA_ICE_CREDIT = Object.freeze({
   html: 'Sea ice: <a href="https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api" target="_blank" rel="noopener">NASA GIBS</a> GHRSST MUR sea ice concentration (JPL PO.DAAC)',
 });
 
+export const NOAA_MARINE_DEPTHS_CREDIT = Object.freeze({
+  key: 'noaa-marine-depths',
+  html: 'Marine depths: <a href="https://www.ncei.noaa.gov/products/etopo-global-relief-model" target="_blank" rel="noopener">NOAA NCEI</a> DEM global mosaic and <a href="https://nauticalcharts.noaa.gov/data/gis-data-and-services.html" target="_blank" rel="noopener">NOAA Office of Coast Survey</a> ENC chart display (public domain; not for navigation)',
+});
+
 export const NWS_ALERTS_CREDIT = Object.freeze({
   key: 'nws-alerts',
   html: 'US weather alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (NOAA, public domain)',
