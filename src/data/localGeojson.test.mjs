@@ -5,7 +5,8 @@ import * as Cesium from 'cesium';
 import {
   GROUND_SAMPLE_MAX_ARMED_RETRIES,
   LOCAL_OVERLAY_COHORT_LIMIT,
-  LOCAL_STEM_TIP_EPSILON_M,
+  LOCAL_DOT_LIFT_M,
+  LOCAL_FOOTPRINT_MAX_DISTANCE_M,
   createLocalGeoJsonLayer,
   createLocalInfrastructureOverlayEntry,
   createLocalInfrastructureOverlayPublisher,
@@ -61,6 +62,7 @@ async function createRealLocalLayerHarness({
   const moveEnd = new MockLayerEvent();
   const dataSources = [];
   const hostCalls = [];
+  const primitives = [];
   globalThis.fetch = async () => ({
     ok: true,
     status: 200,
@@ -104,6 +106,14 @@ async function createRealLocalLayerHarness({
       flyTo() {},
     },
     scene: {
+      primitives: {
+        add(primitive) { primitives.push(primitive); return primitive; },
+        remove(primitive) {
+          const index = primitives.indexOf(primitive);
+          if (index >= 0) primitives.splice(index, 1);
+          return index >= 0;
+        },
+      },
       canvas: { clientWidth: 800, clientHeight: 600 },
       preRender,
       sampleHeightSupported,
@@ -138,6 +148,7 @@ async function createRealLocalLayerHarness({
     viewer,
     dataSources,
     hostCalls,
+    primitives,
     preRender,
     moveEnd,
     sampleCalls,
@@ -191,13 +202,13 @@ test('local infrastructure entries satisfy the shared presentation contract', ()
 
   assert.equal(entry.id, 'dc-42');
   assert.equal(entry.source, 'local-datacenters');
-  assert.equal(entry.position, position, 'entry stays attached to the mutable stem-tip Cartesian');
+  assert.equal(entry.position, position, 'entry stays attached to the mutable anchor Cartesian');
   assert.equal(entry.variant, 'card');
   assert.equal(entry.title, 'AUS-1');
   assert.deepEqual(entry.details, ['Example Cloud']);
   assert.equal(entry.priority, 1180);
   assert.equal(entry.collisionGroup, 'ambient-card');
-  assert.equal(entry.interactive, false, 'point/stem picking remains Cesium-native');
+  assert.equal(entry.interactive, false, 'dot picking remains Cesium-native');
   assert.equal(entry.maxDistance, 14_000_000);
   assert.equal(entry.distanceFadeStartRatio, 250_000 / 14_000_000);
   assert.deepEqual(entry.distanceScale, {
@@ -334,11 +345,11 @@ test('slow parked frames do not keep republishing the same local overlay cohort'
     new Cesium.Cartesian3(10_000, 0, 0), new Cesium.Cartesian3());
   env.moveEnd.raise();
   env.preRender.raise();
-  assert.equal(publications().length, 2, 'changed stem positions must still reach the host');
+  assert.equal(publications().length, 1, 'camera motion alone never moves a surface anchor');
   env.layer.disable(env.viewer);
   await env.layer.enable(env.viewer);
   env.preRender.raise();
-  assert.equal(publications().length, 3, 're-enable must republish after clearing the host');
+  assert.equal(publications().length, 2, 're-enable must republish after clearing the host');
 });
 
 test('real layer disable clears its published host entries and balances settle listeners', async () => {
@@ -373,97 +384,6 @@ test('real layer disable clears its published host entries and balances settle l
   env.cleanup();
 });
 
-test('unchanged moveEnds do not redefine stem constants and real tip changes update once', async () => {
-  const env = await createRealLocalLayerHarness();
-  env.preRender.raise();
-  const entity = env.dataSources[0].entities.values[0];
-  let positionSetCalls = 0;
-  let polylineSetCalls = 0;
-  let polylineDefinitionChanges = 0;
-  const stemArrays = [];
-  const initialStemArray = entity.polyline.positions.getValue();
-  const originalPositionSet = entity.position.setValue.bind(entity.position);
-  const originalPolylineSet = entity.polyline.positions.setValue.bind(entity.polyline.positions);
-  const removeDefinitionListener = entity.polyline.definitionChanged.addEventListener(
-    (_polyline, propertyName) => {
-      if (propertyName === 'positions') polylineDefinitionChanges++;
-    },
-  );
-  entity.position.setValue = (...args) => {
-    positionSetCalls++;
-    return originalPositionSet(...args);
-  };
-  entity.polyline.positions.setValue = (...args) => {
-    polylineSetCalls++;
-    stemArrays.push(args[0]);
-    return originalPolylineSet(...args);
-  };
-
-  env.moveEnd.raise();
-  env.preRender.raise();
-  env.moveEnd.raise();
-  env.preRender.raise();
-  assert.equal(positionSetCalls, 0);
-  assert.equal(polylineSetCalls, 0);
-  assert.equal(polylineDefinitionChanges, 0);
-
-  const camera = env.viewer.camera.positionWC;
-  env.viewer.camera.positionWC = Cesium.Cartesian3.add(
-    camera,
-    new Cesium.Cartesian3(LOCAL_STEM_TIP_EPSILON_M / 10, 0, 0),
-    new Cesium.Cartesian3(),
-  );
-  env.moveEnd.raise();
-  env.preRender.raise();
-  assert.equal(positionSetCalls, 0, 'sub-epsilon camera noise must not redefine the tip');
-  assert.equal(polylineSetCalls, 0);
-  assert.equal(polylineDefinitionChanges, 0, 'sub-epsilon jitter must not redefine the polyline');
-
-  env.viewer.camera.positionWC = Cesium.Cartesian3.add(
-    camera,
-    new Cesium.Cartesian3(10_000, 0, 0),
-    new Cesium.Cartesian3(),
-  );
-  env.moveEnd.raise();
-  env.preRender.raise();
-  assert.equal(positionSetCalls, 1);
-  assert.equal(polylineSetCalls, 1);
-  assert.equal(polylineDefinitionChanges, 1, 'one real tip change must emit one polyline notification');
-
-  env.viewer.camera.positionWC = Cesium.Cartesian3.add(
-    camera,
-    new Cesium.Cartesian3(20_000, 0, 0),
-    new Cesium.Cartesian3(),
-  );
-  env.moveEnd.raise();
-  env.preRender.raise();
-  assert.equal(positionSetCalls, 2);
-  assert.equal(polylineSetCalls, 2);
-  assert.equal(polylineDefinitionChanges, 2, 'each real tip change must emit exactly one notification');
-
-  env.viewer.camera.positionWC = Cesium.Cartesian3.add(
-    camera,
-    new Cesium.Cartesian3(30_000, 0, 0),
-    new Cesium.Cartesian3(),
-  );
-  env.moveEnd.raise();
-  env.preRender.raise();
-  assert.equal(positionSetCalls, 3);
-  assert.equal(polylineSetCalls, 3);
-  assert.equal(polylineDefinitionChanges, 3, 'third real tip change must emit exactly one notification');
-  assert.notEqual(stemArrays[0], initialStemArray, 'first real update must select the alternate buffer');
-  assert.equal(stemArrays[1], initialStemArray, 'second real update must return to the initial buffer');
-  assert.equal(stemArrays[2], stemArrays[0], 'consecutive real updates must alternate buffer identity');
-  assert.equal(
-    new Set([initialStemArray, ...stemArrays]).size,
-    2,
-    'steady-state updates must allocate no stem arrays beyond the two preallocated buffers',
-  );
-  removeDefinitionListener();
-  env.layer.destroy(env.viewer);
-  env.cleanup();
-});
-
 test('a real enabled local layer has no native label graphics at runtime', async () => {
   const env = await createRealLocalLayerHarness();
   const entities = env.dataSources[0].entities.values;
@@ -473,20 +393,73 @@ test('a real enabled local layer has no native label graphics at runtime', async
   env.cleanup();
 });
 
-for (const [heightM, minStemM, maxStemM] of [[500, 45, 90], [10000, 1100, 1400]]) {
-  test(`local infrastructure keeps stems proportional at ${heightM} m`, async (t) => {
-    const env = await createRealLocalLayerHarness();
-    t.after(() => { env.layer.destroy(env.viewer); env.cleanup(); });
-    const entity = env.dataSources[0].entities.values[0];
-    const carto = entity.__localBaseCarto;
-    env.viewer.camera.positionWC = Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, heightM);
-    env.preRender.raise(env.viewer.scene, Cesium.JulianDate.now());
-    const positions = entity.polyline.positions.getValue(Cesium.JulianDate.now());
-    const stemM = Cesium.Cartesian3.distance(positions[0], positions[1]);
-    assert.ok(stemM >= minStemM && stemM <= maxStemM,
-      `a ${heightM} m close-up must not inherit a globe-sized stem: ${stemM.toFixed(1)} m`);
+test('every feature is a picked surface dot with a close-up-only footprint', async (t) => {
+  const env = await createRealLocalLayerHarness();
+  t.after(() => { env.layer.destroy(env.viewer); env.cleanup(); });
+  const entity = env.dataSources[0].entities.values[0];
+  assert.equal(entity.polyline, undefined, 'no stem polyline');
+  assert.equal(entity.point, undefined, 'the dot lives in the shared collection');
+  const displayCondition = entity.polygon.distanceDisplayCondition.getValue();
+  assert.equal(displayCondition.near, 0);
+  assert.equal(displayCondition.far, LOCAL_FOOTPRINT_MAX_DISTANCE_M);
+
+  assert.equal(env.primitives.length, 1, 'one dot collection per layer');
+  const dots = env.primitives[0];
+  assert.ok(dots instanceof Cesium.PointPrimitiveCollection);
+  assert.equal(dots.show, true);
+  assert.equal(dots.length, 1);
+  const dot = dots.get(0);
+  assert.equal(dot.id, entity, 'scene.pick must resolve the dot to its entity');
+  assert.ok(Math.abs(Cesium.Cartographic.fromCartesian(dot.position).height - LOCAL_DOT_LIFT_M) < 0.01);
+
+  env.layer.disable(env.viewer);
+  assert.equal(env.primitives.length, 0, 'disable releases the dots');
+});
+
+test('camera motion never moves a dot; a ground sample moves it once', async (t) => {
+  const env = await createRealLocalLayerHarness({
+    sampleHeightSupported: true, sampleHeight: () => 117,
   });
-}
+  const clock = installFakeClock(t);
+  t.after(() => { env.layer.destroy(env.viewer); env.cleanup(); });
+  const entity = env.dataSources[0].entities.values[0];
+  const dot = env.primitives[0].get(0);
+  let positionSetCalls = 0;
+  const originalPositionSet = entity.position.setValue.bind(entity.position);
+  entity.position.setValue = (...args) => {
+    positionSetCalls++;
+    return originalPositionSet(...args);
+  };
+  const dotHeight = () => Cesium.Cartographic.fromCartesian(dot.position).height;
+
+  // 100 km up: beyond the ground-sample range, so only distance changes.
+  for (const altM of [100_000, 200_000, 400_000]) {
+    setCameraAltitude(env, altM);
+    env.moveEnd.raise();
+    env.preRender.raise();
+  }
+  assert.equal(positionSetCalls, 0, 'camera distance must not redefine the anchor');
+  assert.ok(Math.abs(dotHeight() - LOCAL_DOT_LIFT_M) < 0.01);
+
+  setCameraAltitude(env, 20_000);
+  clock.advance(2_100);
+  env.moveEnd.raise();
+  env.preRender.raise();
+  assert.equal(positionSetCalls, 1, 'one grounding, one anchor update');
+  assert.ok(Math.abs(dotHeight() - (117 + LOCAL_DOT_LIFT_M)) < 0.01);
+  assert.ok(Math.abs(baseHeightM(env) - 117) < 0.01);
+});
+
+test('dots take the horizon depth-test distance as the camera climbs', async (t) => {
+  const env = await createRealLocalLayerHarness();
+  t.after(() => { env.layer.destroy(env.viewer); env.cleanup(); });
+  const dot = env.primitives[0].get(0);
+  setCameraAltitude(env, 5_000_000);
+  env.preRender.raise();
+  assert.ok(dot.disableDepthTestDistance > 5_000_000,
+    `a globe view must draw dots out to the horizon: ${dot.disableDepthTestDistance}`);
+  assert.ok(Number.isFinite(dot.disableDepthTestDistance), 'far-side dots stay depth-tested');
+});
 
 test('local infrastructure creates no native labels or per-frame geometry callbacks', () => {
   const source = readFileSync(new URL('./localGeojsonCore.js', import.meta.url), 'utf8');
@@ -494,8 +467,8 @@ test('local infrastructure creates no native labels or per-frame geometry callba
   assert.doesNotMatch(source, /new Cesium\.CallbackProperty/);
   assert.match(source, /feature\.position = tip/);
   assert.match(source, /record\.entity\.position\.setValue\(record\.tip\)/);
-  assert.match(source, /const stemPositionBuffers = \[\s*\[base, tip\],\s*\[base, tip\],?\s*\]/);
-  assert.match(source, /record\.entity\.polyline\.positions\.setValue\(stemPositions\)/);
+  assert.match(source, /record\.dot\.position = record\.tip/);
+  assert.doesNotMatch(source, /new Cesium\.PolylineGraphics/);
   assert.match(source, /viewer\.camera\.moveEnd\.addEventListener/);
   assert.match(source, /if \(refreshStemGeometry \|\| terrainFloorChanged\)/);
   assert.match(source, /now - _lastVisibilityUpdate < VISIBILITY_UPDATE_MS/);
@@ -515,7 +488,12 @@ async function enableLayerWithFetch(fetchImpl, { dataSources, windowStub } = {})
   const viewer = {
     dataSources: dataSources || { add() {}, remove() { return true; } },
     camera: { positionWC: Cesium.Cartesian3.fromDegrees(0, 0, 1000), moveEnd: new MockLayerEvent() },
-    scene: { canvas: {}, preRender: new MockLayerEvent(), pick() { return null; } },
+    scene: {
+      canvas: {},
+      preRender: new MockLayerEvent(),
+      primitives: { add: (p) => p, remove: () => true },
+      pick() { return null; },
+    },
   };
   const layer = createLocalGeoJsonLayer({
     id: 'local-dams',
@@ -1150,6 +1128,7 @@ async function createMultiFeatureLodHarness({ featureCount = 150, cameraHeightM 
       flyTo() {},
     },
     scene: {
+      primitives: { add: (p) => p, remove: () => true },
       canvas: { clientWidth: 1440, clientHeight: 900 },
       preRender,
       sampleHeightSupported: false,

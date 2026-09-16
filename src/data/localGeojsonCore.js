@@ -1,6 +1,10 @@
 import * as Cesium from 'cesium';
 import { isPointerFree } from './inputOwnership.js';
 import {
+  NEAR_DEPTH_TEST_DISTANCE_M,
+  trackHorizonDepthTest,
+} from '../layers/catalog-points/horizonDepth.js';
+import {
   selectInfraLod,
   applyInfraEvictionGrace,
   shouldRecomputeInfraLod,
@@ -18,11 +22,11 @@ const LOCAL_OVERLAY_MAX_DISTANCE_M = 14000000;
 const LOCAL_OVERLAY_FADE_START_M = 250000;
 const LOCAL_OVERLAY_FADE_START_RATIO =
   LOCAL_OVERLAY_FADE_START_M / LOCAL_OVERLAY_MAX_DISTANCE_M;
-// Stems are anchored at ellipsoid height 0, but high-elevation features
-// (e.g. dams in river canyons) sit hundreds of meters above the ellipsoid,
-// burying the short close-in stem inside the photoreal mesh. Once the
+// Anchors start at ellipsoid height 0, but high-elevation features (e.g.
+// dams in river canyons) sit hundreds of meters above the ellipsoid, so a
+// dot or card anchored there drifts off the photoreal surface. Once the
 // camera is near enough for tiles to be loaded, sample the real surface
-// height once per feature and lift the stem onto it.
+// height once per feature and lift the anchor onto it.
 const GROUND_SAMPLE_MAX_DISTANCE_M = 75000;
 const GROUND_SAMPLE_RETRY_MS = 2000;
 const GROUND_SAMPLE_MAX_ABS_HEIGHT_M = 9000;
@@ -36,9 +40,26 @@ const GROUND_SAMPLE_MAX_ABS_HEIGHT_M = 9000;
  * 30 × 2 s ≈ 60 s, far longer than a tile stream-in.
  */
 export const GROUND_SAMPLE_MAX_ARMED_RETRIES = 30;
-/** Ignore sub-metre camera-derived stem-tip noise at camera settle. */
-export const LOCAL_STEM_TIP_EPSILON_M = 0.5;
-const LOCAL_STEM_TIP_EPSILON_SQ = LOCAL_STEM_TIP_EPSILON_M ** 2;
+/** Ignore sub-metre anchor movement from terrain refinement. */
+export const LOCAL_ANCHOR_EPSILON_M = 0.5;
+const LOCAL_ANCHOR_EPSILON_SQ = LOCAL_ANCHOR_EPSILON_M ** 2;
+/** Every feature is a surface dot (the catalog-points look), never a stem. */
+export const LOCAL_DOT_PIXEL_SIZE = 8;
+/** Dots and card anchors sit this far above the sampled surface. */
+export const LOCAL_DOT_LIFT_M = 5;
+/** Building and dam outlines only draw inside this camera distance. */
+export const LOCAL_FOOTPRINT_MAX_DISTANCE_M = 20_000;
+const LOCAL_DOT_SCALE_BY_DISTANCE = new Cesium.NearFarScalar(
+  50_000,
+  1.2,
+  12_000_000,
+  0.6,
+);
+const LOCAL_DOT_OUTLINE = Cesium.Color.BLACK.withAlpha(0.6);
+const LOCAL_FOOTPRINT_DISPLAY = new Cesium.DistanceDisplayCondition(
+  0,
+  LOCAL_FOOTPRINT_MAX_DISTANCE_M,
+);
 
 /**
  * Build the owner-approved local-infrastructure card copy.
@@ -95,7 +116,7 @@ export function localInfrastructureOverlayCopy(properties, layerId) {
  * @param {object} options
  * @param {string} options.id Stable id within the source.
  * @param {string} options.layerId Local layer id.
- * @param {Cesium.Cartesian3} options.position Current stem-tip position.
+ * @param {Cesium.Cartesian3} options.position Current dot anchor position.
  * @param {object} options.properties Unwrapped feature properties.
  * @param {number} options.priority Source-owned importance score.
  * @param {string} options.accent Source accent color.
@@ -226,8 +247,8 @@ export function createLocalInfrastructureOverlayPublisher({ sourceId, host }) {
   let published = false;
   let destroyed = false;
   // Local entries have immutable metadata and a mutable Cartesian position.
-  // Snapshot coordinates: retaining only the entry reference would miss a
-  // stem tip moving in place. Republishing an unchanged cohort invalidates
+  // Snapshot coordinates: retaining only the entry reference would miss an
+  // anchor moving in place when its ground sample lands. Republishing an unchanged cohort invalidates
   // the host and can sustain a render loop when frames exceed the 450 ms walk.
   let lastPublication = null;
   const sourceOptions = {
@@ -306,8 +327,9 @@ export function localDatasetError(error) {
 
 /**
  * A minimal, rock-solid native implementation for loading local GeoJSON Data.
- * Draws 3D stems (polylines) attached to Point entities and ensures
- * standard scene.pick natively clicks them.
+ * Every feature is a surface dot in one PointPrimitiveCollection whose pick id
+ * is the feature entity, so standard scene.pick natively clicks it. Polygon
+ * and line footprints stay on the entity and only draw close up.
  * @param {object} options Dataset URL, identity, appearance and optional Cesium adapters.
  * @param {object} services Caller-owned operations; see docs/INFRASTRUCTURE-LAYERS.md.
  * @returns {object} A fresh layer implementing init/enable/disable/update/destroy/getStats.
@@ -350,6 +372,10 @@ export function createLocalGeoJsonLayer(
   let _preRenderRemover = null;
   let _cameraMoveEndRemover = null;
   let _stemRecords = [];
+  /** One dot per record; shown whenever the layer is, never LOD-culled. */
+  let _dots = null;
+  /** Feeds the dots the horizon depth-test distance (see horizonDepth.js). */
+  let _horizonDepth = null;
   let _stemGeometryDirty = true;
   let _lastVisibilityUpdate = 0;
   let _destroyed = false;
@@ -454,6 +480,14 @@ export function createLocalGeoJsonLayer(
     if (!_dataSource) return;
     const source = _dataSource;
     _dataSource = null;
+    if (_dots) {
+      try {
+        viewer?.scene?.primitives?.remove(_dots);
+      } catch {
+        /* already gone */
+      }
+      _dots = null;
+    }
     _stemRecords = [];
     _stemGeometryDirty = true;
     _lastVisibilityUpdate = Number.NEGATIVE_INFINITY;
@@ -482,6 +516,10 @@ export function createLocalGeoJsonLayer(
     if (_preRenderRemover) {
       _preRenderRemover();
       _preRenderRemover = null;
+    }
+    if (_horizonDepth) {
+      _horizonDepth.destroy();
+      _horizonDepth = null;
     }
     if (_cameraMoveEndRemover) {
       _cameraMoveEndRemover();
@@ -543,6 +581,18 @@ export function createLocalGeoJsonLayer(
       _lodComputed = false;
       _lastLodProbeMs = Number.NEGATIVE_INFINITY;
       _overlayPublisher.show();
+      // Hand the dots' horizon culling to the GPU (see horizonDepth.js). Set
+      // up before the build so new dots start from the tracked distance.
+      if (!_horizonDepth) {
+        _horizonDepth = trackHorizonDepthTest(
+          viewer,
+          (distanceM) => {
+            for (const record of _stemRecords)
+              record.dot.disableDepthTestDistance = distanceM;
+          },
+          { isActive: () => _enabled },
+        );
+      }
 
       // 1. Initialize data source
       if (!_dataSource) {
@@ -558,6 +608,7 @@ export function createLocalGeoJsonLayer(
             // clear its error or retry.
             _error = null;
             let loaded = null;
+            let dots = null;
             // Whether the scene has actually accepted `loaded` — the two rollback
             // windows (before vs after the add settles) need different cleanup.
             let addedToScene = false;
@@ -615,7 +666,13 @@ export function createLocalGeoJsonLayer(
                 return;
               }
 
-              // Convert parsed points into 3D stems or style polygons
+              dots = new Cesium.PointPrimitiveCollection({
+                blendOption: Cesium.BlendOption.TRANSLUCENT,
+              });
+              dots.show = false;
+              viewer.scene.primitives.add(dots);
+
+              // Give every feature a surface dot; footprints only draw close up.
               const entities = loaded.entities.values;
               _count = entities.length;
               _stemRecords = [];
@@ -626,14 +683,18 @@ export function createLocalGeoJsonLayer(
                 feature.__localLayerId = id; // Tag it so our click handler knows it belongs to this layer
 
                 let pos = feature.position?.getValue(Cesium.JulianDate.now());
+                // The dot replaces GeoJsonDataSource's pin for Point features.
+                feature.billboard = undefined;
 
                 if (!pos) {
                   // It's a polygon or line
                   if (feature.polygon) {
                     feature.polygon.outline = true;
                     feature.polygon.outlineColor = baseColor;
+                    feature.polygon.distanceDisplayCondition =
+                      LOCAL_FOOTPRINT_DISPLAY;
 
-                    // Calculate center point for the stem
+                    // The dot sits at the footprint's center
                     const hierarchy = feature.polygon.hierarchy?.getValue(
                       Cesium.JulianDate.now(),
                     );
@@ -646,6 +707,15 @@ export function createLocalGeoJsonLayer(
                         hierarchy.positions,
                       ).center;
                     }
+                  } else if (feature.polyline) {
+                    feature.polyline.distanceDisplayCondition =
+                      LOCAL_FOOTPRINT_DISPLAY;
+                    const positions = feature.polyline.positions?.getValue(
+                      Cesium.JulianDate.now(),
+                    );
+                    if (positions && positions.length > 0) {
+                      pos = Cesium.BoundingSphere.fromPoints(positions).center;
+                    }
                   }
                 }
 
@@ -653,7 +723,7 @@ export function createLocalGeoJsonLayer(
 
                 const carto = Cesium.Cartographic.fromCartesian(pos);
                 const groundHeight = 0; // Ellipsoid surface until a scene sample lands
-                const tipHeight = 2000; // Initial Stem height
+                const tipHeight = groundHeight + LOCAL_DOT_LIFT_M;
 
                 const base = Cesium.Cartesian3.fromRadians(
                   carto.longitude,
@@ -687,27 +757,19 @@ export function createLocalGeoJsonLayer(
                   ),
                 });
 
-                // Constant properties are refreshed on the existing 450 ms source
-                // cadence. Cesium no longer evaluates 2-3 callbacks per entity on
-                // every frame, while the point/stem pick surface stays native.
+                // A constant position, moved only when a ground sample lands.
+                // The dot's pick id is the entity, so picking stays native.
                 feature.position = tip;
-                const stemPositionBuffers = [
-                  [base, tip],
-                  [base, tip],
-                ];
-                feature.polyline = new Cesium.PolylineGraphics({
-                  positions: stemPositionBuffers[0],
-                  width: 3.5,
-                  material: new Cesium.ColorMaterialProperty(baseColor),
-                });
-                feature.point = new Cesium.PointGraphics({
-                  pixelSize: 10,
+                const dot = dots.add({
+                  id: feature,
+                  position: tip,
+                  pixelSize: LOCAL_DOT_PIXEL_SIZE,
                   color: baseColor,
-                  outlineColor: Cesium.Color.BLACK,
-                  outlineWidth: 2,
-                  // Never depth-cull the anchor against the photoreal mesh —
-                  // globe-horizon culling is handled by the pre-render occluder.
-                  disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                  outlineColor: LOCAL_DOT_OUTLINE,
+                  outlineWidth: 1,
+                  scaleByDistance: LOCAL_DOT_SCALE_BY_DISTANCE,
+                  disableDepthTestDistance:
+                    _horizonDepth?.distanceM() ?? NEAR_DEPTH_TEST_DISTANCE_M,
                 });
 
                 const priority = labelPriorityFromProperties(properties, id);
@@ -718,8 +780,9 @@ export function createLocalGeoJsonLayer(
                   base,
                   tip,
                   nextTip: Cesium.Cartesian3.clone(tip),
-                  stemPositionBuffers,
-                  stemPositionBufferIndex: 0,
+                  dot,
+                  // sampleHeight renders a pick pass; skip our own geometry.
+                  sampleExclusions: [feature, dots],
                   groundHeight,
                   groundSampled: false,
                   lastGroundSampleMs: 0,
@@ -738,6 +801,7 @@ export function createLocalGeoJsonLayer(
               }
               // Setup finished — publish it.
               _dataSource = loaded;
+              _dots = dots;
               _lastUpdate = Date.now();
             } catch (e) {
               // The dataset ships with the build, so this is a broken install,
@@ -751,6 +815,13 @@ export function createLocalGeoJsonLayer(
               if (addedToScene) {
                 try {
                   viewer?.dataSources?.remove(loaded, true);
+                } catch {
+                  /* already gone */
+                }
+              }
+              if (dots) {
+                try {
+                  viewer?.scene?.primitives?.remove(dots);
                 } catch {
                   /* already gone */
                 }
@@ -779,18 +850,14 @@ export function createLocalGeoJsonLayer(
                   viewer.selectedEntity = entity;
                   selectEntityContext(entity);
 
-                  // We zoom to the surface base of the stem or the center of the polygon
-                  let targetPos = null;
+                  // We zoom to the dot's surface base, else the polygon's center
+                  let targetPos = entity.__localBaseCartesian ?? null;
 
-                  if (entity.polyline) {
-                    // If it's a stem, fly to the base
-                    const positions = entity.polyline.positions.getValue(
-                      Cesium.JulianDate.now(),
-                    );
-                    if (positions && positions.length > 0) {
-                      targetPos = positions[0];
-                    }
-                  } else if (entity.polygon && entity.polygon.hierarchy) {
+                  if (
+                    !targetPos &&
+                    entity.polygon &&
+                    entity.polygon.hierarchy
+                  ) {
                     // If it's a polygon, just fly to its center
                     const hierarchy = entity.polygon.hierarchy.getValue(
                       Cesium.JulianDate.now(),
@@ -836,7 +903,7 @@ export function createLocalGeoJsonLayer(
       }
 
       if (_destroyed) return;
-      // 3. Add an incredibly fast pre-render occluder to hide points behind the globe
+      // 3. Add an incredibly fast pre-render occluder to hide footprints behind the globe
       if (_enabled && !_preRenderRemover) {
         _preRenderRemover = viewer.scene.preRender.addEventListener(() => {
           if (!_enabled || !_dataSource) return;
@@ -955,7 +1022,7 @@ export function createLocalGeoJsonLayer(
               record,
             );
             if (refreshStemGeometry || terrainFloorChanged) {
-              updateLocalStemGeometry(viewer, record, now);
+              updateLocalAnchor(viewer, record, now);
             } else if (
               canSampleGround &&
               !record.groundSampled &&
@@ -971,7 +1038,7 @@ export function createLocalGeoJsonLayer(
                 distance < GROUND_SAMPLE_MAX_DISTANCE_M &&
                 sampleLocalGroundHeight(viewer, record, now)
               ) {
-                updateLocalStemGeometry(viewer, record, now, distance);
+                updateLocalAnchor(viewer, record, now, distance);
               }
             }
             if (!wasGroundSampled && record.groundSampled)
@@ -1040,6 +1107,7 @@ export function createLocalGeoJsonLayer(
         return;
       }
       if (_dataSource) _dataSource.show = true;
+      if (_dots) _dots.show = true;
       viewer.scene.requestRender?.();
     },
 
@@ -1119,7 +1187,7 @@ function sampleLocalGroundHeight(viewer, record, now) {
   if (globe?.show && globe.tilesLoaded === false) return false;
   let sampled;
   try {
-    sampled = viewer.scene.sampleHeight(record.carto, [record.entity]);
+    sampled = viewer.scene.sampleHeight(record.carto, record.sampleExclusions);
   } catch {
     return false; // tiles not ready; retry on a later bounded update
   }
@@ -1158,41 +1226,28 @@ function setLocalGroundHeight(record, height) {
   record.entity.__localBaseCartesian = record.base;
 }
 
-function updateLocalStemGeometry(viewer, record, now, knownDistance = null) {
+function updateLocalAnchor(viewer, record, now, knownDistance = null) {
   const distance = Number.isFinite(knownDistance)
     ? knownDistance
     : Cesium.Cartesian3.distance(viewer.camera.positionWC, record.base);
   if (distance < GROUND_SAMPLE_MAX_DISTANCE_M)
     sampleLocalGroundHeight(viewer, record, now);
-  // Keep the intended screen-size scaling in close-up views too. A 5 km
-  // minimum made a marker hundreds of metres tall beside a nearby building.
-  const effectiveDistance = Math.max(distance, 1);
-  const canvasHeight = viewer.scene.canvas.clientHeight || 1080;
-  const fov = viewer.camera.frustum.fov || Math.PI / 3;
-  const targetPx = 65;
-  const fovFactor = 2 * Math.tan(fov / 2) * (targetPx / canvasHeight);
-  const tipHeight = record.groundHeight + effectiveDistance * fovFactor;
   Cesium.Cartesian3.fromRadians(
     record.carto.longitude,
     record.carto.latitude,
-    tipHeight,
+    record.groundHeight + LOCAL_DOT_LIFT_M,
     Cesium.Ellipsoid.WGS84,
     record.nextTip,
   );
   if (
     Cesium.Cartesian3.distanceSquared(record.tip, record.nextTip) <=
-    LOCAL_STEM_TIP_EPSILON_SQ
+    LOCAL_ANCHOR_EPSILON_SQ
   ) {
     return false;
   }
   Cesium.Cartesian3.clone(record.nextTip, record.tip);
-  record.stemPositionBufferIndex = 1 - record.stemPositionBufferIndex;
-  const stemPositions =
-    record.stemPositionBuffers[record.stemPositionBufferIndex];
-  stemPositions[0] = record.base;
-  stemPositions[1] = record.tip;
   record.entity.position.setValue(record.tip);
-  record.entity.polyline.positions.setValue(stemPositions);
+  record.dot.position = record.tip;
   return true;
 }
 

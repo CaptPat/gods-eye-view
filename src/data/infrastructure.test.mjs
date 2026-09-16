@@ -135,6 +135,7 @@ test('two viewers use their supplied contexts and dispose independently', async 
     const viewer = {
       dataSources: sources,
       scene: {
+        primitives: new Cesium.PrimitiveCollection(),
         canvas: {},
         preRender: new Cesium.Event(),
         requestRender() {},
@@ -183,6 +184,7 @@ test('consumer build includes only infrastructure code and resolves assets under
   const entry = output.find((item) => item.type === 'chunk' && item.isEntry);
   const sources = Object.keys(entry.modules).filter((id) => id.endsWith('.js'));
   assert.deepEqual(sources.map((id) => id.split('/').at(-1)).sort(), [
+    'horizonDepth.js',
     'infrastructure.js',
     'localGeojsonCore.js',
     'localGeojsonLod.js',
