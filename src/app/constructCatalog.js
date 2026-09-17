@@ -9,6 +9,7 @@ import { createApplicationRadio } from './layers/radio.js';
 import { createApplicationTraffic } from './layers/traffic.js';
 import { createApplicationBikeshare } from './layers/bikeshare.js';
 import { createApplicationDirections } from './layers/directions.js';
+import { createApplicationTransit } from './layers/transit.js';
 import { createApplicationInstallations } from './layers/militaryInstallations.js';
 import { createApplicationSatellites } from './layers/satellites.js';
 import { createApplicationLaunches } from './layers/rocketLaunches.js';
@@ -53,6 +54,8 @@ import { createApplicationMarineDepths } from './layers/marineDepths.js';
 import { createApplicationCables } from './layers/submarineCables.js';
 import { createInfrastructureLayers } from '../data/infrastructure.js';
 import { localGeoJsonServices } from './localGeojsonServices.js';
+import { createBhoteKoshiEventLayer } from '../data/bhoteKoshiEvent.js';
+import { createBhoteKoshiLocatorLayer } from '../data/bhoteKoshiLocator.js';
 
 const SOURCE_METHODS = Object.freeze({
   flights: ['getSnapshot'],
@@ -88,6 +91,7 @@ export function createApplicationCatalog({
   metadata = LAYER_STATE_REGISTRY,
   vesselOptions,
   resolveAsset,
+  nepalBoundaryResolver,
 }) {
   if (!signal?.addEventListener)
     throw new TypeError('An application lifetime signal is required');
@@ -134,6 +138,10 @@ export function createApplicationCatalog({
     });
     const catalog = createLayerCatalog(
       [
+        createBhoteKoshiEventLayer(),
+        createBhoteKoshiLocatorLayer({
+          boundaryResolver: nepalBoundaryResolver,
+        }),
         flights,
         military,
         createApplicationEarthquakes({ source: sources.earthquakes }),
@@ -171,6 +179,7 @@ export function createApplicationCatalog({
         createApplicationTraffic({ source: sources.traffic }),
         createApplicationCctv({ surface, source: sources.cctv }),
         createApplicationRadio({ surface, source: sources.radio }),
+        createApplicationTransit({ surface, source: sources.transit }),
         createApplicationBikeshare({ source: sources.bikeshare }),
         createApplicationDirections(),
         vessels,

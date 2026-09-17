@@ -156,25 +156,26 @@ function encode(state) {
   return params.toString();
 }
 
-test('tide and current stations share only their enabled state, as tokens h and k', () => {
+test('tide and current stations share only their enabled state, as tokens T and k', () => {
   const state = createDefaultLayerState();
   assert.equal(Object.hasOwn(state.options, 'tide-stations'), false);
   assert.equal(Object.hasOwn(state.options, 'current-stations'), false);
   state.enabledLayerIds = ['tide-stations', 'current-stations'];
   const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(params.get('l'), 'k.h');
+  assert.equal(params.get('l'), 'k.T');
   const options = String(params.get('lo') || '').split('_');
-  assert.equal(options.some((entry) => entry.startsWith('h.') || entry.startsWith('k.')), false);
+  assert.equal(options.some((entry) => entry.startsWith('T.') || entry.startsWith('k.')), false);
   assert.deepEqual(
-    decodeLayerStateParams(new URLSearchParams('v=2&l=h.k')).enabledLayerIds,
+    decodeLayerStateParams(new URLSearchParams('v=2&l=T.k')).enabledLayerIds,
     ['current-stations', 'tide-stations'],
   );
 });
 
 test('production registry is exact, canonical, and rejects incomplete contracts', async () => {
   assert.equal(validateLayerStateRegistry(), true);
-  assert.equal(REGISTERED_LAYER_IDS.length, 44);
-  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 44);
+  assert.equal(REGISTERED_LAYER_IDS.length, 47);
+  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 47);
+  assert.ok(REGISTERED_LAYER_IDS.includes('transit'));
   assert.deepEqual(REGISTERED_LAYER_IDS, [...REGISTERED_LAYER_IDS].sort());
   assert.throws(
     () => validateLayerStateRegistry([...LAYER_STATE_REGISTRY, LAYER_STATE_REGISTRY[0]]),
@@ -241,8 +242,8 @@ test('v2 codec distinguishes absent from empty and keeps canonical deterministic
 });
 
 test('unknown enabled-layer tokens reject the payload instead of becoming an empty set', () => {
-  assert.equal(decodeLayerStateParams(new URLSearchParams('v=2&l=y')), null);
-  assert.equal(decodeLayerStateParams(new URLSearchParams('v=2&l=c.y')), null);
+  assert.equal(decodeLayerStateParams(new URLSearchParams('v=2&l=unknown')), null);
+  assert.equal(decodeLayerStateParams(new URLSearchParams('v=2&l=c.unknown')), null);
 });
 
 test('share-link capacity: uppercase tokens are valid and case-sensitive, and the enabled list holds 62 tokens', () => {
@@ -273,6 +274,12 @@ test('share-link capacity: uppercase tokens are valid and case-sensitive, and th
   const overCeiling = `${'a.'.repeat(64)}a`;
   assert.equal(overCeiling.length, 129);
   assert.equal(decodeLayerStateParams(new URLSearchParams(`v=2&l=${overCeiling}`)), null);
+});
+
+test('Nepal event and locator have distinct enabled-only share tokens', () => {
+  const decoded = decodeLayerStateParams(new URLSearchParams('v=2&l=h.z'));
+  assert.deepEqual(decoded.enabledLayerIds, ['bhote-koshi-2026', 'bhote-koshi-locator']);
+  assert.ok(encode(decoded).includes('l=h.z'));
 });
 
 test('unknown and forbidden option fields are ignored while missing options use codec defaults', () => {
@@ -1650,18 +1657,18 @@ test('weather radar options round-trip through the compact URL and normalize str
   state.enabledLayerIds = ['weather-radar'];
   state.options['weather-radar'] = { usDetail: true, opacity: 0.4 };
   const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(params.get('l'), 'z');
+  assert.equal(params.get('l'), 'R');
   const assignments = String(params.get('lo') || '').split('_');
-  assert.ok(assignments.includes('z.u.1'), assignments.join('_'));
-  assert.ok(assignments.includes('z.o.40'), assignments.join('_'));
+  assert.ok(assignments.includes('R.u.1'), assignments.join('_'));
+  assert.ok(assignments.includes('R.o.40'), assignments.join('_'));
   assert.deepEqual(decodeLayerStateParams(params).options['weather-radar'], { usDetail: true, opacity: 0.4 });
 
   state.options['weather-radar'] = { usDetail: false, opacity: 0.7 };
   const defaults = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(String(defaults.get('lo') || '').split('_').some((entry) => entry.startsWith('z.')), false);
+  assert.equal(String(defaults.get('lo') || '').split('_').some((entry) => entry.startsWith('R.')), false);
 
   assert.deepEqual(
-    decodeLayerStateParams(new URLSearchParams('v=2&l=z&lo=z.o.55')).options['weather-radar'],
+    decodeLayerStateParams(new URLSearchParams('v=2&l=R&lo=R.o.55')).options['weather-radar'],
     { usDetail: false, opacity: 0.7 },
     'an unknown opacity token falls back to the default',
   );
@@ -1678,7 +1685,7 @@ test('weather overlays options round-trip through the compact URL and normalize 
   state.enabledLayerIds = ['weather-overlays', 'weather-radar'];
   state.options['weather-overlays'] = { mode: 'pollen', pollenType: 'weed', opacity: 1 };
   const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(params.get('l'), 'o.z');
+  assert.equal(params.get('l'), 'o.R');
   const assignments = String(params.get('lo') || '').split('_');
   for (const expected of ['o.m.p', 'o.p.w', 'o.o.100']) {
     assert.ok(assignments.includes(expected), assignments.join('_'));

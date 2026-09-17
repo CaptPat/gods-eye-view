@@ -6,7 +6,7 @@ Fork: `CaptPat/gods-eye-view`, branded Cyclops View in Pinokio. This work is for
 
 - `main` is at `1b20ba7`, pushed; `origin/main` matches.
 - `main` holds all of `bilawalsidhu/gods-eye-view` main through PR #583 (`1ad565c`), from three syncs: `6462f0a` for #433–#456, `3eab0cc` for #501–#570 and `77a9966` for #571–#583. Every fork layer since then is merged on top.
-- The weather suite was built before the second sync. That merge ported the fork's layers into upstream's new catalog (`src/app/layers/`) and moved the radar token to `z`.
+- The weather suite was built before the second sync. That merge ported the fork's layers into upstream's new catalog (`src/app/layers/`) and moved the radar token to `z`. The fourth sync (upstream #584–#626) moved it again to `R`, because upstream's Nepal locator took `z`; Tide Stations moved from `h` to `T` and UFO Incidents from `j` to `X` for the same reason.
 - CI parity passes on `main`:
   - `npm run format:check`;
   - `npm run check:boundaries`, which now also runs `check-import-directions.mjs`;
@@ -89,7 +89,7 @@ Seven fork layers, all in a new "Sky" group in the Layers panel, built in three 
 
 | Merge | Layers (share token) | Source |
 |---|---|---|
-| `96552cb` | UFO Incidents (`j`), Fireballs (`l`) | Wikidata snapshot (CC0); NASA/JPL CNEOS via `/api/fireballs` |
+| `96552cb` | UFO Incidents (`X`, was `j`), Fireballs (`l`) | Wikidata snapshot (CC0); NASA/JPL CNEOS via `/api/fireballs` |
 | `d5d7e65` | Aurora Forecast (`1`), Day & Night (`2`), Meteor Showers (`3`) | NOAA SWPC OVATION via `/api/aurora`; computed sun and moon positions; bundled IMO shower list |
 | night sky merge | Night Sky (`4`), Planets & Deep Sky (`5`) | d3-celestial (BSD-3) bundled; astronomy-engine (MIT) loaded on demand |
 
@@ -107,9 +107,9 @@ Specs are `docs/superpowers/specs/2026-09-15-sky-events-design.md` and `…-nigh
 
 | # | Feature | Merge | Share token | Sources |
 |---|---|---|---|---|
-| 1 | Weather Radar layer | `c91acea` | `z` (was `p`, then `n`, before upstream syncs) | RainViewer worldwide, IEM NEXRAD US detail |
+| 1 | Weather Radar layer | `c91acea` | `R` (was `p`, then `n`, then `z`, before upstream syncs) | RainViewer worldwide, IEM NEXRAD US detail |
 | 2 | Right-click weather report | `6c17f1d` | — | Google Weather API, Open-Meteo marine/solar |
-| 3 | Tide Stations and Current Stations layers | `9ec8930` | `h`, `k` | NOAA CO-OPS |
+| 3 | Tide Stations and Current Stations layers | `9ec8930` | `T` (was `h`), `k` | NOAA CO-OPS |
 | 4 | Weather Overlays layer (clouds, temperature, air quality, pollen) | `3c71064` | `o` | NOAA nowCOAST GMGSI, NOAA GFS via PacIOOS ERDDAP, Google Air Quality and Pollen heatmap tiles |
 | 5 | Severe Weather layer | `02c84f7`, then `7124efd` | `v` | NWS active alerts plus zone shapes; GDACS events, cyclone tracks and cones |
 

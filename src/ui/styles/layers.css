@@ -1300,6 +1300,7 @@
       .feed-loading,
       .feed-degraded,
       .feed-stale,
+      .feed-partial,
       .feed-fallback,
       .feed-unavailable
     )

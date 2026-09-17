@@ -27,10 +27,13 @@ export function createApplicationData({
     throw new TypeError('An application layer catalog is required');
   for (const layer of catalog.layers) dataManager.register(layer);
   for (const layer of catalog.layers) layer.attachDataManager?.(dataManager);
-  // Imagery layers (fork: weather radar, weather overlays) hide themselves
-  // under map sources that cannot show them, so they follow the scene's stack.
-  for (const layer of catalog.layers)
+  // Imagery layers (fork: weather radar, weather overlays, sea ice, marine
+  // depths) hide themselves under map sources that cannot show them, so they
+  // follow the scene's stack. Upstream's scene layers use the longer name.
+  for (const layer of catalog.layers) {
     layer.attachMapStack?.(mapStackController);
+    layer.attachMapStackController?.(mapStackController);
+  }
   // Restoration starts only after the caller's complete registry is sealed.
   dataManager.finalizeRegistrations(catalog.metadata);
   if (allowQaRegistration) {
