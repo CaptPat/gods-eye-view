@@ -1,12 +1,8 @@
 import {
   OVERPASS_MAX_RESPONSE_BYTES,
-<<<<<<< HEAD
-=======
   resolveOverpassUpstreams,
->>>>>>> e7707d9a0f34d9fbffc300023c319f95caa5be30
   OVERPASS_USER_AGENT,
   OVERPASS_TIMEOUT_MS,
-  overpassUpstreams,
 } from './constants.js';
 import { readResponseTextCapped } from '../common/http.js';
 import { simplifyOverpassPayloadBody } from './geometry.js';
@@ -107,7 +103,6 @@ function refusal(status, retryAfterMs) {
 }
 
 /**
-<<<<<<< HEAD
  * Number of elements in a JSON Overpass body, or null when the body is not a
  * JSON element list (e.g. an XML `out` format).
  * @param {{body?: string}|null} payload
@@ -148,27 +143,14 @@ function overpassPayloadIsCacheable(payload, cacheKey) {
 }
 
 /**
- * Try each mirror once, retaining response-size and per-mirror timeout caps.
- * Refusals and body-level failures rotate; total failure returns the last
- * rate-limit payload, otherwise the first refusal, or throws a network error.
- * @param {string} body URL-encoded Overpass QL query body.
- * @param {number} [maxResponseBytes] Endpoint-specific response cap.
- * @param {object} [options] Server-only endpoint and I/O overrides for tests.
- * @returns {Promise<{status:number,body:string,contentType:string,endpoint:string,rateLimited:boolean}>}
-=======
  * Query only the configured chain with capped reads, timeouts and per-endpoint cooldowns.
  * Explicit endpoint/I/O overrides are server-only test seams. Empty data is valid.
->>>>>>> e7707d9a0f34d9fbffc300023c319f95caa5be30
  */
 async function fetchOverpassPayload(
   body,
   maxResponseBytes = OVERPASS_MAX_RESPONSE_BYTES,
   {
-<<<<<<< HEAD
-    endpoints = overpassUpstreams(),
-=======
     endpoints = resolveOverpassUpstreams(),
->>>>>>> e7707d9a0f34d9fbffc300023c319f95caa5be30
     fetchImpl = fetch,
     readBody = readResponseTextCapped,
     simplify = simplifyOverpassPayloadBody,
@@ -261,9 +243,4 @@ async function fetchOverpassPayload(
   return failure;
 }
 
-export {
-  overpassElementCount,
-  overpassPayloadIsCacheable,
-  overpassPayloadIsData,
-  fetchOverpassPayload,
-};
+export { overpassPayloadIsData, fetchOverpassPayload };
