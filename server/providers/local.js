@@ -129,7 +129,7 @@ export { overpassPayloadIsData } from './overpass/transport.js';
 export { fetchOverpassPayload } from './overpass/transport.js';
 export { overpassElementCount } from './overpass/transport.js';
 export { overpassPayloadIsCacheable } from './overpass/transport.js';
-export { OVERPASS_UPSTREAMS } from './overpass/constants.js';
+export { resolveOverpassUpstreams as OVERPASS_UPSTREAMS } from './overpass/constants.js';
 export { isPrivateOverpassHost } from './overpass/constants.js';
 export { overpassUpstreams } from './overpass/constants.js';
 export { parseOverpassUpstreamsEnv } from './overpass/constants.js';
