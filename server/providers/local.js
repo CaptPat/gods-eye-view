@@ -20,6 +20,7 @@ import { cctvProxy } from './cctv.js';
 import { defaultSourceRoot } from './common/source-root.js';
 import { radioBrowserProxy } from './radio.js';
 import { gbfsProxy } from './gbfs.js';
+import { localReceiversProxy } from './local-receivers.js';
 import { transitProxy } from './transit.js';
 import { adsbLolProxy } from './aircraft/adsb-lol.js';
 import { aisLiveProxy } from './vessels/ais-live.js';
@@ -27,6 +28,10 @@ import { trackBackfillProxies } from './aircraft/tracks.js';
 import { openAiRealtimeProxy } from './openai.js';
 import { googlePlacesContextProxy } from './places.js';
 import { keySetupEndpoint } from '../standalone/key-setup.js';
+import { weatherProxy } from './weather.js';
+import { firePerimetersProxy } from './firePerimeters.js';
+import { cycloneProxy } from './cyclones.js';
+import { windProxy } from './wind.js';
 
 /** Construct the local provider plugins in their established order. */
 function localProviderPlugins() {
@@ -53,12 +58,17 @@ function localProviderPlugins() {
     cctvProxy({ sourceRoot: defaultSourceRoot }),
     radioBrowserProxy(),
     gbfsProxy(),
+    localReceiversProxy(),
     transitProxy(),
     adsbLolProxy(),
     aisLiveProxy(),
     trackBackfillProxies(),
     openAiRealtimeProxy(),
     googlePlacesContextProxy(),
+    windProxy(),
+    weatherProxy(),
+    cycloneProxy(),
+    firePerimetersProxy(),
     keySetupEndpoint(),
   ];
 }
@@ -119,7 +129,7 @@ export { overpassPayloadIsData } from './overpass/transport.js';
 export { fetchOverpassPayload } from './overpass/transport.js';
 export { overpassElementCount } from './overpass/transport.js';
 export { overpassPayloadIsCacheable } from './overpass/transport.js';
-export { OVERPASS_UPSTREAMS } from './overpass/constants.js';
+export { resolveOverpassUpstreams as OVERPASS_UPSTREAMS } from './overpass/constants.js';
 export { isPrivateOverpassHost } from './overpass/constants.js';
 export { overpassUpstreams } from './overpass/constants.js';
 export { parseOverpassUpstreamsEnv } from './overpass/constants.js';
