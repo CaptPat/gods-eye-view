@@ -1,3 +1,5 @@
+import reservationRows from './layerStateTokenReservations.json' with { type: 'json' };
+
 const VALID_DISPOSITIONS = new Set([
   'enabled-only',
   'enabled+options',
@@ -5,6 +7,10 @@ const VALID_DISPOSITIONS = new Set([
 ]);
 
 export const LAYER_STATE_VERSION = 2;
+export const LAYER_STATE_TOKEN_ALPHABET =
+  '0123456789abcdefghijklmnopqrstuvwxyz';
+const LAYER_STATE_TOKEN_PATTERN = /^[a-z0-9]{1,2}$/;
+const NEW_SINGLE_CHARACTER_TOKEN_PATTERN = /^[0-9]$/;
 /** Re-check cadence while a shared subject waits for its feed row to arrive. */
 const PENDING_TRACKING_POLL_MS = 1_000;
 /**
@@ -17,13 +23,13 @@ const PENDING_TRACKING_POLL_MS = 1_000;
  */
 const TRACKING_ID_GRAMMAR = /^[0-9a-z~_-]{1,16}$/;
 /**
- * Ceilings for the untrusted v2 layer fields. The enabled list holds up to 62
- * one-character tokens ([a-zA-Z0-9], case-sensitive) and 61 dots, 123
- * characters; options stay far above a dozen short assignments. A value past
- * either is malformed or hostile. Reject the WHOLE payload, matching
- * the unknown-token rule — never salvage a prefix.
+ * Ceilings for the untrusted v2 layer fields. The layer ceiling covers the
+ * complete reserved one-character space plus every two-character base-36
+ * allocation, while the option ceiling covers a dozen short assignments.
+ * Reject the WHOLE payload, matching the unknown-token rule — never salvage a
+ * prefix.
  */
-const MAX_ENABLED_LAYERS_CHARS = 128;
+const MAX_ENABLED_LAYERS_CHARS = 4_096;
 const MAX_LAYER_OPTIONS_CHARS = 512;
 export const LAYER_STATE_STORAGE_KEY = 'gev:layer-state:v2';
 export const LAYER_RESTORE_ORIGINS = Object.freeze({
@@ -81,28 +87,6 @@ function normalizeVolume(value) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return null;
   return Math.round(Math.max(0, Math.min(1, numeric)) * 100) / 100;
-}
-
-const RADAR_OPACITIES = Object.freeze([0.4, 0.7, 1]);
-
-function normalizeRadarOpacity(value) {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return null;
-  return (
-    RADAR_OPACITIES.find((option) => Math.abs(option - numeric) < 0.001) ?? null
-  );
-}
-
-function opacityOption(key, token, defaultValue) {
-  return Object.freeze({
-    key,
-    token,
-    defaultValue,
-    normalize: normalizeRadarOpacity,
-    encode: (value) => String(Math.round(value * 100)),
-    decode: (value) =>
-      /^(40|70|100)$/.test(value) ? Number(value) / 100 : null,
-  });
 }
 
 function booleanOption(
@@ -191,7 +175,14 @@ function stringOption(key, token, defaultValue) {
   });
 }
 
-function enumOption(key, token, defaultValue, values, codes) {
+function enumOption(
+  key,
+  token,
+  defaultValue,
+  values,
+  codes,
+  { absentValue = defaultValue } = {},
+) {
   const reverse = Object.fromEntries(
     Object.entries(codes).map(([name, code]) => [code, name]),
   );
@@ -199,6 +190,7 @@ function enumOption(key, token, defaultValue, values, codes) {
     key,
     token,
     defaultValue,
+    absentValue,
     normalize: (value) => normalizeEnum(values, value),
     encode: (value) => codes[value],
     decode: (value) => reverse[value] || null,
@@ -227,7 +219,138 @@ function integerOption(key, token, defaultValue) {
   });
 }
 
+/**
+ * A share-link-only option: the whole-state codec carries it, but the stored
+ * local blob always holds its default.
+ */
+function shareOnlyOption(spec) {
+  return Object.freeze({ ...spec, shareOnly: true });
+}
+
+/**
+ * A signed integer in `[min, max]`, rejected (never clamped) outside it: a
+ * clamped box edge would be a different box, not a shorter spelling.
+ */
+function boundedIntegerOption(key, token, defaultValue, { min, max }) {
+  const parse = (value) => {
+    const number =
+      typeof value === 'number'
+        ? value
+        : /^-?\d{1,9}$/.test(String(value).trim())
+          ? Number(String(value).trim())
+          : NaN;
+    return Number.isInteger(number) && number >= min && number <= max
+      ? number
+      : null;
+  };
+  return Object.freeze({
+    key,
+    token,
+    defaultValue,
+    normalize: parse,
+    encode: (value) => String(value),
+    decode: parse,
+  });
+}
+
+/**
+ * Recent Imagery day: runtime key `S30:2026-09-18`, URL form `S20260918`.
+ * The calendar is checked both ways, and "today" is never consulted, so a
+ * link decodes the same whenever it is opened.
+ */
+const IMAGERY_LETTERS = Object.freeze({ S30: 'S', L30: 'L', VIIRS: 'V' });
+const IMAGERY_PRODUCTS = Object.freeze({ S: 'S30', L: 'L30', V: 'VIIRS' });
+
+function imageryKey(product, year, month, day) {
+  const time = Date.UTC(Number(year), Number(month) - 1, Number(day));
+  const iso = Number.isFinite(time)
+    ? new Date(time).toISOString().slice(0, 10)
+    : '';
+  return product && iso === `${year}-${month}-${day}`
+    ? `${product}:${iso}`
+    : null;
+}
+
+function imageryPinOption(key, token) {
+  return Object.freeze({
+    key,
+    token,
+    defaultValue: null,
+    normalize: (value) => {
+      const match = /^(S30|L30|VIIRS):(\d{4})-(\d{2})-(\d{2})$/.exec(
+        typeof value === 'string' ? value.trim() : '',
+      );
+      return match ? imageryKey(match[1], match[2], match[3], match[4]) : null;
+    },
+    encode: (value) => {
+      const [product, day] = value.split(':');
+      return `${IMAGERY_LETTERS[product]}${day.replaceAll('-', '')}`;
+    },
+    decode: (value) => {
+      const match = /^([SLV])(\d{4})(\d{2})(\d{2})$/.exec(
+        typeof value === 'string' ? value : '',
+      );
+      return match
+        ? imageryKey(IMAGERY_PRODUCTS[match[1]], match[2], match[3], match[4])
+        : null;
+    },
+  });
+}
+
 const OPTION_GROUPS = Object.freeze({
+  traffic: Object.freeze([
+    enumOption('roadMode', 'r', null, ['tomtom', 'osm', 'hybrid'], {
+      tomtom: 't',
+      osm: 'o',
+      hybrid: 'h',
+    }),
+  ]),
+  'weather-lightning': Object.freeze([
+    enumOption('opacity', 'o', 'strong', ['light', 'strong'], {
+      light: 'l',
+      strong: 's',
+    }),
+  ]),
+  'weather-radar': Object.freeze([
+    enumOption('opacity', 'o', 'strong', ['light', 'strong'], {
+      light: 'l',
+      strong: 's',
+    }),
+  ]),
+  'weather-satellite': Object.freeze([
+    enumOption('infrared', 'i', 'filtered', ['filtered', 'full'], {
+      filtered: 'f',
+      full: 'a',
+    }),
+    enumOption('opacity', 'o', 'strong', ['light', 'strong'], {
+      light: 'l',
+      strong: 's',
+    }),
+    enumOption(
+      'product',
+      'p',
+      'clouds-regional',
+      ['clouds', 'clouds-regional'],
+      { clouds: 'g', 'clouds-regional': 'r' },
+    ),
+  ]),
+  wind: Object.freeze([
+    enumOption('model', 'm', 'gfs', ['gfs', 'ifs'], { gfs: 'g', ifs: 'i' }),
+    enumOption(
+      'overlay',
+      'o',
+      'none',
+      ['none', 'speed', 'temperature', 'pressure'],
+      { none: 'n', speed: 's', temperature: 't', pressure: 'p' },
+      { absentValue: 'speed' },
+    ),
+    enumOption('units', 'u', 'km/h', ['km/h', 'm/s', 'mph'], {
+      'km/h': 'k',
+      'm/s': 'm',
+      mph: 'i',
+    }),
+    booleanOption('paused', 'p', false),
+  ]),
   flights: Object.freeze([
     // Owner directive 2026-08-22: the fleet's 3D models are DEFAULT-ON in
     // PROXIMITY mode. Proximity is itself the altitude/count gate — models only
@@ -272,6 +395,23 @@ const OPTION_GROUPS = Object.freeze({
     booleanOption('showProjection', 'p', true),
     booleanOption('autoHop', 'a', false),
   ]),
+  'recent-imagery': Object.freeze([
+    // Box edges in degrees × 100000; latitudes stop at the Web-Mercator limit.
+    boundedIntegerOption('west', 'w', null, { min: -18000000, max: 18000000 }),
+    boundedIntegerOption('south', 's', null, { min: -8505110, max: 8505110 }),
+    boundedIntegerOption('east', 'e', null, { min: -18000000, max: 18000000 }),
+    boundedIntegerOption('north', 'n', null, { min: -8505110, max: 8505110 }),
+    imageryPinOption('a', 'a'),
+    imageryPinOption('b', 'b'),
+    // 0 one image, 1 image against the basemap, 2 two images A / B.
+    boundedIntegerOption('mode', 'm', 0, { min: 0, max: 2 }),
+    // The swipe position is one comparison's framing, not a preference: a
+    // stored split resurfaced in the next session's first comparison.
+    shareOnlyOption(
+      boundedIntegerOption('split', 'p', 50, { min: 0, max: 100 }),
+    ),
+    booleanOption('viirs', 'v', false),
+  ]),
   radio: Object.freeze([
     Object.freeze({
       key: 'filter',
@@ -290,30 +430,6 @@ const OPTION_GROUPS = Object.freeze({
       decode: (value) =>
         /^\d{1,3}$/.test(value) ? normalizeVolume(Number(value) / 100) : null,
     }),
-  ]),
-  'weather-overlays': Object.freeze([
-    enumOption(
-      'mode',
-      'm',
-      'clouds',
-      ['clouds', 'temperature', 'air-quality', 'pollen'],
-      {
-        clouds: 'c',
-        temperature: 't',
-        'air-quality': 'a',
-        pollen: 'p',
-      },
-    ),
-    enumOption('pollenType', 'p', 'tree', ['tree', 'grass', 'weed'], {
-      tree: 't',
-      grass: 'g',
-      weed: 'w',
-    }),
-    opacityOption('opacity', 'o', 0.7),
-  ]),
-  'weather-radar': Object.freeze([
-    booleanOption('usDetail', 'u', false),
-    opacityOption('opacity', 'o', 0.7),
   ]),
 });
 
@@ -345,11 +461,98 @@ export const SHARE_TRACKING_RESTORE_POLICIES = Object.freeze({
 });
 
 /**
+ * The original single-character assignments are a closed compatibility set.
+ * Keep their exact mapping pinned by the independent snapshot in the tests.
+ */
+export const LEGACY_LAYER_STATE_TOKENS = Object.freeze({
+  'ais-live-vessels': 'a',
+  'alpr-cameras': 'p',
+  'bhote-koshi-2026': 'h',
+  'bhote-koshi-locator': 'z',
+  bikeshare: 'b',
+  cctv: 'c',
+  directions: 'n',
+  earthquakes: 'e',
+  'fire-perimeters': '2',
+  flights: 'f',
+  'local-dams': 'q',
+  'local-datacenters': 'd',
+  'local-firms': 'w',
+  military: 'm',
+  'military-awareness': 'g',
+  'military-installations': 'i',
+  radio: 'r',
+  'recent-imagery': '1',
+  'rocket-launches': 'x',
+  satellites: 's',
+  'telegeography-submarine-cables': 'u',
+  traffic: 't',
+  transit: 'j',
+  'weather-cyclones': 'y',
+  'weather-lightning': 'l',
+  'weather-radar': 'v',
+  'weather-satellite': 'o',
+  wind: 'k',
+});
+
+/**
+ * Permanent token ownership. Existing share links are public authored state,
+ * so an allocation stays here even if its layer is later removed. The JSON
+ * ledger is also read directly from the published Git base by the checker.
+ */
+export function parseLayerStateTokenReservations(rows) {
+  if (!Array.isArray(rows)) {
+    throw new Error('Layer-state token ledger must be an array');
+  }
+  const reservations = Object.create(null);
+  const reservedIdsByToken = new Map();
+  for (const row of rows) {
+    if (
+      !Array.isArray(row) ||
+      row.length !== 2 ||
+      typeof row[0] !== 'string' ||
+      typeof row[1] !== 'string'
+    ) {
+      throw new Error('Invalid layer-state token ledger row');
+    }
+    const [id, token] = row;
+    if (!/^[a-z0-9-]+$/.test(id) || !LAYER_STATE_TOKEN_PATTERN.test(token)) {
+      throw new Error(`Invalid layer-state token reservation: ${id}`);
+    }
+    if (Object.hasOwn(reservations, id)) {
+      throw new Error(`Duplicate layer-state token reservation id: ${id}`);
+    }
+    if (reservedIdsByToken.has(token)) {
+      throw new Error(`Duplicate layer-state token reservation: ${token}`);
+    }
+    if (
+      (Object.hasOwn(LEGACY_LAYER_STATE_TOKENS, id) &&
+        token !== LEGACY_LAYER_STATE_TOKENS[id]) ||
+      (token.length === 1 &&
+        !NEW_SINGLE_CHARACTER_TOKEN_PATTERN.test(token) &&
+        LEGACY_LAYER_STATE_TOKENS[id] !== token)
+    ) {
+      throw new Error(`Legacy layer-state token is immutable: ${id}`);
+    }
+    reservations[id] = token;
+    reservedIdsByToken.set(token, id);
+  }
+  for (const [id, token] of Object.entries(LEGACY_LAYER_STATE_TOKENS)) {
+    if (reservations[id] !== token) {
+      throw new Error(`Missing or changed legacy layer-state token: ${id}`);
+    }
+  }
+  return Object.freeze(reservations);
+}
+
+export const LAYER_STATE_TOKEN_RESERVATIONS =
+  parseLayerStateTokenReservations(reservationRows);
+
+/**
  * Canonical serialization registry. Its order, not runtime registration order,
  * owns stable URL ordering.
  */
 export const LAYER_STATE_REGISTRY = Object.freeze([
-  Object.freeze({ id: 'airports', token: '0', disposition: 'enabled-only' }),
   Object.freeze({
     id: 'ais-live-vessels',
     token: 'a',
@@ -358,11 +561,6 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({
     id: 'alpr-cameras',
     token: 'p',
-    disposition: 'enabled-only',
-  }),
-  Object.freeze({
-    id: 'aurora-forecast',
-    token: '1',
     disposition: 'enabled-only',
   }),
   Object.freeze({
@@ -382,25 +580,18 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
     disposition: 'enabled+options',
     optionOwner: 'cctv',
   }),
-  Object.freeze({
-    id: 'current-stations',
-    token: 'k',
-    disposition: 'enabled-only',
-  }),
-  Object.freeze({ id: 'day-night', token: '2', disposition: 'enabled-only' }),
   Object.freeze({ id: 'directions', token: 'n', disposition: 'enabled-only' }),
   Object.freeze({ id: 'earthquakes', token: 'e', disposition: 'enabled-only' }),
-  Object.freeze({ id: 'fireballs', token: 'l', disposition: 'enabled-only' }),
+  Object.freeze({
+    id: 'fire-perimeters',
+    token: '2',
+    disposition: 'enabled-only',
+  }),
   Object.freeze({
     id: 'flights',
     token: 'f',
     disposition: 'enabled+options',
     optionOwner: 'flights',
-  }),
-  Object.freeze({
-    id: 'forts-castles',
-    token: 'K',
-    disposition: 'enabled-only',
   }),
   Object.freeze({ id: 'local-dams', token: 'q', disposition: 'enabled-only' }),
   Object.freeze({
@@ -409,16 +600,6 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
     disposition: 'enabled-only',
   }),
   Object.freeze({ id: 'local-firms', token: 'w', disposition: 'enabled-only' }),
-  Object.freeze({
-    id: 'marine-depths',
-    token: 'D',
-    disposition: 'enabled-only',
-  }),
-  Object.freeze({
-    id: 'meteor-showers',
-    token: '3',
-    disposition: 'enabled-only',
-  }),
   Object.freeze({
     id: 'military',
     token: 'm',
@@ -435,43 +616,17 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
     token: 'i',
     disposition: 'enabled-only',
   }),
-  Object.freeze({ id: 'night-sky', token: '4', disposition: 'enabled-only' }),
-  Object.freeze({
-    id: 'nuclear-accidents',
-    token: '8',
-    disposition: 'enabled-only',
-  }),
-  Object.freeze({
-    id: 'nuclear-power-plants',
-    token: '6',
-    disposition: 'enabled-only',
-  }),
-  Object.freeze({
-    id: 'nuclear-waste-sites',
-    token: '7',
-    disposition: 'enabled-only',
-  }),
-  Object.freeze({
-    id: 'offshore-platforms',
-    token: 'O',
-    disposition: 'enabled-only',
-  }),
-  Object.freeze({ id: 'oil-gas', token: 'G', disposition: 'enabled-only' }),
-  Object.freeze({
-    id: 'parks-monuments',
-    token: 'P',
-    disposition: 'enabled-only',
-  }),
-  Object.freeze({
-    id: 'power-plants',
-    token: '9',
-    disposition: 'enabled-only',
-  }),
   Object.freeze({
     id: 'radio',
     token: 'r',
     disposition: 'enabled+options',
     optionOwner: 'radio',
+  }),
+  Object.freeze({
+    id: 'recent-imagery',
+    token: '1',
+    disposition: 'enabled+options',
+    optionOwner: 'recent-imagery',
   }),
   Object.freeze({
     id: 'rocket-launches',
@@ -484,62 +639,106 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
     disposition: 'enabled+options',
     optionOwner: 'satellites',
   }),
-  Object.freeze({ id: 'sea-ice', token: 'I', disposition: 'enabled-only' }),
-  Object.freeze({
-    id: 'severe-weather',
-    token: 'v',
-    disposition: 'enabled-only',
-  }),
-  Object.freeze({ id: 'sky-objects', token: '5', disposition: 'enabled-only' }),
   Object.freeze({
     id: 'telegeography-submarine-cables',
     token: 'u',
     disposition: 'enabled-only',
   }),
   Object.freeze({
-    id: 'tide-stations',
-    token: 'T',
-    disposition: 'enabled-only',
+    id: 'traffic',
+    token: 't',
+    disposition: 'enabled+options',
+    optionOwner: 'traffic',
   }),
-  Object.freeze({ id: 'traffic', token: 't', disposition: 'enabled-only' }),
   Object.freeze({ id: 'transit', token: 'j', disposition: 'enabled-only' }),
   Object.freeze({
-    id: 'transmission-lines',
-    token: 'L',
+    id: 'weather-cyclones',
+    token: 'y',
     disposition: 'enabled-only',
   }),
   Object.freeze({
-    id: 'ufo-incidents',
-    token: 'X',
-    disposition: 'enabled-only',
-  }),
-  Object.freeze({
-    id: 'us-pipelines',
-    token: 'U',
-    disposition: 'enabled-only',
-  }),
-  Object.freeze({
-    id: 'weather-overlays',
-    token: 'o',
+    id: 'weather-lightning',
+    token: 'l',
     disposition: 'enabled+options',
-    optionOwner: 'weather-overlays',
+    optionOwner: 'weather-lightning',
   }),
   Object.freeze({
     id: 'weather-radar',
-    token: 'R',
+    token: 'v',
     disposition: 'enabled+options',
     optionOwner: 'weather-radar',
   }),
   Object.freeze({
-    id: 'world-heritage',
-    token: 'H',
-    disposition: 'enabled-only',
+    id: 'weather-satellite',
+    token: 'o',
+    disposition: 'enabled+options',
+    optionOwner: 'weather-satellite',
+  }),
+  Object.freeze({
+    id: 'wind',
+    token: 'k',
+    disposition: 'enabled+options',
+    optionOwner: 'wind',
   }),
 ]);
 
 export const REGISTERED_LAYER_IDS = Object.freeze(
   LAYER_STATE_REGISTRY.map((entry) => entry.id),
 );
+
+/** Consume unreserved digits before the two-character base-36 namespace. */
+export function nextLayerStateToken(
+  reservations = LAYER_STATE_TOKEN_RESERVATIONS,
+) {
+  const occupied = new Set(Object.values(reservations || {}));
+  for (const digit of '0123456789') {
+    if (!occupied.has(digit)) return digit;
+  }
+  for (const first of LAYER_STATE_TOKEN_ALPHABET) {
+    for (const second of LAYER_STATE_TOKEN_ALPHABET) {
+      const candidate = `${first}${second}`;
+      if (!occupied.has(candidate)) return candidate;
+    }
+  }
+  throw new Error('Layer-state token namespace exhausted');
+}
+
+function allocationRank(token) {
+  if (NEW_SINGLE_CHARACTER_TOKEN_PATTERN.test(token)) return Number(token);
+  if (typeof token !== 'string' || token.length !== 2) return Infinity;
+  const first = LAYER_STATE_TOKEN_ALPHABET.indexOf(token[0]);
+  const second = LAYER_STATE_TOKEN_ALPHABET.indexOf(token[1]);
+  return first < 0 || second < 0 ? Infinity : 10 + first * 36 + second;
+}
+
+/** Check a proposed ledger against the published merge-time base. */
+export function validateLayerStateAllocations(
+  baseReservations,
+  reservations = LAYER_STATE_TOKEN_RESERVATIONS,
+) {
+  if (!baseReservations || typeof baseReservations !== 'object') {
+    throw new Error('Base layer-state token reservations are required');
+  }
+  for (const [id, token] of Object.entries(baseReservations)) {
+    if (reservations[id] !== token) {
+      throw new Error(`Published layer-state token changed or removed: ${id}`);
+    }
+  }
+  const newlyReserved = Object.entries(reservations)
+    .filter(([id]) => !Object.hasOwn(baseReservations, id))
+    .sort((left, right) => allocationRank(left[1]) - allocationRank(right[1]));
+  const occupied = { ...baseReservations };
+  for (const [id, token] of newlyReserved) {
+    const expected = nextLayerStateToken(occupied);
+    if (token !== expected) {
+      throw new Error(
+        `Layer-state token for ${id} must be the next free token ${expected}`,
+      );
+    }
+    occupied[id] = token;
+  }
+  return true;
+}
 
 const REGISTRY_BY_ID = new Map(
   LAYER_STATE_REGISTRY.map((entry) => [entry.id, entry]),
@@ -581,9 +780,38 @@ export function isExplicitLayerStateOrigin(origin) {
 }
 
 /** Validate the static registry itself before it is used to seal a manager. */
-export function validateLayerStateRegistry(registry = LAYER_STATE_REGISTRY) {
+export function validateLayerStateRegistry(
+  registry = LAYER_STATE_REGISTRY,
+  reservations = LAYER_STATE_TOKEN_RESERVATIONS,
+) {
   if (!Array.isArray(registry) || registry.length === 0) {
     throw new Error('Layer-state registry must be a non-empty array');
+  }
+  if (
+    !reservations ||
+    typeof reservations !== 'object' ||
+    Array.isArray(reservations)
+  ) {
+    throw new Error('Layer-state token reservations must be an object');
+  }
+  const reservedIdsByToken = new Map();
+  for (const [id, token] of Object.entries(reservations)) {
+    if (!/^[a-z0-9-]+$/.test(id) || !LAYER_STATE_TOKEN_PATTERN.test(token)) {
+      throw new Error(`Invalid layer-state token reservation: ${id}`);
+    }
+    if (
+      (Object.hasOwn(LEGACY_LAYER_STATE_TOKENS, id) &&
+        token !== LEGACY_LAYER_STATE_TOKENS[id]) ||
+      (token.length === 1 &&
+        !NEW_SINGLE_CHARACTER_TOKEN_PATTERN.test(token) &&
+        LEGACY_LAYER_STATE_TOKENS[id] !== token)
+    ) {
+      throw new Error(`Legacy layer-state token is immutable: ${id}`);
+    }
+    if (reservedIdsByToken.has(token)) {
+      throw new Error(`Duplicate layer-state token reservation: ${token}`);
+    }
+    reservedIdsByToken.set(token, id);
   }
   const ids = new Set();
   const tokens = new Set();
@@ -595,9 +823,14 @@ export function validateLayerStateRegistry(registry = LAYER_STATE_REGISTRY) {
     if (ids.has(entry.id))
       throw new Error(`Duplicate layer-state id: ${entry.id}`);
     ids.add(entry.id);
-    // One case-sensitive character: 'a' and 'A' are different layers.
-    if (!/^[a-zA-Z0-9]$/.test(entry.token || ''))
+    if (!LAYER_STATE_TOKEN_PATTERN.test(entry.token || ''))
       throw new Error(`Invalid layer-state token: ${entry.id}`);
+    if (reservations[entry.id] !== entry.token) {
+      throw new Error(`Unreserved layer-state token: ${entry.id}`);
+    }
+    if (reservedIdsByToken.get(entry.token) !== entry.id) {
+      throw new Error(`Layer-state token reservation mismatch: ${entry.token}`);
+    }
     if (tokens.has(entry.token))
       throw new Error(`Duplicate layer-state token: ${entry.token}`);
     tokens.add(entry.token);
@@ -719,18 +952,26 @@ export function encodeLayerStateParams(params, state) {
 
 /** Decode v2 fields. Null means that the layer payload is absent. */
 export function decodeLayerStateParams(params) {
-  if (params.get('v') !== String(LAYER_STATE_VERSION) || !params.has('l'))
+  const layerFields = params.getAll('l');
+  if (
+    params.get('v') !== String(LAYER_STATE_VERSION) ||
+    layerFields.length !== 1
+  )
     return null;
-  const rawLayers = String(params.get('l') || '');
+  const rawLayers = layerFields[0];
   const rawOptionsField = String(params.get('lo') || '');
   // Fail closed on an oversized payload rather than decoding a truncated one.
   if (rawLayers.length > MAX_ENABLED_LAYERS_CHARS) return null;
   if (rawOptionsField.length > MAX_LAYER_OPTIONS_CHARS) return null;
-  const layerTokens = rawLayers.split('.').filter(Boolean);
-  // `l=` is the one valid explicit-empty representation. Any non-empty token
-  // set containing an unknown member rejects the complete layer payload so a
-  // typo or future token cannot silently become an authoritative empty set.
-  if (layerTokens.some((token) => !REGISTRY_BY_TOKEN.has(token))) return null;
+  const layerTokens = rawLayers ? rawLayers.split('.') : [];
+  // `l=` is the one valid explicit-empty representation. Reject repeated
+  // fields, empty members, duplicate members, or unknown members; silently
+  // removing one would turn a malformed share into a different state.
+  if (
+    layerTokens.some((token) => !token || !REGISTRY_BY_TOKEN.has(token)) ||
+    new Set(layerTokens).size !== layerTokens.length
+  )
+    return null;
   const enabledLayerIds = layerTokens.map(
     (token) => REGISTRY_BY_TOKEN.get(token).id,
   );
@@ -768,13 +1009,28 @@ export function decodeLayerStateParams(params) {
   return normalizeLayerState({ enabledLayerIds, options: rawOptions });
 }
 
-/** Stable local-storage representation (full IDs for debuggability). */
+/** Options with share-link-only values reset to their defaults. */
+function withoutShareOnlyOptions(options) {
+  const out = {};
+  for (const ownerId of OPTION_OWNER_IDS) {
+    out[ownerId] = { ...(options?.[ownerId] || {}) };
+    for (const spec of optionSpecs(ownerId)) {
+      if (spec.shareOnly) out[ownerId][spec.key] = spec.defaultValue;
+    }
+  }
+  return out;
+}
+
+/**
+ * Stable local-storage representation (full IDs for debuggability), with
+ * share-link-only options at their defaults.
+ */
 export function serializeStoredLayerState(state) {
   const normalized = normalizeLayerState(state);
   return JSON.stringify({
     v: LAYER_STATE_VERSION,
     l: normalized.enabledLayerIds,
-    o: normalized.options,
+    o: withoutShareOnlyOptions(normalized.options),
   });
 }
 
@@ -786,7 +1042,7 @@ export function parseStoredLayerState(raw) {
       return null;
     return normalizeLayerState({
       enabledLayerIds: parsed.l,
-      options: parsed.o,
+      options: withoutShareOnlyOptions(parsed.o),
     });
   } catch {
     return null;
