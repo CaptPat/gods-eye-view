@@ -3,30 +3,39 @@ import path from 'node:path';
 // ---------------------------------------------------------------------------
 // Overpass API proxy constants and cache state
 // ---------------------------------------------------------------------------
-/**
- * User-Agent sent to every Overpass mirror.
- *
- * The OSM API usage policy asks for a "Valid User-Agent identifying application
- * and version"; a generic proxy label is not one. A mirror is free to refuse a
- * client it cannot identify, and `src/overpassProxy.test.mjs` pins what that
- * costs: a refusal is never data, so the query falls through to whatever
- * mirrors are left. Keep this honest and stable — if it is ever refused, the
- * answer is less query volume, not a new name.
- */
+/** Stable application identity for operator-configured Overpass instances. */
 const OVERPASS_USER_AGENT =
   'gods-eye-view/0.1 (+https://github.com/bilawalsidhu/gods-eye-view)';
 
-/** Ordered list of Overpass API mirrors; tried sequentially on failure/rate-limit. */
-const OVERPASS_UPSTREAMS = [
-  'https://overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-  'https://lz4.overpass-api.de/api/interpreter',
-  // Community full-planet instance (privateforge nonprofit) — added 2026-07-30
-  // when all three mirrors above refused this IP (likely a dev-traffic rate
-  // ban; refused connections fail in ms, so healthy mirrors above still win).
-  // Verified: planet coverage (Texas query), CORS *, ~5-20 s cold latency.
-  'https://overpass.private.coffee/api/interpreter',
-];
+/** Parse only operator-supplied HTTP(S) endpoints; private instances are allowed. */
+function parseOverpassUpstreams(raw) {
+  const endpoints = [];
+  for (const token of String(raw || '').split(',')) {
+    try {
+      const url = new URL(token.trim());
+      if (
+        !['http:', 'https:'].includes(url.protocol) ||
+        !url.hostname ||
+        url.hash
+      )
+        continue;
+      if (!endpoints.includes(url.href)) endpoints.push(url.href);
+    } catch {
+      // Invalid configuration never becomes an upstream or appears in logs.
+    }
+  }
+  return endpoints.slice(0, 8);
+}
+
+let upstreamMemo = { raw: null, endpoints: [] };
+
+/** Resolve after environment loading. Public Overpass instances are not used by default. */
+function resolveOverpassUpstreams() {
+  const raw = process.env.OVERPASS_UPSTREAMS || '';
+  if (upstreamMemo.raw !== raw)
+    upstreamMemo = { raw, endpoints: parseOverpassUpstreams(raw) };
+  return [...upstreamMemo.endpoints];
+}
 
 /**
  * TTL for FRESH cached Overpass responses (ms). Road geometry is static for
@@ -195,30 +204,26 @@ function parseOverpassUpstreamsEnv(raw, warn = () => {}) {
 }
 
 /**
- * Endpoints for this request: env-configured instances first, then the public
- * mirrors.
- *
- * The public list is four names for two operators — lz4 aliases
- * overpass-api.de, and kumi.systems and private.coffee resolve to one machine.
- * Measured 2026-09-12 from one network, both refused every query:
- * overpass-api.de answered 406 to this proxy's exact User-Agent (reproducible,
- * a blocklist entry rather than a heuristic), and the shared host answered 504
- * only after ~60 s, far past OVERPASS_TIMEOUT_MS. On such a network every
- * Overpass-backed layer stays empty unless a self-hosted instance is supplied
- * here.
+ * Endpoints for this request: the fork's GEV_OVERPASS_UPSTREAMS first (validated
+ * by parseOverpassUpstreamsEnv, which refuses plaintext to routable hosts), then
+ * upstream's OVERPASS_UPSTREAMS. Public Overpass instances are never added:
+ * upstream #742 stopped using them by default, and measured 2026-09-12 they
+ * refused this proxy anyway (overpass-api.de 406 on the User-Agent; the
+ * kumi.systems/private.coffee host 504 after ~60 s).
  *
  * Read lazily: the Vite config copies dotenv files into process.env AFTER
  * provider modules are imported, so a module-level list would miss them.
  * @returns {string[]}
  */
 function overpassUpstreams() {
-  return [
-    ...parseOverpassUpstreamsEnv(
-      process.env.GEV_OVERPASS_UPSTREAMS,
-      (message) => console.warn(`[overpass] ${message}`),
-    ),
-    ...OVERPASS_UPSTREAMS,
-  ];
+  const endpoints = parseOverpassUpstreamsEnv(
+    process.env.GEV_OVERPASS_UPSTREAMS,
+    (message) => console.warn(`[overpass] ${message}`),
+  );
+  for (const url of resolveOverpassUpstreams()) {
+    if (!endpoints.includes(url)) endpoints.push(url);
+  }
+  return endpoints;
 }
 
 export {
@@ -242,7 +247,8 @@ export {
   OVERPASS_SIMPLIFY_MIN_POINTS,
   OVERPASS_SIMPLIFY_TOLERANCE_DEG,
   OVERPASS_MAX_RESPONSE_BYTES,
-  OVERPASS_UPSTREAMS,
+  parseOverpassUpstreams,
+  resolveOverpassUpstreams,
   OVERPASS_USER_AGENT,
   OVERPASS_TIMEOUT_MS,
 };

@@ -85,7 +85,7 @@ export function createWeatherRadarLayer({
         swapTimer = null;
         if (enabled && !playing) renderLive();
         notifyRows();
-        requestRender('weather-radar');
+        requestRender('radar-loop');
       }, SWAP_CHECK_MS);
     }
   }
@@ -106,7 +106,7 @@ export function createWeatherRadarLayer({
     imagery.show(loopTime);
     loopTimer = timers.setTimeout(tick, step.delayMs);
     notifyRows();
-    requestRender('weather-radar');
+    requestRender('radar-loop');
   }
 
   function startLoop() {
@@ -129,12 +129,12 @@ export function createWeatherRadarLayer({
       renderLive();
     }
     notifyRows();
-    requestRender('weather-radar');
+    requestRender('radar-loop');
   }
 
   const layer = {
-    id: 'weather-radar',
-    name: 'Weather Radar',
+    id: 'radar-loop',
+    name: 'Radar Loop',
     icon: '🌧️',
     source: 'RainViewer',
     updateInterval: REFRESH_MS,

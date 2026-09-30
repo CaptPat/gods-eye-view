@@ -7,7 +7,7 @@ import {
 import { governorRequestRender } from '../../renderGovernor.js';
 
 /**
- * Construct one Weather Radar layer with real credits and the render governor.
+ * Construct one Radar Loop layer with real credits and the render governor.
  * The map stack is attached by application data setup (`attachMapStack`).
  */
 export function createApplicationWeatherRadar(options = {}) {

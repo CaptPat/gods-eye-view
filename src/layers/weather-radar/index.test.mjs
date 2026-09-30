@@ -144,12 +144,12 @@ async function enabled(h) {
 
 test('the layer identifies itself and refreshes every five minutes', () => {
   const { layer } = harness();
-  assert.equal(layer.id, 'weather-radar');
-  assert.equal(layer.name, 'Weather Radar');
+  assert.equal(layer.id, 'radar-loop');
+  assert.equal(layer.name, 'Radar Loop');
   assert.equal(layer.icon, '🌧️');
   assert.equal(layer.updateInterval, REFRESH_MS);
   assert.equal(REFRESH_MS, 300_000);
-  assert.equal(defaultLayer.id, 'weather-radar');
+  assert.equal(defaultLayer.id, 'radar-loop');
   assert.equal(
     RAINVIEWER_CREDIT.html,
     'Radar: <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>',
@@ -167,7 +167,7 @@ test('enabling credits RainViewer, fetches frames and shows the newest with an h
   assert.deepEqual(h.requests, ['/api/radar/frames?source=rainviewer']);
   assert.equal(h.imagery.api.shownTime(), T);
   assert.ok(
-    h.renderRequests.includes('weather-radar'),
+    h.renderRequests.includes('radar-loop'),
     'a normal refresh requests a render',
   );
   // count 13, not 12: retention counts back from the newest frame, so the 7-minute lag drops nothing.
@@ -291,7 +291,7 @@ test('the loop preloads every frame, steps through ready frames, and pause retur
       before + 1,
       'each loop tick that shows a frame requests exactly one render',
     );
-    assert.equal(h.renderRequests.at(-1), 'weather-radar');
+    assert.equal(h.renderRequests.at(-1), 'radar-loop');
   };
   h.imagery.ready.add(frames(3)[0].time);
   h.imagery.ready.add(frames(3)[2].time);
