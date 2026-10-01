@@ -9,7 +9,6 @@ import { militaryInstallationsProxy } from './military-installations.js';
 import { regionalBriefProxy } from './regional/briefing.js';
 import { geocodeProxy } from './regional/place.js';
 import { weatherEffectsProxy } from './regional/weather-effects.js';
-import { weatherRadarProxy } from './weather-radar.js';
 import { weatherReportProxy } from './weather-report.js';
 import { severeWeatherProxy } from './severe-weather.js';
 import { weatherOverlaysProxy } from './weather-overlays.js';
@@ -47,7 +46,6 @@ function localProviderPlugins() {
     militaryInstallationsProxy(),
     regionalBriefProxy(),
     geocodeProxy(),
-    weatherRadarProxy(),
     weatherReportProxy(),
     weatherOverlaysProxy(),
     tidesProxy(),
@@ -74,11 +72,6 @@ function localProviderPlugins() {
 }
 
 export { localProviderPlugins };
-
-export {
-  createWeatherRadarHandler,
-  weatherRadarProxy,
-} from './weather-radar.js';
 
 export {
   createWeatherReportHandler,

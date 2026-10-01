@@ -215,8 +215,8 @@ test('tide and current stations share only their enabled state, as tokens zk and
 
 test('production registry is exact, canonical, and rejects incomplete contracts', async () => {
   assert.equal(validateLayerStateRegistry(), true);
-  assert.equal(REGISTERED_LAYER_IDS.length, 54);
-  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 54);
+  assert.equal(REGISTERED_LAYER_IDS.length, 53);
+  assert.equal(new Set(REGISTERED_LAYER_IDS).size, 53);
   assert.ok(REGISTERED_LAYER_IDS.includes('transit'));
   assert.deepEqual(REGISTERED_LAYER_IDS, [...REGISTERED_LAYER_IDS].sort());
   assert.deepEqual(LEGACY_LAYER_STATE_TOKENS, {
@@ -525,7 +525,9 @@ test('malformed enabled-layer lists reject the entire payload', () => {
 
 test('fork layers own the z? block and allocate within it in order', () => {
   const forkEntries = LAYER_STATE_REGISTRY.filter(({ token }) => token.startsWith('z') && token.length === 2);
-  assert.equal(forkEntries.length, 26);
+  // 26 fork tokens are reserved; radar-loop (zg) is retired but keeps its ledger row.
+  assert.equal(forkEntries.length, 25);
+  assert.equal(LAYER_STATE_TOKEN_RESERVATIONS['radar-loop'], 'zg');
   assert.equal(nextForkLayerStateToken(), 'zq');
   // Upstream's own sequence is untouched by the fork block: digits come first.
   assert.equal(nextLayerStateToken(), '0');
@@ -2395,42 +2397,14 @@ test('the owner layer going away revokes the pending watch at any origin', async
   }
 });
 
-test('radar loop options round-trip through the compact URL and normalize strictly', () => {
-  const state = createDefaultLayerState();
-  assert.deepEqual(state.options['radar-loop'], { usDetail: false, opacity: 0.7 });
-
-  state.enabledLayerIds = ['radar-loop'];
-  state.options['radar-loop'] = { usDetail: true, opacity: 0.4 };
-  const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(params.get('l'), 'zg');
-  const assignments = String(params.get('lo') || '').split('_');
-  assert.ok(assignments.includes('zg.u.1'), assignments.join('_'));
-  assert.ok(assignments.includes('zg.o.40'), assignments.join('_'));
-  assert.deepEqual(decodeLayerStateParams(params).options['radar-loop'], { usDetail: true, opacity: 0.4 });
-
-  state.options['radar-loop'] = { usDetail: false, opacity: 0.7 };
-  const defaults = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(String(defaults.get('lo') || '').split('_').some((entry) => entry.startsWith('zg.')), false);
-
-  assert.deepEqual(
-    decodeLayerStateParams(new URLSearchParams('v=2&l=zg&lo=zg.o.55')).options['radar-loop'],
-    { usDetail: false, opacity: 0.7 },
-    'an unknown opacity token falls back to the default',
-  );
-  assert.deepEqual(
-    normalizeLayerState({ options: { 'radar-loop': { usDetail: 'yes', opacity: 0.69999 } } }).options['radar-loop'],
-    { usDetail: false, opacity: 0.7 },
-  );
-});
-
 test('weather overlays options round-trip through the compact URL and normalize strictly', () => {
   const state = createDefaultLayerState();
   assert.deepEqual(state.options['weather-overlays'], { mode: 'clouds', pollenType: 'tree', opacity: 0.7 });
 
-  state.enabledLayerIds = ['weather-overlays', 'radar-loop'];
+  state.enabledLayerIds = ['weather-overlays'];
   state.options['weather-overlays'] = { mode: 'pollen', pollenType: 'weed', opacity: 1 };
   const params = encodeLayerStateParams(new URLSearchParams('v=2'), state);
-  assert.equal(params.get('l'), 'zg.zo');
+  assert.equal(params.get('l'), 'zo');
   const assignments = String(params.get('lo') || '').split('_');
   for (const expected of ['zo.m.p', 'zo.p.w', 'zo.o.100']) {
     assert.ok(assignments.includes(expected), assignments.join('_'));

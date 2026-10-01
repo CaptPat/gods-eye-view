@@ -98,9 +98,6 @@
       "node": "./server/providers/traffic.js"
     },
     "./sources/traffic": "./src/data/tomtomTiles.js",
-    "./server/providers/weather-radar": {
-      "node": "./server/providers/weather-radar.js"
-    },
     "./server/providers/weather-report": {
       "node": "./server/providers/weather-report.js"
     },
@@ -187,7 +184,6 @@
     "./layers/installations": "./src/layers/installations/index.js",
     "./layers/awareness": "./src/layers/awareness/index.js",
     "./layers/traffic": "./src/layers/traffic/index.js",
-    "./layers/weather-radar": "./src/layers/weather-radar/index.js",
     "./layers/weather-overlays": "./src/layers/weather-overlays/index.js",
     "./layers/tides": "./src/layers/tides/index.js",
     "./layers/ufo-incidents": "./src/layers/ufo-incidents/index.js",

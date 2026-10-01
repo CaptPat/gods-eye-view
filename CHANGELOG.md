@@ -1,5 +1,7 @@
 # Changelog
 
+- Remove the fork's Radar Loop layer and its RainViewer and Iowa Environmental Mesonet NEXRAD proxy; upstream's Weather Radar covers precipitation radar. Its share token `zg` stays reserved in the ledger and is never reused.
+
 - Merge upstream #627–#821 (upstream weather suite with wind, radar, satellite, lightning and cyclones; Fire Perimeters; Recent Imagery; local RTL-SDR and ADS-B; Cyber HUD; no public Overpass by default). Upstream's share-link token ledger now allocates digits then `00`–`zz` in order, so all 26 fork layers moved to a reserved `z0`–`zp` block that upstream reaches last; older fork links with uppercase or digit tokens no longer open. The fork's radar is now **Radar Loop** (`radar-loop`, token `zg`) beside upstream's Weather Radar, and fork weather layers join upstream's Weather group. `GEV_OVERPASS_UPSTREAMS` still leads the Overpass chain, followed by upstream's `OVERPASS_UPSTREAMS`; the public mirrors are gone.
 
 - Merge upstream #584–#626 (Transit, Director, Nepal flood scene). Upstream now owns share tokens `h`, `z` and `j`, so Tide Stations moved to `T`, Weather Radar to `R` and UFO Incidents to `X`; older fork links with those letters now open upstream's layers instead.

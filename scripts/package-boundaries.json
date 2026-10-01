@@ -123,19 +123,6 @@
     "modules": ["src/data/tomtomTiles.js"],
     "external": []
   },
-  "weather-radar-provider": {
-    "runtime": "node",
-    "exports": ["./server/providers/weather-radar"],
-    "modules": [
-      "server/providers/weather-radar.js",
-      "server/providers/weather-radar/sources.js",
-      "server/providers/common/rate-limit.js",
-      "server/providers/common/http.js",
-      "src/sources/httpBody.js",
-      "src/sources/rateLimit.js"
-    ],
-    "external": []
-  },
   "weather-report-provider": {
     "runtime": "node",
     "exports": ["./server/providers/weather-report"],
@@ -1186,18 +1173,6 @@
     ],
     "external": ["cesium", "pbf", "@mapbox/vector-tile"]
   },
-  "weather-radar-layer": {
-    "exports": ["./layers/weather-radar"],
-    "modules": [
-      "src/layers/weather-imagery/frameImagery.js",
-      "src/layers/weather-imagery/opacity.js",
-      "src/layers/weather-radar/controls.js",
-      "src/layers/weather-radar/frames.js",
-      "src/layers/weather-radar/imagery.js",
-      "src/layers/weather-radar/index.js"
-    ],
-    "external": ["cesium"]
-  },
   "tides-layer": {
     "exports": ["./layers/tides"],
     "modules": [
@@ -1874,7 +1849,6 @@
       "src/data/trailRenderer.js",
       "src/data/vesselLabels.js",
       "src/data/weatherOverlays.js",
-      "src/data/weatherRadar.js",
       "src/firstRunExperience.js",
       "src/hud.js",
       "src/hudLocality.js",
@@ -2175,10 +2149,6 @@
       "src/layers/weather-overlays/index.js",
       "src/layers/weather-overlays/modes.js",
       "src/layers/weather-overlays/palette.js",
-      "src/layers/weather-radar/controls.js",
-      "src/layers/weather-radar/frames.js",
-      "src/layers/weather-radar/imagery.js",
-      "src/layers/weather-radar/index.js",
       "src/loadingFeedback.js",
       "src/locationStatus.js",
       "src/locations.js",
@@ -2353,7 +2323,6 @@
       "src/data/directions.js",
       "src/app/layers/directions.js",
       "src/app/layers/severeWeather.js",
-      "src/app/layers/weatherRadar.js",
       "src/app/layers/tides.js",
       "src/app/layers/catalogPointServices.js",
       "src/app/layers/fireballs.js",
@@ -2929,18 +2898,13 @@
       "src/app/layers/seaIce.js",
       "src/app/layers/marineDepths.js",
       "src/app/layers/weatherOverlays.js",
-      "src/app/layers/weatherRadar.js",
       "src/weatherReport/groundPick.js",
       "src/layers/weather-imagery/frameImagery.js",
       "src/layers/severe-weather/model.js",
-      "src/layers/weather-radar/frames.js",
       "src/layers/weather-imagery/opacity.js",
-      "src/layers/weather-radar/imagery.js",
       "src/layers/severe-weather/rendering.js",
       "src/layers/severe-weather/selection.js",
       "src/layers/severe-weather/index.js",
-      "src/layers/weather-radar/controls.js",
-      "src/layers/weather-radar/index.js",
       "src/layers/tides/points.js",
       "src/layers/catalog-points/horizonDepth.js",
       "src/layers/weather-overlays/modes.js",

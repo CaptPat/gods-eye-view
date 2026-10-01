@@ -24,7 +24,6 @@ import { createApplicationAwareness } from './layers/militaryAwareness.js';
 import { createApplicationFirms } from './layers/firms.js';
 import { createApplicationEarthquakes } from './layers/earthquakes.js';
 import { createApplicationSevereWeather } from './layers/severeWeather.js';
-import { createApplicationWeatherRadar } from './layers/weatherRadar.js';
 import { createApplicationWeatherOverlays } from './layers/weatherOverlays.js';
 import {
   createApplicationCurrentStations,
@@ -182,9 +181,8 @@ export function createApplicationCatalog({
           source: sources['fire-perimeters'],
         }),
         // Fork layers fetch through their own proxies, so they take no catalog source.
-        // Radar and overlays follow the map stack via data setup (attachMapStack).
+        // Overlays follow the map stack via data setup (attachMapStack).
         createApplicationSevereWeather(),
-        createApplicationWeatherRadar(),
         createApplicationWeatherOverlays(),
         createApplicationTideStations(),
         createApplicationCurrentStations(),

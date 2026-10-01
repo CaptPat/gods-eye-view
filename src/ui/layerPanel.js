@@ -61,7 +61,6 @@ const PANEL_GROUPS = [
     ids: [
       'wind',
       'weather-radar',
-      'radar-loop',
       'weather-satellite',
       'weather-overlays',
       'weather-lightning',

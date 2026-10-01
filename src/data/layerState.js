@@ -473,10 +473,6 @@ const OPTION_GROUPS = Object.freeze({
     }),
     opacityOption('opacity', 'o', 0.7),
   ]),
-  'radar-loop': Object.freeze([
-    booleanOption('usDetail', 'u', false),
-    opacityOption('opacity', 'o', 0.7),
-  ]),
 });
 
 const TRACKING_OPTION_KEY_BY_LAYER = Object.freeze({
@@ -721,12 +717,6 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
     id: 'power-plants',
     token: 'zf',
     disposition: 'enabled-only',
-  }),
-  Object.freeze({
-    id: 'radar-loop',
-    token: 'zg',
-    disposition: 'enabled+options',
-    optionOwner: 'radar-loop',
   }),
   Object.freeze({
     id: 'radio',

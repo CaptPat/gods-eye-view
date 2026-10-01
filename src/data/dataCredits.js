@@ -372,16 +372,6 @@ export const TOMTOM_CREDIT = {
     '<a href="https://www.tomtom.com" target="_blank" rel="noopener">TomTom</a>',
 };
 
-export const RAINVIEWER_CREDIT = Object.freeze({
-  key: 'rainviewer',
-  html: 'Radar: <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>',
-});
-
-export const IEM_NEXRAD_CREDIT = Object.freeze({
-  key: 'iem-nexrad',
-  html: 'US radar: <a href="https://mesonet.agron.iastate.edu/" target="_blank" rel="noopener">Iowa Environmental Mesonet</a> NEXRAD',
-});
-
 export const NOAA_GMGSI_CREDIT = Object.freeze({
   key: 'noaa-gmgsi',
   html: 'Clouds: <a href="https://nowcoast.noaa.gov/" target="_blank" rel="noopener">NOAA nowCOAST</a> GMGSI geostationary satellite mosaic',
