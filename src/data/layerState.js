@@ -454,13 +454,14 @@ const OPTION_GROUPS = Object.freeze({
     }),
   ]),
   'weather-overlays': Object.freeze([
+    // `c` (clouds, cut for upstream's Satellite clouds) is retired: it decodes
+    // to nothing, so an old link opens the default mode. Never reuse it.
     enumOption(
       'mode',
       'm',
-      'clouds',
-      ['clouds', 'temperature', 'air-quality', 'pollen'],
+      'temperature',
+      ['temperature', 'air-quality', 'pollen'],
       {
-        clouds: 'c',
         temperature: 't',
         'air-quality': 'a',
         pollen: 'p',

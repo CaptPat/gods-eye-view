@@ -2399,7 +2399,7 @@ test('the owner layer going away revokes the pending watch at any origin', async
 
 test('weather overlays options round-trip through the compact URL and normalize strictly', () => {
   const state = createDefaultLayerState();
-  assert.deepEqual(state.options['weather-overlays'], { mode: 'clouds', pollenType: 'tree', opacity: 0.7 });
+  assert.deepEqual(state.options['weather-overlays'], { mode: 'temperature', pollenType: 'tree', opacity: 0.7 });
 
   state.enabledLayerIds = ['weather-overlays'];
   state.options['weather-overlays'] = { mode: 'pollen', pollenType: 'weed', opacity: 1 };
@@ -2415,18 +2415,27 @@ test('weather overlays options round-trip through the compact URL and normalize 
     opacity: 1,
   });
 
-  state.options['weather-overlays'] = { mode: 'clouds', pollenType: 'tree', opacity: 0.7 };
+  state.options['weather-overlays'] = { mode: 'temperature', pollenType: 'tree', opacity: 0.7 };
   const defaults = encodeLayerStateParams(new URLSearchParams('v=2'), state);
   assert.equal(String(defaults.get('lo') || '').split('_').some((entry) => entry.startsWith('zo.')), false);
 
   assert.deepEqual(
     decodeLayerStateParams(new URLSearchParams('v=2&l=zo&lo=zo.m.x_zo.p.g_zo.o.55')).options['weather-overlays'],
-    { mode: 'clouds', pollenType: 'grass', opacity: 0.7 },
+    { mode: 'temperature', pollenType: 'grass', opacity: 0.7 },
     'unknown mode and opacity tokens fall back to their defaults',
   );
   assert.deepEqual(
+    decodeLayerStateParams(new URLSearchParams('v=2&l=zo&lo=zo.m.c')).options['weather-overlays'],
+    { mode: 'temperature', pollenType: 'tree', opacity: 0.7 },
+    'a link from before clouds moved to Satellite clouds opens the default mode',
+  );
+  assert.deepEqual(
     normalizeLayerState({ options: { 'weather-overlays': { mode: 'fog', pollenType: 'grass', opacity: 0.4 } } }).options['weather-overlays'],
-    { mode: 'clouds', pollenType: 'grass', opacity: 0.4 },
+    { mode: 'temperature', pollenType: 'grass', opacity: 0.4 },
+  );
+  assert.equal(
+    normalizeLayerState({ options: { 'weather-overlays': { mode: 'clouds' } } }).options['weather-overlays'].mode,
+    'temperature',
   );
 });
 

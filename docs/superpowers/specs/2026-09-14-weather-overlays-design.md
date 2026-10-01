@@ -1,6 +1,7 @@
 # Weather overlays layer — design
 
-Status: implemented (merged to fork main 2026-09-14, 3c71064)
+Status: implemented (merged to fork main 2026-09-14, 3c71064). The Clouds mode was removed
+2026-10-01 in favour of upstream's Satellite clouds layer; Temperature is now the default mode.
 Fork: CaptPat/gods-eye-view (Cyclops View). Fork-only work; nothing is proposed upstream.
 
 ## Purpose

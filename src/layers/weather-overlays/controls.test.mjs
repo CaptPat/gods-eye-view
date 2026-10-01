@@ -13,33 +13,38 @@ import {
 import { buildLegend, buildRowControls } from './controls.js';
 
 const base = {
-  mode: 'clouds',
+  mode: 'temperature',
   pollenType: 'tree',
   opacity: 0.7,
   googleConfigured: true,
 };
 
 test('modes map to proxy keys, source names and zoom caps', () => {
-  assert.deepEqual(MODES, ['clouds', 'temperature', 'air-quality', 'pollen']);
+  assert.deepEqual(MODES, ['temperature', 'air-quality', 'pollen']);
   assert.equal(overlayKey('pollen', 'grass'), 'pollen-grass');
   assert.equal(overlayKey('temperature', 'grass'), 'temperature');
   assert.equal(modeOfKey('pollen-weed'), 'pollen');
-  assert.deepEqual(OVERLAY_KEYS.map(maximumLevelFor), [7, 6, 12, 10, 10, 10]);
+  assert.deepEqual(OVERLAY_KEYS.map(maximumLevelFor), [6, 12, 10, 10, 10]);
+  assert.equal(
+    maximumLevelFor('clouds'),
+    null,
+    'clouds moved to Satellite clouds',
+  );
   assert.equal(maximumLevelFor('fog'), null);
   assert.equal(sourceName('pollen', 'weed'), 'Google Pollen · Weed');
-  assert.equal(sourceName('clouds', 'weed'), 'NOAA GMGSI satellite');
+  assert.equal(sourceName('temperature', 'weed'), 'NOAA GFS model');
   assert.equal(normalizeMode('air-quality'), 'air-quality');
   assert.equal(normalizeMode('fog'), null);
+  assert.equal(normalizeMode('clouds'), null);
   assert.equal(normalizePollenType('grass'), 'grass');
   assert.equal(normalizePollenType('pine'), null);
 });
 
-test('chips: four modes, pollen types only in pollen mode, then three opacities', () => {
-  const clouds = buildRowControls(base).chips;
+test('chips: three modes, pollen types only in pollen mode, then three opacities', () => {
+  const temperature = buildRowControls(base).chips;
   assert.deepEqual(
-    clouds.map((chip) => chip.id),
+    temperature.map((chip) => chip.id),
     [
-      'mode-clouds',
       'mode-temperature',
       'mode-air-quality',
       'mode-pollen',
@@ -48,17 +53,17 @@ test('chips: four modes, pollen types only in pollen mode, then three opacities'
       'opacity-100',
     ],
   );
-  assert.deepEqual(clouds[0], {
-    id: 'mode-clouds',
-    label: 'Clouds',
-    title: 'Cloud cover from geostationary satellites',
+  assert.deepEqual(temperature[0], {
+    id: 'mode-temperature',
+    label: 'Temp',
+    title: 'Air temperature at 2 m',
     active: true,
     disabled: false,
-    params: { mode: 'clouds' },
+    params: { mode: 'temperature' },
   });
   assert.deepEqual(
-    clouds
-      .slice(4)
+    temperature
+      .slice(3)
       .map((chip) => [chip.label, chip.active, chip.params.opacity]),
     [
       ['40%', false, 0.4],
@@ -74,7 +79,7 @@ test('chips: four modes, pollen types only in pollen mode, then three opacities'
   }).chips;
   assert.deepEqual(
     pollen
-      .slice(4, 7)
+      .slice(3, 6)
       .map((chip) => [chip.id, chip.label, chip.active, chip.params]),
     [
       ['pollen-tree', 'Tree', false, { pollenType: 'tree' }],
@@ -105,7 +110,7 @@ test('Google modes are disabled with a reason only once the server reports no ke
     'Air quality (US AQI): needs a Google Maps API key',
   );
   assert.equal(
-    keyless.find((chip) => chip.id === 'mode-clouds').disabled,
+    keyless.find((chip) => chip.id === 'mode-temperature').disabled,
     false,
   );
   assert.equal(
@@ -115,14 +120,6 @@ test('Google modes are disabled with a reason only once the server reports no ke
 });
 
 test('legends carry text for every entry and the measured colours', () => {
-  assert.deepEqual(
-    buildLegend('clouds').map((item) => [item.label, item.count, item.color]),
-    [
-      ['Low', 'warm tops', '#8c8c8c'],
-      ['Mid', 'cool tops', '#c8c8c8'],
-      ['High', 'cold tops', '#ffffff'],
-    ],
-  );
   assert.deepEqual(
     buildLegend('temperature').map((item) => `${item.label} ${item.count}`),
     [

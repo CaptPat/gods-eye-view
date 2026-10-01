@@ -10,7 +10,6 @@ import {
   GOOGLE_AIR_QUALITY_CREDIT,
   GOOGLE_POLLEN_CREDIT,
   NOAA_GFS_CREDIT,
-  NOAA_GMGSI_CREDIT,
 } from '../../data/dataCredits.js';
 import { LayerPanel } from '../../ui/layerPanel.js';
 
@@ -109,7 +108,6 @@ function harness({ answers = {}, visible = true } = {}) {
   const events = new EventTarget();
   const clock = { now: NOW, visible };
   const table = {
-    clouds: manifest('clouds', T15),
     temperature: manifest('temperature', T15),
     'air-quality': manifest('air-quality', T16),
     'pollen-tree': manifest('pollen-tree', T16),
@@ -130,7 +128,6 @@ function harness({ answers = {}, visible = true } = {}) {
     createImagery: () => imagery.api,
     registerCredit: (_viewer, credit) => credited.push(credit.key),
     credits: {
-      clouds: { key: 'clouds' },
       temperature: { key: 'temperature' },
       'air-quality': { key: 'air-quality' },
       pollen: { key: 'pollen' },
@@ -170,10 +167,6 @@ test('the layer identifies itself, refreshes every ten minutes and ships real cr
   assert.equal(REFRESH_MS, 600_000);
   assert.equal(defaultLayer.id, 'weather-overlays');
   assert.equal(
-    NOAA_GMGSI_CREDIT.html,
-    'Clouds: <a href="https://nowcoast.noaa.gov/" target="_blank" rel="noopener">NOAA nowCOAST</a> GMGSI geostationary satellite mosaic',
-  );
-  assert.equal(
     NOAA_GFS_CREDIT.html,
     'Temperature: NOAA NCEP GFS via <a href="https://pae-paha.pacioos.hawaii.edu/erddap/griddap/ncep_global.html" target="_blank" rel="noopener">PacIOOS ERDDAP</a>',
   );
@@ -187,18 +180,20 @@ test('the layer identifies itself, refreshes every ten minutes and ships real cr
   );
 });
 
-test('enabling credits the mode, fetches its manifest and shows the cloud image with its age', async () => {
+test('enabling credits the default temperature mode, fetches its manifest and shows its valid time', async () => {
   const h = harness();
   await enabled(h);
-  assert.deepEqual(h.credited, ['clouds']);
-  assert.deepEqual(h.requests, ['/api/weather-overlays/manifest?mode=clouds']);
-  assert.equal(h.imagery.source(), 'clouds');
+  assert.deepEqual(h.credited, ['temperature']);
+  assert.deepEqual(h.requests, [
+    '/api/weather-overlays/manifest?mode=temperature',
+  ]);
+  assert.equal(h.imagery.source(), 'temperature');
   assert.equal(h.imagery.api.shownTime(), T15);
   assert.deepEqual(h.layer.getStats(), {
     status: 'ok',
-    source: 'NOAA GMGSI satellite · 15:00 UTC · 80 min old',
+    source: 'NOAA GFS model · valid 15:00 UTC',
     lastUpdate: NOW,
-    countLabel: 'CLOUDS',
+    countLabel: 'TEMP',
   });
   assert.ok(h.renderRequests.includes('weather-overlays'));
 });
@@ -231,7 +226,7 @@ test('switching mode clears imagery, credits the new source and refetches; polle
     'the old mode is cleared at once',
   );
   assert.ok(h.renderRequests.length > renders, 'clearing requests a render');
-  assert.deepEqual(h.credited, ['clouds', 'pollen']);
+  assert.deepEqual(h.credited, ['temperature', 'pollen']);
   assert.equal(
     h.requests.at(-1),
     '/api/weather-overlays/manifest?mode=pollen-tree',
@@ -249,7 +244,7 @@ test('switching mode clears imagery, credits the new source and refetches; polle
   assert.equal(h.imagery.source(), 'pollen-grass');
   assert.deepEqual(
     h.credited,
-    ['clouds', 'pollen'],
+    ['temperature', 'pollen'],
     'same credit for another pollen type',
   );
   assert.equal(
@@ -264,6 +259,11 @@ test('switching mode clears imagery, credits the new source and refetches; polle
   });
 
   assert.equal(h.layer.setParams({ mode: 'fog' }, { origin: 'user' }), false);
+  assert.equal(
+    h.layer.setParams({ mode: 'clouds' }, { origin: 'share-restore' }),
+    false,
+    'clouds moved to Satellite clouds',
+  );
   assert.equal(
     h.layer.setParams({ pollenType: 'pine' }, { origin: 'user' }),
     false,
@@ -316,7 +316,10 @@ test('a Google mode without a server key reports unavailable, draws nothing, and
     chips.find((chip) => chip.id === 'mode-air-quality').disabled,
     true,
   );
-  assert.equal(chips.find((chip) => chip.id === 'mode-clouds').disabled, false);
+  assert.equal(
+    chips.find((chip) => chip.id === 'mode-temperature').disabled,
+    false,
+  );
 });
 
 test('loading, a hidden-tab skip, stale with an image, and unavailable without one', async () => {
@@ -324,17 +327,17 @@ test('loading, a hidden-tab skip, stale with an image, and unavailable without o
   const gate = new Promise((resolve) => {
     release = resolve;
   });
-  const h = harness({ answers: { clouds: gate } });
+  const h = harness({ answers: { temperature: gate } });
   h.layer.init(h.viewer);
   h.layer.enable(h.viewer);
   const pending = h.layer.update(h.viewer, {});
   assert.deepEqual(h.layer.getStats(), {
     loading: true,
-    source: 'NOAA GMGSI satellite',
+    source: 'NOAA GFS model',
     loadingLabel: 'Loading',
-    countLabel: 'CLOUDS',
+    countLabel: 'TEMP',
   });
-  release(manifest('clouds', T15));
+  release(manifest('temperature', T15));
   assert.equal(await pending, true);
   assert.equal(h.layer.getStats().status, 'ok');
 
@@ -347,7 +350,7 @@ test('loading, a hidden-tab skip, stale with an image, and unavailable without o
   assert.equal(h.requests.length, 1);
 
   h.clock.visible = true;
-  h.table.clouds = new Error('offline');
+  h.table.temperature = new Error('offline');
   assert.equal(
     await h.layer.update(h.viewer, {}),
     true,
@@ -355,19 +358,19 @@ test('loading, a hidden-tab skip, stale with an image, and unavailable without o
   );
   assert.deepEqual(h.layer.getStats(), {
     stale: true,
-    source: 'NOAA GMGSI satellite · 15:00 UTC',
+    source: 'NOAA GFS model · 15:00 UTC',
     error: 'Overlay source unavailable — showing 15:00 UTC',
     lastUpdate: NOW,
-    countLabel: 'CLOUDS',
+    countLabel: 'TEMP',
   });
 
-  h.table.clouds = manifest('clouds', T15, { stale: true });
+  h.table.temperature = manifest('temperature', T15, { stale: true });
   await h.layer.update(h.viewer, {});
   assert.equal(h.layer.getStats().stale, true, 'a stale manifest reads stale');
 
   const cold = harness({
     answers: {
-      clouds: {
+      temperature: {
         status: 502,
         body: { error: 'upstream unavailable', googleConfigured: false },
       },
@@ -376,9 +379,9 @@ test('loading, a hidden-tab skip, stale with an image, and unavailable without o
   await enabled(cold);
   assert.deepEqual(cold.layer.getStats(), {
     status: 'unavailable',
-    source: 'NOAA GMGSI satellite',
+    source: 'NOAA GFS model',
     error: 'Overlay source unavailable',
-    countLabel: 'CLOUDS',
+    countLabel: 'TEMP',
   });
   assert.equal(
     cold.layer.getRowControls().chips.find((chip) => chip.id === 'mode-pollen')
@@ -391,7 +394,7 @@ test('loading, a hidden-tab skip, stale with an image, and unavailable without o
 test('a newer image is shown only once its tiles are ready, and the delayed swap requests a render', async () => {
   const h = harness();
   await enabled(h);
-  h.table.clouds = manifest('clouds', T16);
+  h.table.temperature = manifest('temperature', T16);
   h.clock.now = Date.UTC(2026, 8, 14, 17, 5);
   await h.layer.update(h.viewer, {});
   assert.equal(h.imagery.api.shownTime(), T15, 'still showing the older image');
@@ -414,9 +417,9 @@ test('Google 3D is reported from the attached controller and from map-stack even
   await enabled(h);
   assert.deepEqual(h.layer.getStats(), {
     status: 'idle',
-    source: 'NOAA GMGSI satellite',
+    source: 'NOAA GFS model',
     statusMessage: 'Hidden by Google 3D map source',
-    countLabel: 'CLOUDS',
+    countLabel: 'TEMP',
   });
   active = 'esri-imagery';
   assert.equal(h.layer.getStats().status, 'ok');
@@ -482,7 +485,7 @@ function rowText(stats) {
     { _timeAgo: () => 'just now' },
     {
       id: 'weather-overlays',
-      source: 'NOAA GMGSI satellite',
+      source: 'NOAA GFS model',
       enabled: true,
       lifecycleState: 'enabled',
       stats,
@@ -495,13 +498,13 @@ test('the Layers panel renders every status shape as the spec states', async () 
   await enabled(h);
   assert.equal(
     rowText(h.layer.getStats()),
-    'NOAA GMGSI satellite · 15:00 UTC · 80 min old · just now',
+    'NOAA GFS model · valid 15:00 UTC · just now',
   );
-  h.table.clouds = new Error('offline');
+  h.table.temperature = new Error('offline');
   await h.layer.update(h.viewer, {});
   assert.equal(
     rowText(h.layer.getStats()),
-    'STALE · NOAA GMGSI satellite · 15:00 UTC · Overlay source unavailable — showing 15:00 UTC',
+    'STALE · NOAA GFS model · 15:00 UTC · Overlay source unavailable — showing 15:00 UTC',
   );
 
   const temperature = harness();
@@ -559,27 +562,24 @@ test('the Layers panel renders every status shape as the spec states', async () 
     'UNAVAILABLE · Google Air Quality · Google overlay tile budget reached for today',
   );
 
-  const cold = harness({ answers: { clouds: new Error('offline') } });
+  const cold = harness({ answers: { temperature: new Error('offline') } });
   await enabled(cold);
   assert.equal(
     rowText(cold.layer.getStats()),
-    'UNAVAILABLE · NOAA GMGSI satellite · Overlay source unavailable',
+    'UNAVAILABLE · NOAA GFS model · Overlay source unavailable',
   );
 
-  const loading = harness({ answers: { clouds: new Promise(() => {}) } });
+  const loading = harness({ answers: { temperature: new Promise(() => {}) } });
   loading.layer.init(loading.viewer);
   loading.layer.enable(loading.viewer);
   void loading.layer.update(loading.viewer, {});
-  assert.equal(
-    rowText(loading.layer.getStats()),
-    'NOAA GMGSI satellite · Loading',
-  );
+  assert.equal(rowText(loading.layer.getStats()), 'NOAA GFS model · Loading');
 
   const hidden = harness();
   hidden.layer.attachMapStack({ getActiveId: () => 'photoreal' });
   await enabled(hidden);
   assert.equal(
     rowText(hidden.layer.getStats()),
-    'NOAA GMGSI satellite · Hidden by Google 3D map source',
+    'NOAA GFS model · Hidden by Google 3D map source',
   );
 });

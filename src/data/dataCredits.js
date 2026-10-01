@@ -372,11 +372,6 @@ export const TOMTOM_CREDIT = {
     '<a href="https://www.tomtom.com" target="_blank" rel="noopener">TomTom</a>',
 };
 
-export const NOAA_GMGSI_CREDIT = Object.freeze({
-  key: 'noaa-gmgsi',
-  html: 'Clouds: <a href="https://nowcoast.noaa.gov/" target="_blank" rel="noopener">NOAA nowCOAST</a> GMGSI geostationary satellite mosaic',
-});
-
 export const NOAA_GFS_CREDIT = Object.freeze({
   key: 'noaa-gfs',
   html: 'Temperature: NOAA NCEP GFS via <a href="https://pae-paha.pacioos.hawaii.edu/erddap/griddap/ncep_global.html" target="_blank" rel="noopener">PacIOOS ERDDAP</a>',

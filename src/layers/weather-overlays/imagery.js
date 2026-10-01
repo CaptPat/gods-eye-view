@@ -15,8 +15,6 @@ import { maximumLevelFor, modeOfKey } from './modes.js';
 export function overlayInsertIndex(viewer) {
   return viewer?.scene?.globe?.show ? 1 : 0;
 }
-/** GMGSI longwave pixels darker than this (0-1) are warm surface: made clear. */
-export const CLOUD_CLEAR_THRESHOLD = 0.3;
 /** Google's required attribution, shown on screen while its imagery is drawn. */
 export const GOOGLE_IMAGERY_CREDITS = Object.freeze({
   'air-quality': 'Source: Includes air quality data from Google',
@@ -38,18 +36,9 @@ export function createOverlayProvider(key, timeMs) {
   });
 }
 
-export function createOverlayLayer(provider, key) {
-  if (key !== 'clouds') return new Cesium.ImageryLayer(provider);
-  return new Cesium.ImageryLayer(provider, {
-    colorToAlpha: Cesium.Color.BLACK,
-    colorToAlphaThreshold: CLOUD_CLEAR_THRESHOLD,
-  });
-}
-
 export function createOverlayImagery(viewer, options = {}) {
   return createFrameImagery(viewer, {
     createProvider: createOverlayProvider,
-    createLayer: createOverlayLayer,
     insertIndex: () => overlayInsertIndex(viewer),
     ...options,
   });

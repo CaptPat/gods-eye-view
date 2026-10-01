@@ -37,13 +37,6 @@ export const POLLEN_LEGEND = Object.freeze([
   Object.freeze({ label: 'Very high', index: 5, color: '#ff0000' }),
 ]);
 
-/** Longwave infrared: brighter means colder, higher cloud tops. */
-export const CLOUD_LEGEND = Object.freeze([
-  Object.freeze({ label: 'Low', detail: 'warm tops', color: '#8c8c8c' }),
-  Object.freeze({ label: 'Mid', detail: 'cool tops', color: '#c8c8c8' }),
-  Object.freeze({ label: 'High', detail: 'cold tops', color: '#ffffff' }),
-]);
-
 export function celsiusToFahrenheit(celsius) {
   return Math.round((celsius * 9) / 5 + 32);
 }

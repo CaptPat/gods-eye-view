@@ -2,7 +2,6 @@ import { IMAGERY_OPACITIES } from '../weather-imagery/opacity.js';
 import { MODES, MODE_INFO, POLLEN_LABELS, POLLEN_TYPES } from './modes.js';
 import {
   AIR_QUALITY_LEGEND,
-  CLOUD_LEGEND,
   POLLEN_LEGEND,
   TEMPERATURE_STOPS,
   celsiusToFahrenheit,
@@ -13,14 +12,6 @@ import {
  * so `count` always carries the secondary text and is never undefined.
  */
 export function buildLegend(mode) {
-  if (mode === 'temperature') {
-    return TEMPERATURE_STOPS.map(({ celsius, color }) => ({
-      label: `${celsius}°C`,
-      count: `${celsiusToFahrenheit(celsius)}°F`,
-      color,
-      blurb: `${celsius}°C (${celsiusToFahrenheit(celsius)}°F) at 2 m`,
-    }));
-  }
   if (mode === 'air-quality') {
     return AIR_QUALITY_LEGEND.map(({ label, range, color }) => ({
       label,
@@ -37,11 +28,11 @@ export function buildLegend(mode) {
       blurb: `Universal Pollen Index ${index}: ${label}`,
     }));
   }
-  return CLOUD_LEGEND.map(({ label, detail, color }) => ({
-    label,
-    count: detail,
+  return TEMPERATURE_STOPS.map(({ celsius, color }) => ({
+    label: `${celsius}°C`,
+    count: `${celsiusToFahrenheit(celsius)}°F`,
     color,
-    blurb: `Infrared cloud: ${label.toLowerCase()} cloud, ${detail}; clear sky is transparent`,
+    blurb: `${celsius}°C (${celsiusToFahrenheit(celsius)}°F) at 2 m`,
   }));
 }
 

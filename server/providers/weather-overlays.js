@@ -5,8 +5,6 @@ import {
   GFS_WINDOW_MS,
   gfsGridUrl,
   gfsValidTime,
-  gmgsiCapabilitiesUrl,
-  gmgsiTileUrl,
   googleTileUrl,
   googleTimeBucket,
   isGfsTime,
@@ -14,7 +12,6 @@ import {
   isGoogleTime,
   isOverlayKey,
   parseGfsCsv,
-  parseGmgsiTimes,
   parseTileCoords,
 } from './weather-overlays/sources.js';
 import {
@@ -22,13 +19,11 @@ import {
   renderTemperatureTile,
 } from './weather-overlays/render.js';
 
-export const CAPABILITIES_TTL_MS = 10 * 60_000;
 export const GRID_TTL_MS = 60 * 60_000;
 // Google Pollen policy prohibits caching/storage, and the Air Quality API is
 // "subject to caching restrictions" — Google tiles are never cached (Task 4
-// amendment). NOAA clouds and temperature stay cached per the plan.
+// amendment). NOAA temperature stays cached per the plan.
 export const GOOGLE_TILE_TTL_MS = 0;
-export const CLOUD_TILE_TTL_MS = 3 * 60 * 60_000;
 export const TEMPERATURE_TILE_TTL_MS = 60 * 60_000;
 export const TILE_CACHE_LIMIT = 1500;
 export const PRUNE_INTERVAL_MS = 60_000;
@@ -46,7 +41,6 @@ export const GOOGLE_TILE_BUDGET_REASON =
 // the most recent failure is re-thrown from cache in between. A source that
 // has already loaded once keeps its existing TTL/stale-if-held behaviour.
 export const FAILURE_COOLDOWN_MS = 60_000;
-const CAPABILITIES_MAX_BYTES = 1024 * 1024;
 const GRID_MAX_BYTES = 8 * 1024 * 1024;
 const TILE_MAX_BYTES = 2 * 1024 * 1024;
 const DAY_MS = 24 * 60 * 60_000;
@@ -141,7 +135,6 @@ export function createWeatherOverlaysHandler({
   const inFlight = new Map();
   const grids = new Map();
   const failures = new Map();
-  let capabilities = null;
   let lastPrune = 0;
   let googleBudgetDay = null;
   let googleBudgetUsed = 0;
@@ -198,41 +191,6 @@ export function createWeatherOverlaysHandler({
     });
     if (!response.ok) throw new Error(`upstream HTTP ${response.status}`);
     return response;
-  }
-
-  async function cloudTimes() {
-    if (capabilities && now() - capabilities.checkedAt < CAPABILITIES_TTL_MS) {
-      return capabilities;
-    }
-    if (!capabilities) {
-      const cooling = coolingDownFailure('gmgsi-capabilities');
-      if (cooling) throw cooling;
-    }
-    try {
-      const { promise } = coalesceProxyRequest(
-        inFlight,
-        'gmgsi-capabilities',
-        async () =>
-          parseGmgsiTimes(
-            await readResponseTextCapped(
-              await fetchUpstream(gmgsiCapabilitiesUrl()),
-              CAPABILITIES_MAX_BYTES,
-            ),
-          ),
-      );
-      const times = await promise;
-      if (!times.length) throw new Error('no GMGSI times');
-      capabilities = { times, checkedAt: now(), stale: false };
-      clearFailure('gmgsi-capabilities');
-    } catch (error) {
-      if (!capabilities) {
-        recordFailure('gmgsi-capabilities', error);
-        throw error;
-      }
-      capabilities = { ...capabilities, checkedAt: now(), stale: true };
-      logFailure('GMGSI capabilities refresh', error);
-    }
-    return capabilities;
   }
 
   async function gridFor(timeMs) {
@@ -320,21 +278,12 @@ export function createWeatherOverlaysHandler({
       });
     }
     try {
-      if (key === 'clouds') {
-        const { times, stale } = await cloudTimes();
-        return sendJson(res, 200, {
-          ...base,
-          available: true,
-          time: times.at(-1),
-          stale,
-        });
-      }
       const time = gfsValidTime(now());
       const { stale } = await gridFor(time);
       return sendJson(res, 200, { ...base, available: true, time, stale });
     } catch (error) {
       logFailure(`${key} manifest`, error);
-      const fallback = key === 'temperature' ? nearestHeldGridTime() : null;
+      const fallback = nearestHeldGridTime();
       if (fallback !== null) {
         return sendJson(res, 200, {
           ...base,
@@ -406,15 +355,6 @@ export function createWeatherOverlaysHandler({
           );
         },
         'no-store',
-      );
-    }
-    if (key === 'clouds') {
-      const { times } = await cloudTimes();
-      if (!times.includes(time)) {
-        return sendJson(res, 404, { error: 'unknown overlay time' });
-      }
-      return sendTile(res, cacheKey, CLOUD_TILE_TTL_MS, async () =>
-        readPngCapped(await fetchUpstream(gmgsiTileUrl(time, coords))),
       );
     }
     if (!isGfsTime(time, now())) {

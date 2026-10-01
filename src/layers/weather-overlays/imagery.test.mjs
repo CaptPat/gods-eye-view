@@ -2,9 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as Cesium from 'cesium';
 import {
-  CLOUD_CLEAR_THRESHOLD,
   createOverlayImagery,
-  createOverlayLayer,
   createOverlayProvider,
   overlayInsertIndex,
   overlayTemplate,
@@ -34,25 +32,8 @@ test('providers cap zoom per mode, and Google imagery carries its attribution on
   assert.equal(pollen.credit.html, 'Source: Includes pollen data from Google');
   assert.equal(pollen.credit.showOnScreen, true);
 
-  assert.equal(createOverlayProvider('clouds', T).maximumLevel, 7);
-  assert.equal(createOverlayProvider('clouds', T).credit, undefined);
   assert.equal(createOverlayProvider('temperature', T).maximumLevel, 6);
-});
-
-test('cloud layers turn dark, warm pixels transparent; other modes draw as served', () => {
-  const clouds = createOverlayLayer(
-    createOverlayProvider('clouds', T),
-    'clouds',
-  );
-  assert.ok(clouds instanceof Cesium.ImageryLayer);
-  assert.ok(Cesium.Color.equals(clouds.colorToAlpha, Cesium.Color.BLACK));
-  assert.equal(clouds.colorToAlphaThreshold, CLOUD_CLEAR_THRESHOLD);
-  assert.equal(CLOUD_CLEAR_THRESHOLD, 0.3);
-  const temperature = createOverlayLayer(
-    createOverlayProvider('temperature', T),
-    'temperature',
-  );
-  assert.equal(temperature.colorToAlpha, undefined);
+  assert.equal(createOverlayProvider('temperature', T).credit, undefined);
 });
 
 /** A minimal fake viewer whose `scene.globe.show` drives overlayInsertIndex. */

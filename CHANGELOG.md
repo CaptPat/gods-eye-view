@@ -1,5 +1,7 @@
 # Changelog
 
+- Remove the Clouds mode from Weather Overlays; upstream's Satellite clouds layer serves the same NOAA global infrared mosaic, plus GOES regional imagery, a clouds-only filter and history playback. Weather Overlays now opens on Temperature and keeps Air Quality and Pollen. Old share links with the clouds mode (`m.c`) open Temperature, and `c` is never reused.
+
 - Remove the fork's Radar Loop layer and its RainViewer and Iowa Environmental Mesonet NEXRAD proxy; upstream's Weather Radar covers precipitation radar. Its share token `zg` stays reserved in the ledger and is never reused.
 
 - Merge upstream #627–#821 (upstream weather suite with wind, radar, satellite, lightning and cyclones; Fire Perimeters; Recent Imagery; local RTL-SDR and ADS-B; Cyber HUD; no public Overpass by default). Upstream's share-link token ledger now allocates digits then `00`–`zz` in order, so all 26 fork layers moved to a reserved `z0`–`zp` block that upstream reaches last; older fork links with uppercase or digit tokens no longer open. The fork's radar is now **Radar Loop** (`radar-loop`, token `zg`) beside upstream's Weather Radar, and fork weather layers join upstream's Weather group. `GEV_OVERPASS_UPSTREAMS` still leads the Overpass chain, followed by upstream's `OVERPASS_UPSTREAMS`; the public mirrors are gone.

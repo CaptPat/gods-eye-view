@@ -3,20 +3,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   GFS_GRIDDAP_URL,
-  GMGSI_WMS_URL,
   OVERLAY_KEYS,
   gfsGridUrl,
   gfsValidTime,
-  gmgsiTileUrl,
   googleTileUrl,
   googleTimeBucket,
   isGfsTime,
   isGoogleKey,
   isGoogleTime,
   isOverlayKey,
-  mercatorBounds,
   parseGfsCsv,
-  parseGmgsiTimes,
   parseTileCoords,
 } from '../../server/providers/weather-overlays/sources.js';
 
@@ -27,11 +23,9 @@ const fixture = (name) =>
   );
 const hour = (h, day = 14) => Date.UTC(2026, 8, day, h);
 const NOW = Date.UTC(2026, 8, 14, 16, 20);
-const HALF = 20037508.342789244;
 
 test('overlay keys and tile coordinates follow each mode zoom cap', () => {
   assert.deepEqual(OVERLAY_KEYS, [
-    'clouds',
     'temperature',
     'air-quality',
     'pollen-tree',
@@ -40,10 +34,15 @@ test('overlay keys and tile coordinates follow each mode zoom cap', () => {
   ]);
   assert.equal(isOverlayKey('pollen'), false, 'pollen is served per type');
   assert.equal(isGoogleKey('pollen-weed'), true);
-  assert.equal(isGoogleKey('clouds'), false);
-  assert.deepEqual(parseTileCoords('clouds', '7', '127', '0'), {
-    z: 7,
-    x: 127,
+  assert.equal(isGoogleKey('temperature'), false);
+  assert.equal(
+    isOverlayKey('clouds'),
+    false,
+    'clouds moved to Satellite clouds',
+  );
+  assert.deepEqual(parseTileCoords('temperature', '6', '63', '0'), {
+    z: 6,
+    x: 63,
     y: 0,
   });
   assert.deepEqual(parseTileCoords('air-quality', '12', '0', '0'), {
@@ -52,7 +51,6 @@ test('overlay keys and tile coordinates follow each mode zoom cap', () => {
     y: 0,
   });
   for (const [key, z] of [
-    ['clouds', '8'],
     ['temperature', '7'],
     ['air-quality', '13'],
     ['pollen-grass', '11'],
@@ -65,18 +63,12 @@ test('overlay keys and tile coordinates follow each mode zoom cap', () => {
     ['1.5', '0', '0'],
     ['a', '0', '0'],
   ]) {
-    assert.equal(parseTileCoords('clouds', ...bad), null, bad.join('/'));
+    assert.equal(parseTileCoords('temperature', ...bad), null, bad.join('/'));
   }
   assert.equal(parseTileCoords('nope', '0', '0', '0'), null);
 });
 
-test('Web Mercator bounds and the upstream URLs', () => {
-  const east = mercatorBounds({ z: 1, x: 1, y: 0 });
-  assert.equal(east.west, 0);
-  assert.equal(east.south, 0);
-  assert.ok(Math.abs(east.east - HALF) < 1e-6);
-  assert.ok(Math.abs(east.north - HALF) < 1e-6);
-
+test('the upstream URLs', () => {
   assert.equal(
     googleTileUrl('pollen-grass', { z: 3, x: 1, y: 2 }, 'K E Y'),
     'https://pollen.googleapis.com/v1/mapTypes/GRASS_UPI/heatmapTiles/3/1/2?key=K%20E%20Y',
@@ -86,41 +78,10 @@ test('Web Mercator bounds and the upstream URLs', () => {
     'https://airquality.googleapis.com/v1/mapTypes/US_AQI/heatmapTiles/0/0/0?key=k',
   );
 
-  const wms = new URL(gmgsiTileUrl(hour(15), { z: 9, x: 121, y: 212 }));
-  assert.equal(wms.origin + wms.pathname, GMGSI_WMS_URL);
-  assert.equal(
-    wms.searchParams.get('layers'),
-    'global_longwave_imagery_mosaic',
-  );
-  assert.equal(wms.searchParams.get('crs'), 'EPSG:3857');
-  assert.equal(wms.searchParams.get('version'), '1.3.0');
-  assert.equal(wms.searchParams.get('time'), '2026-09-14T15:00:00Z');
-  const bbox = wms.searchParams.get('bbox').split(',').map(Number);
-  assert.deepEqual(
-    bbox.map((value) => Math.round(value)),
-    [-10566655, 3365675, -10488383, 3443947],
-  );
-
   assert.equal(
     gfsGridUrl(hour(15)),
     `${GFS_GRIDDAP_URL}?tmp2m%5B(2026-09-14T15:00:00Z)%5D%5B(-90):2:(90)%5D%5B(0):2:(359.5)%5D`,
   );
-});
-
-test('GMGSI times parse from the recorded capabilities, including ISO ranges', () => {
-  assert.deepEqual(
-    parseGmgsiTimes(fixture('gmgsi-capabilities.xml')),
-    [10, 11, 12, 13, 14, 15].map((h) => hour(h)),
-  );
-  const ranged =
-    '<Layer><Name>global_longwave_imagery_mosaic</Name>' +
-    '<Dimension name="time" units="ISO8601">2026-09-14T13:00:00.000Z/2026-09-14T15:00:00.000Z/PT1H</Dimension></Layer>';
-  assert.deepEqual(
-    parseGmgsiTimes(ranged),
-    [13, 14, 15].map((h) => hour(h)),
-  );
-  assert.deepEqual(parseGmgsiTimes('<Layer><Name>other</Name></Layer>'), []);
-  assert.deepEqual(parseGmgsiTimes(null), []);
 });
 
 test('GFS steps and Google hour buckets are accepted only near now', () => {

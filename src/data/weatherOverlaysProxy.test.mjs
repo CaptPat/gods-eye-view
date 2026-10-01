@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import createViteConfig from '../../vite.config.js';
 import {
-  CAPABILITIES_TTL_MS,
   DEFAULT_GOOGLE_TILE_BUDGET,
   FAILURE_COOLDOWN_MS,
   GOOGLE_TILE_BUDGET_REASON,
@@ -80,17 +79,9 @@ function harness({
 } = {}) {
   const clock = { now: NOW };
   const logs = [];
-  const down = { capabilities: false, grid: false };
+  const down = { grid: false };
   const net = upstream([
     ...routes,
-    [
-      'GetCapabilities',
-      () => {
-        if (down.capabilities) throw new Error('offline');
-        return new Response(text('gmgsi-capabilities.xml'));
-      },
-    ],
-    ['request=GetMap', pngResponse('gmgsi-longwave-tile.png')],
     [
       'ncep_global.csvp',
       () => {
@@ -113,17 +104,17 @@ function harness({
   return { handler, net, logs, clock, down };
 }
 
-test('manifests: newest GMGSI time, nearest GFS step, and the current hour for Google modes', async () => {
+test('manifests: nearest GFS step and the current hour for Google modes; clouds is gone', async () => {
   const h = harness();
-  const clouds = await invoke(h.handler, '/manifest?mode=clouds');
-  assert.equal(clouds.status, 200);
-  assert.deepEqual(clouds.json(), {
-    mode: 'clouds',
-    googleConfigured: true,
-    available: true,
-    time: T15,
-    stale: false,
-  });
+  assert.equal(
+    (await invoke(h.handler, '/manifest?mode=clouds')).status,
+    400,
+    'cloud cover moved to the Satellite clouds layer',
+  );
+  assert.equal(
+    (await invoke(h.handler, `/tiles/clouds/${T15}/3/1/2.png`)).status,
+    400,
+  );
 
   const temperature = await invoke(h.handler, '/manifest?mode=temperature');
   assert.deepEqual(temperature.json(), {
@@ -179,9 +170,11 @@ test('without a Google key the Google modes are unavailable and their tiles 404;
     (await invoke(h.handler, `/tiles/pollen-tree/${H16}/3/1/2.png`)).status,
     404,
   );
-  const clouds = (await invoke(h.handler, '/manifest?mode=clouds')).json();
-  assert.equal(clouds.available, true);
-  assert.equal(clouds.googleConfigured, false);
+  const temperature = (
+    await invoke(h.handler, '/manifest?mode=temperature')
+  ).json();
+  assert.equal(temperature.available, true);
+  assert.equal(temperature.googleConfigured, false);
   assert.equal(h.net.count('googleapis.com'), 0);
 });
 
@@ -255,61 +248,6 @@ test('Google tiles use the server key, are never cached, and failures are not ca
   );
 });
 
-test('cloud tiles are served only for advertised GMGSI times; capabilities refresh every ten minutes and go stale on failure', async () => {
-  const h = harness();
-  const route = `/tiles/clouds/${T15}/7/30/53.png`;
-  const miss = await invoke(h.handler, route);
-  assert.equal(miss.status, 200);
-  assert.ok(miss.buffer.equals(bytes('gmgsi-longwave-tile.png')));
-  assert.equal(miss.headers['Cache-Control'], 'private, max-age=600');
-  const getMap = new URL(
-    h.net.calls.find((href) => href.includes('request=GetMap')),
-  );
-  assert.equal(getMap.searchParams.get('time'), '2026-09-14T15:00:00Z');
-  assert.equal(
-    getMap.searchParams.get('layers'),
-    'global_longwave_imagery_mosaic',
-  );
-  assert.equal(
-    (await invoke(h.handler, route)).headers['X-Overlay-Cache'],
-    'HIT',
-  );
-  assert.equal(
-    (
-      await invoke(
-        h.handler,
-        `/tiles/clouds/${Date.UTC(2026, 8, 14, 9)}/7/30/53.png`,
-      )
-    ).status,
-    404,
-  );
-  assert.equal(
-    (await invoke(h.handler, `/tiles/clouds/${T15}/8/0/0.png`)).status,
-    400,
-    'zoom 8 is beyond the cloud cap',
-  );
-  assert.equal(h.net.count('GetCapabilities'), 1);
-
-  h.down.capabilities = true;
-  h.clock.now += CAPABILITIES_TTL_MS + 1;
-  assert.deepEqual((await invoke(h.handler, '/manifest?mode=clouds')).json(), {
-    mode: 'clouds',
-    googleConfigured: true,
-    available: true,
-    time: T15,
-    stale: true,
-  });
-
-  const cold = harness();
-  cold.down.capabilities = true;
-  const failed = await invoke(cold.handler, '/manifest?mode=clouds');
-  assert.equal(failed.status, 502);
-  assert.deepEqual(failed.json(), {
-    error: 'upstream unavailable',
-    googleConfigured: true,
-  });
-});
-
 test('temperature tiles are rendered from the GFS grid; a failed refresh falls back to the held grid as stale', async () => {
   const h = harness();
   const route = `/tiles/temperature/${T15}/0/0/0.png`;
@@ -373,7 +311,7 @@ test('manifest and tile rate limits are separate; methods, unknown paths and non
   const manifestLimited = harness({ limiter: () => false });
   const refused = await invoke(
     manifestLimited.handler,
-    '/manifest?mode=clouds',
+    '/manifest?mode=temperature',
   );
   assert.equal(refused.status, 429);
   assert.equal(refused.headers['Retry-After'], '10');
@@ -395,15 +333,15 @@ test('manifest and tile rate limits are separate; methods, unknown paths and non
     429,
   );
   assert.equal(
-    (await invoke(tileLimited.handler, '/manifest?mode=clouds')).status,
+    (await invoke(tileLimited.handler, '/manifest?mode=temperature')).status,
     200,
   );
 
   const h = harness({
-    routes: [['request=GetMap', () => new Response('<html>not a tile</html>')]],
+    routes: [['US_AQI', () => new Response('<html>not a tile</html>')]],
   });
   assert.equal(
-    (await invoke(h.handler, '/manifest?mode=clouds', 'POST')).status,
+    (await invoke(h.handler, '/manifest?mode=temperature', 'POST')).status,
     405,
   );
   assert.equal((await invoke(h.handler, '/nope')).status, 404);
@@ -412,11 +350,11 @@ test('manifest and tile rate limits are separate; methods, unknown paths and non
     400,
   );
   assert.equal(
-    (await invoke(h.handler, `/tiles/clouds/${T15}/0/0/0.jpg`)).status,
+    (await invoke(h.handler, `/tiles/temperature/${T15}/0/0/0.jpg`)).status,
     400,
   );
   assert.equal(
-    (await invoke(h.handler, `/tiles/clouds/${T15}/2/1/1.png`)).status,
+    (await invoke(h.handler, `/tiles/air-quality/${H16}/2/1/1.png`)).status,
     502,
   );
 });
@@ -493,11 +431,18 @@ test('the Google manifest reports the budget-exhausted reason; NOAA modes are un
       stale: false,
     },
   );
-  const clouds = await invoke(h.handler, '/manifest?mode=clouds');
-  assert.equal(clouds.status, 200);
-  assert.equal(clouds.json().available, true, 'NOAA manifests are unaffected');
-  const cloudTile = await invoke(h.handler, `/tiles/clouds/${T15}/7/30/53.png`);
-  assert.equal(cloudTile.status, 200, 'NOAA tiles are unaffected');
+  const temperature = await invoke(h.handler, '/manifest?mode=temperature');
+  assert.equal(temperature.status, 200);
+  assert.equal(
+    temperature.json().available,
+    true,
+    'NOAA manifests are unaffected',
+  );
+  const temperatureTile = await invoke(
+    h.handler,
+    `/tiles/temperature/${T15}/0/0/0.png`,
+  );
+  assert.equal(temperatureTile.status, 200, 'NOAA tiles are unaffected');
 });
 
 test('the Google tile budget resets at the UTC day boundary', async () => {
@@ -543,31 +488,6 @@ test('googleDailyBudgetFromEnv reads a positive integer, else the default', () =
       `falls back for ${JSON.stringify(bad)}`,
     );
   }
-});
-
-test('a never-succeeded GMGSI capabilities failure is cooled down for 60 s, then retried', async () => {
-  const h = harness();
-  h.down.capabilities = true;
-  assert.equal((await invoke(h.handler, '/manifest?mode=clouds')).status, 502);
-  assert.equal((await invoke(h.handler, '/manifest?mode=clouds')).status, 502);
-  assert.equal(
-    h.net.count('GetCapabilities'),
-    1,
-    'the second call is served from the cooldown, no new upstream call',
-  );
-
-  h.clock.now += FAILURE_COOLDOWN_MS + 1;
-  assert.equal((await invoke(h.handler, '/manifest?mode=clouds')).status, 502);
-  assert.equal(
-    h.net.count('GetCapabilities'),
-    2,
-    'the cooldown elapsed: retried upstream',
-  );
-
-  h.down.capabilities = false;
-  h.clock.now += FAILURE_COOLDOWN_MS + 1;
-  assert.equal((await invoke(h.handler, '/manifest?mode=clouds')).status, 200);
-  assert.equal(h.net.count('GetCapabilities'), 3);
 });
 
 test('a never-succeeded GFS grid failure is cooled down for 60 s, then retried; stale-if-held is unaffected', async () => {

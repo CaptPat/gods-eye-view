@@ -101,10 +101,6 @@ export function createWeatherOverlaysLayer({
   }
 
   function shownDetail(name, shown) {
-    if (mode === 'clouds') {
-      const ageMinutes = Math.max(0, Math.floor((now() - shown) / 60_000));
-      return `${name} · ${hhmm(shown)} UTC · ${ageMinutes} min old`;
-    }
     if (mode === 'temperature') return `${name} · valid ${hhmm(shown)} UTC`;
     return name;
   }

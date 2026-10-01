@@ -10,16 +10,11 @@ export const GFS_STEP_MS = 3 * HOUR_MS;
 export const GFS_WINDOW_MS = 6 * HOUR_MS;
 /** Google tile time buckets are accepted from 3 h back to 1 h ahead. */
 export const GOOGLE_WINDOW_MS = 3 * HOUR_MS;
-export const GMGSI_WMS_URL =
-  'https://nowcoast.noaa.gov/geoserver/satellite/ows';
-export const GMGSI_LAYER = 'global_longwave_imagery_mosaic';
 /** PacIOOS ERDDAP hosts NCEP GFS; NOAA CoastWatch's copy 302-redirects here. */
 export const GFS_GRIDDAP_URL =
   'https://pae-paha.pacioos.hawaii.edu/erddap/griddap/ncep_global.csvp';
 const GFS_HEADER =
   'time (UTC),latitude (degrees_north),longitude (degrees_east),tmp2m (K)';
-const WEB_MERCATOR_HALF = 20037508.342789244;
-const MAX_CAPABILITY_TIMES = 48;
 const GOOGLE_TILE_BASES = Object.freeze({
   'air-quality':
     'https://airquality.googleapis.com/v1/mapTypes/US_AQI/heatmapTiles',
@@ -53,79 +48,8 @@ export function parseTileCoords(key, z, x, y) {
   return { z: zi, x: xi, y: yi };
 }
 
-/** EPSG:3857 bounds of a Web Mercator tile, in metres. */
-export function mercatorBounds({ z, x, y }) {
-  const size = (2 * WEB_MERCATOR_HALF) / 2 ** z;
-  const west = -WEB_MERCATOR_HALF + x * size;
-  const north = WEB_MERCATOR_HALF - y * size;
-  return { west, south: north - size, east: west + size, north };
-}
-
 export function googleTileUrl(key, { z, x, y }, apiKey) {
   return `${GOOGLE_TILE_BASES[key]}/${z}/${x}/${y}?key=${encodeURIComponent(apiKey)}`;
-}
-
-export function gmgsiCapabilitiesUrl() {
-  return `${GMGSI_WMS_URL}?service=WMS&request=GetCapabilities&version=1.3.0`;
-}
-
-function expandTimeRange(start, end, period) {
-  const startMs = Date.parse(start);
-  const endMs = Date.parse(end);
-  const hours = /^PT(\d+)H$/.exec(period);
-  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || !hours) return [];
-  const step = Number(hours[1]) * HOUR_MS;
-  const times = [];
-  for (
-    let time = endMs;
-    time >= startMs && times.length < MAX_CAPABILITY_TIMES;
-    time -= step
-  ) {
-    times.push(time);
-  }
-  return times;
-}
-
-/** Hourly GMGSI longwave times from a WMS 1.3.0 capabilities document, oldest first. */
-export function parseGmgsiTimes(xml) {
-  const text = String(xml ?? '');
-  const at = text.indexOf(`<Name>${GMGSI_LAYER}</Name>`);
-  if (at < 0) return [];
-  const end = text.indexOf('</Layer>', at);
-  const layer = text.slice(at, end < 0 ? undefined : end);
-  const match = /<Dimension[^>]*name="time"[^>]*>([^<]*)<\/Dimension>/.exec(
-    layer,
-  );
-  if (!match) return [];
-  const times = match[1].split(',').flatMap((entry) => {
-    const parts = entry.trim().split('/');
-    return parts.length === 3
-      ? expandTimeRange(...parts)
-      : [Date.parse(parts[0])];
-  });
-  return [...new Set(times)]
-    .filter((time) => Number.isFinite(time) && time % HOUR_MS === 0)
-    .sort((a, b) => a - b)
-    .slice(-MAX_CAPABILITY_TIMES);
-}
-
-export function gmgsiTileUrl(timeMs, coords) {
-  const { west, south, east, north } = mercatorBounds(coords);
-  const params = new URLSearchParams({
-    service: 'WMS',
-    version: '1.3.0',
-    request: 'GetMap',
-    layers: GMGSI_LAYER,
-    styles: '',
-    crs: 'EPSG:3857',
-    bbox: [west, south, east, north].join(','),
-    width: '256',
-    height: '256',
-    format: 'image/png',
-    transparent: 'true',
-    time: isoSeconds(timeMs),
-  });
-  return `${GMGSI_WMS_URL}?${params}`;
 }
 
 /** GFS "best" series steps every 3 h; take the step nearest now. */
