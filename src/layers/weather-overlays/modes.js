@@ -2,23 +2,16 @@
  * Overlay modes and the keys the proxy serves them under. Pure: shared by the
  * browser layer and `server/providers/weather-overlays/sources.js`.
  */
-// Cloud cover lives in upstream's Satellite clouds layer (weather-satellite),
-// which serves the same NOAA global mosaic plus GOES regional imagery.
-export const MODES = Object.freeze(['temperature', 'air-quality', 'pollen']);
+// Cloud cover and 2 m temperature live upstream: Satellite clouds
+// (weather-satellite) and the Wind layer's Temperature field, both of which
+// also draw on Google 3D.
+export const MODES = Object.freeze(['air-quality', 'pollen']);
 export const POLLEN_TYPES = Object.freeze(['tree', 'grass', 'weed']);
-export const DEFAULT_MODE = 'temperature';
+export const DEFAULT_MODE = 'air-quality';
 export const DEFAULT_POLLEN_TYPE = 'tree';
 export const DEFAULT_OPACITY = 0.7;
 
 export const MODE_INFO = Object.freeze({
-  temperature: Object.freeze({
-    label: 'Temp',
-    title: 'Air temperature at 2 m',
-    name: 'NOAA GFS model',
-    short: 'TEMP',
-    google: false,
-    maximumLevel: 6,
-  }),
   'air-quality': Object.freeze({
     label: 'Air',
     title: 'Air quality (US AQI)',
@@ -45,7 +38,6 @@ export const POLLEN_LABELS = Object.freeze({
 
 /** Every key the proxy serves: one per mode, with pollen split by type. */
 export const OVERLAY_KEYS = Object.freeze([
-  'temperature',
   'air-quality',
   ...POLLEN_TYPES.map((type) => `pollen-${type}`),
 ]);

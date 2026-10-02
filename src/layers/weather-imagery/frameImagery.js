@@ -6,26 +6,36 @@ export const PRELOAD_ALPHA = 0.001;
 /**
  * Show `time` at once when nothing is shown, it is already shown, or its tiles
  * are ready. Otherwise preload it beside the shown frame and keep showing that.
+ * Preloading can itself make a frame ready (a frame draped on 3D tiles is
+ * ready as soon as it exists), so readiness is checked again afterwards.
  * @returns {boolean} Whether `time` is now the shown frame.
  */
 export function swapToFrame(imagery, time) {
   const current = imagery.shownTime();
-  if (current === null || current === time || imagery.isReady(time)) {
-    imagery.show(time);
-    imagery.release([time]);
-    return true;
+  if (current !== null && current !== time && !imagery.isReady(time)) {
+    imagery.preload([time]);
+    if (!imagery.isReady(time)) {
+      imagery.release([current, time]);
+      return false;
+    }
   }
-  imagery.preload([time]);
-  imagery.release([current, time]);
-  return false;
+  imagery.show(time);
+  imagery.release([time]);
+  return true;
 }
 
 /**
- * One Cesium imagery layer per frame time for the current source. A frame is
- * ready once the globe's tile queue first reports 0 after its layer was added.
+ * One Cesium imagery layer per frame time for the current source. Frames go to
+ * the collection `host()` names: the globe's `imageryLayers`, a photoreal 3D
+ * tileset's own `imageryLayers` (Cesium drapes imagery onto the tiles), or no
+ * collection at all, in which case they wait detached until `rehome()` finds
+ * one. A globe frame is ready once the globe's tile queue first reports 0 after
+ * its layer was added; the globe never reports for tileset imagery, so a frame
+ * draped on a tileset counts as ready at once.
+ *
  * `insertIndex` places new layers at that index (clamped to the collection)
  * instead of on top. It may be a constant integer or a function evaluated
- * fresh each time a layer is added (or re-seated), so callers can track a
+ * fresh each time a layer is added (or re-homed), so callers can track a
  * moving target such as "directly above the base map".
  */
 export function createFrameImagery(
@@ -34,12 +44,15 @@ export function createFrameImagery(
     createProvider,
     createLayer = (provider) => new Cesium.ImageryLayer(provider),
     insertIndex = null,
+    host = () => ({ collection: viewer.imageryLayers, kind: 'globe' }),
   } = {},
 ) {
   if (typeof createProvider !== 'function') {
     throw new TypeError('createFrameImagery requires createProvider');
   }
   const layers = new Map();
+  /** Frame time → the collection holding its layer, or null while detached. */
+  const homes = new Map();
   const pending = new Set();
   const ready = new Set();
   let source = null;
@@ -59,11 +72,39 @@ export function createFrameImagery(
     return Number.isInteger(value) ? value : null;
   }
 
+  function resolveHost() {
+    const next = host() || {};
+    return next.collection
+      ? { collection: next.collection, kind: next.kind || 'globe' }
+      : { collection: null, kind: 'none' };
+  }
+
+  /** Add `layer` to the current host; returns where it went (null: detached). */
+  function place(time, layer) {
+    const { collection, kind } = resolveHost();
+    if (!collection) return null;
+    const index = resolveInsertIndex();
+    if (index !== null) {
+      collection.add(layer, Math.min(index, collection.length));
+    } else {
+      collection.add(layer);
+    }
+    if (kind === 'globe') {
+      pending.add(time);
+    } else {
+      ready.add(time);
+    }
+    return collection;
+  }
+
   function remove(time) {
     const layer = layers.get(time);
     if (!layer) return;
-    viewer.imageryLayers.remove(layer, true);
+    const home = homes.get(time);
+    if (home) home.remove(layer, true);
+    else layer.destroy?.();
     layers.delete(time);
+    homes.delete(time);
     pending.delete(time);
     ready.delete(time);
     if (shown === time) shown = null;
@@ -74,17 +115,8 @@ export function createFrameImagery(
     const layer = createLayer(createProvider(source, time), source);
     layer.alpha = PRELOAD_ALPHA;
     layer.show = true;
-    const index = resolveInsertIndex();
-    if (index !== null) {
-      viewer.imageryLayers.add(
-        layer,
-        Math.min(index, viewer.imageryLayers.length),
-      );
-    } else {
-      viewer.imageryLayers.add(layer);
-    }
     layers.set(time, layer);
-    pending.add(time);
+    homes.set(time, place(time, layer));
     return layer;
   }
 
@@ -112,23 +144,21 @@ export function createFrameImagery(
       for (const time of [...layers.keys()]) if (!keep.has(time)) remove(time);
     },
     /**
-     * Move every current frame back to a freshly resolved `insertIndex`,
-     * for example after the base map is added or removed beneath it. A
-     * no-op when `insertIndex` was never given (the "append on top"
-     * default, e.g. radar).
+     * Move every current frame to the freshly resolved host and `insertIndex`:
+     * to the 3D tiles when the globe is hidden, back above the base map when a
+     * globe map returns, or detached when nothing can host imagery. Without an
+     * `insertIndex` a frame on an unchanged host keeps its place (the "append
+     * on top" default).
      */
-    reseat() {
-      if (insertIndex === null) return;
-      for (const layer of layers.values()) {
-        viewer.imageryLayers.remove(layer, false);
-        const index = resolveInsertIndex();
-        viewer.imageryLayers.add(
-          layer,
-          Math.min(
-            index ?? viewer.imageryLayers.length,
-            viewer.imageryLayers.length,
-          ),
-        );
+    rehome() {
+      const target = resolveHost().collection;
+      for (const [time, layer] of layers) {
+        const home = homes.get(time);
+        if (home === target && insertIndex === null) continue;
+        if (home) home.remove(layer, false);
+        pending.delete(time);
+        ready.delete(time);
+        homes.set(time, place(time, layer));
       }
     },
     isReady: (time) => ready.has(time),

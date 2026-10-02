@@ -209,10 +209,8 @@
     "exports": ["./server/providers/weather-overlays"],
     "modules": [
       "server/providers/weather-overlays.js",
-      "server/providers/weather-overlays/render.js",
       "server/providers/weather-overlays/sources.js",
       "src/layers/weather-overlays/modes.js",
-      "src/layers/weather-overlays/palette.js",
       "server/providers/places/google-key.js",
       "scripts/google-server-key.mjs",
       "server/providers/common/rate-limit.js",
@@ -1393,6 +1391,7 @@
   "weather-overlays-layer": {
     "exports": ["./layers/weather-overlays"],
     "modules": [
+      "src/maps/imageryHost.js",
       "src/layers/weather-imagery/frameImagery.js",
       "src/layers/weather-imagery/opacity.js",
       "src/layers/weather-overlays/controls.js",

@@ -9,7 +9,7 @@ import { maximumLevelFor, modeOfKey } from './modes.js';
  * `scene.globe.show = false`) on the photoreal 3D-tileset stack, and adds
  * exactly one base layer at index 0 for every globe stack — so `globe.show`
  * is a reliable proxy for "is there a base layer below index 0 right now".
- * Evaluated fresh on every insert (and on `reseat()`), never cached, so it
+ * Evaluated fresh on every insert (and on `rehome()`), never cached, so it
  * tracks map-stack changes instead of a constant snapshot from layer setup.
  */
 export function overlayInsertIndex(viewer) {
@@ -36,10 +36,60 @@ export function createOverlayProvider(key, timeMs) {
   });
 }
 
+/**
+ * Frame imagery for the overlay, plus Google's required on-screen credit while
+ * it drapes on Google 3D. Cesium shows an imagery provider's credit only for
+ * globe imagery; a tileset's draped imagery contributes none, so the credit is
+ * added to the credit display directly for as long as a Google frame is shown
+ * there.
+ */
 export function createOverlayImagery(viewer, options = {}) {
-  return createFrameImagery(viewer, {
+  const host = options.host ?? (() => ({ kind: 'globe' }));
+  const frames = createFrameImagery(viewer, {
     createProvider: createOverlayProvider,
     insertIndex: () => overlayInsertIndex(viewer),
     ...options,
   });
+  let source = null;
+  let credit = null;
+
+  function syncCredit() {
+    const text =
+      frames.shownTime() !== null && host().kind === 'tileset'
+        ? (GOOGLE_IMAGERY_CREDITS[modeOfKey(source)] ?? null)
+        : null;
+    if ((credit?.html ?? null) === text) return;
+    if (credit) viewer?.creditDisplay?.removeStaticCredit?.(credit);
+    credit = text ? new Cesium.Credit(text, true) : null;
+    if (credit) viewer?.creditDisplay?.addStaticCredit?.(credit);
+  }
+
+  return {
+    ...frames,
+    setSource(nextSource) {
+      frames.setSource(nextSource);
+      source = nextSource;
+      syncCredit();
+    },
+    show(time) {
+      frames.show(time);
+      syncCredit();
+    },
+    release(keepTimes) {
+      frames.release(keepTimes);
+      syncCredit();
+    },
+    rehome() {
+      frames.rehome();
+      syncCredit();
+    },
+    clear() {
+      frames.clear();
+      syncCredit();
+    },
+    destroy() {
+      frames.destroy();
+      syncCredit();
+    },
+  };
 }

@@ -372,11 +372,6 @@ export const TOMTOM_CREDIT = {
     '<a href="https://www.tomtom.com" target="_blank" rel="noopener">TomTom</a>',
 };
 
-export const NOAA_GFS_CREDIT = Object.freeze({
-  key: 'noaa-gfs',
-  html: 'Temperature: NOAA NCEP GFS via <a href="https://pae-paha.pacioos.hawaii.edu/erddap/griddap/ncep_global.html" target="_blank" rel="noopener">PacIOOS ERDDAP</a>',
-});
-
 export const GOOGLE_AIR_QUALITY_CREDIT = Object.freeze({
   key: 'google-air-quality',
   html: 'Air quality overlay: Source: Includes air quality data from Google',

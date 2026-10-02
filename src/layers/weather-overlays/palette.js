@@ -1,18 +1,4 @@
-/**
- * Colours shared by the server's temperature tile renderer and the Layers-panel
- * legends. Pure data and arithmetic: no Cesium, no DOM, no Node built-ins.
- */
-
-/** Temperature ramp at 2 m, °C to sRGB. Values outside the ends clamp. */
-export const TEMPERATURE_STOPS = Object.freeze([
-  Object.freeze({ celsius: -30, color: '#5e3c99' }),
-  Object.freeze({ celsius: -15, color: '#3b6fd8' }),
-  Object.freeze({ celsius: 0, color: '#9fd8f0' }),
-  Object.freeze({ celsius: 10, color: '#fff3a0' }),
-  Object.freeze({ celsius: 20, color: '#ffb050' }),
-  Object.freeze({ celsius: 30, color: '#f05a28' }),
-  Object.freeze({ celsius: 40, color: '#a50f15' }),
-]);
+/** Layers-panel legend colours. Pure data: no Cesium, no DOM, no Node built-ins. */
 
 /** US AQI categories; the colours Google's US_AQI heatmap tiles use (measured). */
 export const AIR_QUALITY_LEGEND = Object.freeze([
@@ -36,30 +22,3 @@ export const POLLEN_LEGEND = Object.freeze([
   Object.freeze({ label: 'High', index: 4, color: '#ff8c00' }),
   Object.freeze({ label: 'Very high', index: 5, color: '#ff0000' }),
 ]);
-
-export function celsiusToFahrenheit(celsius) {
-  return Math.round((celsius * 9) / 5 + 32);
-}
-
-function hexToRgb(hex) {
-  const value = Number.parseInt(hex.slice(1), 16);
-  return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
-}
-
-const STOP_RGB = TEMPERATURE_STOPS.map((stop) => hexToRgb(stop.color));
-
-/** Linear interpolation along the ramp; null for a missing value. */
-export function temperatureRgb(celsius) {
-  if (!Number.isFinite(celsius)) return null;
-  const last = TEMPERATURE_STOPS.length - 1;
-  if (celsius <= TEMPERATURE_STOPS[0].celsius) return [...STOP_RGB[0]];
-  if (celsius >= TEMPERATURE_STOPS[last].celsius) return [...STOP_RGB[last]];
-  let upper = 1;
-  while (TEMPERATURE_STOPS[upper].celsius < celsius) upper += 1;
-  const low = TEMPERATURE_STOPS[upper - 1].celsius;
-  const high = TEMPERATURE_STOPS[upper].celsius;
-  const t = (celsius - low) / (high - low);
-  return STOP_RGB[upper - 1].map((channel, index) =>
-    Math.round(channel + (STOP_RGB[upper][index] - channel) * t),
-  );
-}

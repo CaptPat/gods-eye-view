@@ -31,9 +31,50 @@ test('providers cap zoom per mode, and Google imagery carries its attribution on
   assert.equal(pollen.maximumLevel, 10);
   assert.equal(pollen.credit.html, 'Source: Includes pollen data from Google');
   assert.equal(pollen.credit.showOnScreen, true);
+});
 
-  assert.equal(createOverlayProvider('temperature', T).maximumLevel, 6);
-  assert.equal(createOverlayProvider('temperature', T).credit, undefined);
+test('on 3D tiles the Google credit is put on screen directly; the globe shows the provider credit itself', () => {
+  const shownCredits = new Set();
+  const viewer = {
+    ...fakeViewer([], { globeShow: false }),
+    creditDisplay: {
+      addStaticCredit: (credit) => shownCredits.add(credit),
+      removeStaticCredit: (credit) => shownCredits.delete(credit),
+    },
+  };
+  const tileset = { add() {}, remove() {}, length: 0 };
+  let host = { collection: tileset, kind: 'tileset' };
+  const imagery = createOverlayImagery(viewer, {
+    ...overlayFactories(),
+    host: () => host,
+  });
+  const onScreen = () => [...shownCredits].map((credit) => credit.html);
+
+  imagery.setSource('air-quality');
+  assert.deepEqual(onScreen(), [], 'nothing drawn yet');
+  imagery.show(T);
+  assert.deepEqual(onScreen(), [
+    'Source: Includes air quality data from Google',
+  ]);
+  assert.equal([...shownCredits][0].showOnScreen, true);
+
+  imagery.setSource('pollen-grass');
+  imagery.show(T);
+  assert.deepEqual(onScreen(), ['Source: Includes pollen data from Google']);
+
+  host = { collection: viewer.imageryLayers, kind: 'globe' };
+  imagery.rehome();
+  assert.deepEqual(onScreen(), [], 'the globe draws the provider credit');
+
+  host = { collection: tileset, kind: 'tileset' };
+  imagery.rehome();
+  assert.equal(onScreen().length, 1);
+  imagery.clear();
+  assert.deepEqual(onScreen(), [], 'cleared imagery takes its credit away');
+
+  imagery.show(T);
+  imagery.destroy();
+  assert.deepEqual(onScreen(), []);
 });
 
 /** A minimal fake viewer whose `scene.globe.show` drives overlayInsertIndex. */
@@ -90,17 +131,17 @@ test('overlayInsertIndex: below any base layer when there is one, otherwise inde
 test('an empty collection takes the overlay at index 0', () => {
   const viewer = fakeViewer([], { globeShow: false });
   const imagery = createOverlayImagery(viewer, overlayFactories());
-  imagery.setSource('temperature');
+  imagery.setSource('air-quality');
   imagery.show(T);
-  assert.deepEqual(layerNames(viewer.layers), ['temperature']);
+  assert.deepEqual(layerNames(viewer.layers), ['air-quality']);
 });
 
 test('a collection holding only radar: the overlay lands below it (no base layer yet)', () => {
   const viewer = fakeViewer([{ radar: true }], { globeShow: false });
   const imagery = createOverlayImagery(viewer, overlayFactories());
-  imagery.setSource('temperature');
+  imagery.setSource('air-quality');
   imagery.show(T);
-  assert.deepEqual(layerNames(viewer.layers), ['temperature', 'radar']);
+  assert.deepEqual(layerNames(viewer.layers), ['air-quality', 'radar']);
 });
 
 test('a base layer plus radar: the overlay lands between them', () => {
@@ -108,21 +149,21 @@ test('a base layer plus radar: the overlay lands between them', () => {
     globeShow: true,
   });
   const imagery = createOverlayImagery(viewer, overlayFactories());
-  imagery.setSource('temperature');
+  imagery.setSource('air-quality');
   imagery.show(T);
-  assert.deepEqual(layerNames(viewer.layers), ['base', 'temperature', 'radar']);
+  assert.deepEqual(layerNames(viewer.layers), ['base', 'air-quality', 'radar']);
   imagery.destroy();
   assert.equal(viewer.listenerCount(), 0);
 });
 
-test('a map-stack change that adds a base layer re-seats the overlay above it, below radar', () => {
+test('a map-stack change that adds a base layer re-homes the overlay above it, below radar', () => {
   // Photoreal-to-globe switch, radar already enabled: overlay starts with no
   // base layer beneath it (index 0).
   const viewer = fakeViewer([{ radar: true }], { globeShow: false });
   const imagery = createOverlayImagery(viewer, overlayFactories());
-  imagery.setSource('temperature');
+  imagery.setSource('air-quality');
   imagery.show(T);
-  assert.deepEqual(layerNames(viewer.layers), ['temperature', 'radar']);
+  assert.deepEqual(layerNames(viewer.layers), ['air-quality', 'radar']);
 
   // The map controller adds the new base layer; something else (a stand-in
   // for anything that could touch the collection directly) displaces the
@@ -134,16 +175,16 @@ test('a map-stack change that adds a base layer re-seats the overlay above it, b
   viewer.imageryLayers.add(overlayLayer);
   assert.deepEqual(
     layerNames(viewer.layers),
-    ['base', 'radar', 'temperature'],
+    ['base', 'radar', 'air-quality'],
     'displaced above radar — the bug this finding fixes',
   );
 
-  // reseat() is what the layer's map-stack listener calls: it must put the
+  // rehome() is what the layer's map-stack listener calls: it must put the
   // overlay back above the base and below radar, however it got displaced.
-  imagery.reseat();
+  imagery.rehome();
   assert.deepEqual(
     layerNames(viewer.layers),
-    ['base', 'temperature', 'radar'],
-    'reseat restores the overlay directly above the base, below radar',
+    ['base', 'air-quality', 'radar'],
+    'rehome restores the overlay directly above the base, below radar',
   );
 });

@@ -1,3 +1,4 @@
+import { NO_IMAGERY_HOST, resolveImageryHost } from '../../maps/imageryHost.js';
 import { swapToFrame } from '../weather-imagery/frameImagery.js';
 import { normalizeImageryOpacity } from '../weather-imagery/opacity.js';
 import { buildRowControls } from './controls.js';
@@ -47,7 +48,6 @@ export function createWeatherOverlaysLayer({
   let unavailableReason = null;
   let loading = false;
   let googleConfigured = null;
-  let mapStackId = null;
   let mapStackController = null;
   let rowListener = null;
   let request = null;
@@ -55,10 +55,18 @@ export function createWeatherOverlaysLayer({
 
   const currentKey = () => overlayKey(mode, pollenType);
   const notifyRows = () => rowListener?.();
-  const onMapStack = (event) => {
-    mapStackId = event?.detail?.activeStack?.id ?? mapStackId;
+  /**
+   * Where the overlay drapes: the globe on a globe map, the photoreal tileset's
+   * own imagery layers on Google 3D, or nowhere when neither exists.
+   */
+  const currentHost = () =>
+    resolveImageryHost({
+      viewer,
+      tileset: mapStackController?.getImageryHostTileset?.() ?? null,
+    });
+  const onMapStack = () => {
     if (imagery) {
-      imagery.reseat?.();
+      imagery.rehome?.();
       requestRender(RENDER_REASON);
     }
     notifyRows();
@@ -100,27 +108,23 @@ export function createWeatherOverlaysLayer({
     requestRender(RENDER_REASON);
   }
 
-  function shownDetail(name, shown) {
-    if (mode === 'temperature') return `${name} · valid ${hhmm(shown)} UTC`;
-    return name;
-  }
-
   const layer = {
     id: 'weather-overlays',
-    name: 'Weather Overlays',
-    icon: '🌡️',
+    name: 'Air Quality',
+    icon: '🌫️',
     source: MODE_INFO[DEFAULT_MODE].name,
     updateInterval: REFRESH_MS,
 
     init(nextViewer) {
       viewer = nextViewer;
-      imagery = createImagery(nextViewer);
+      imagery = createImagery(nextViewer, { host: currentHost });
       imagery.setAlpha(opacity);
       eventTarget?.addEventListener?.(MAP_STACK_EVENT, onMapStack);
     },
 
     attachMapStack(mapStack) {
       mapStackController = mapStack ?? null;
+      imagery?.rehome?.();
       notifyRows();
     },
 
@@ -222,14 +226,11 @@ export function createWeatherOverlaysLayer({
       const name = sourceName(mode, pollenType);
       const countLabel = MODE_INFO[mode].short;
       const shown = imagery?.shownTime() ?? null;
-      const activeStackId = mapStackController
-        ? (mapStackController.getActiveId?.() ?? null)
-        : mapStackId;
-      if (activeStackId === 'photoreal') {
+      if (viewer && currentHost().kind === 'none') {
         return {
           status: 'idle',
           source: name,
-          statusMessage: 'Hidden by Google 3D map source',
+          statusMessage: NO_IMAGERY_HOST,
           countLabel,
         };
       }
@@ -271,7 +272,7 @@ export function createWeatherOverlaysLayer({
       }
       return {
         status: 'ok',
-        source: shownDetail(name, shown),
+        source: name,
         lastUpdate,
         countLabel,
       };

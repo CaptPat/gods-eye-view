@@ -13,39 +13,37 @@ import {
 import { buildLegend, buildRowControls } from './controls.js';
 
 const base = {
-  mode: 'temperature',
+  mode: 'air-quality',
   pollenType: 'tree',
   opacity: 0.7,
   googleConfigured: true,
 };
 
 test('modes map to proxy keys, source names and zoom caps', () => {
-  assert.deepEqual(MODES, ['temperature', 'air-quality', 'pollen']);
+  assert.deepEqual(MODES, ['air-quality', 'pollen']);
   assert.equal(overlayKey('pollen', 'grass'), 'pollen-grass');
-  assert.equal(overlayKey('temperature', 'grass'), 'temperature');
+  assert.equal(overlayKey('air-quality', 'grass'), 'air-quality');
   assert.equal(modeOfKey('pollen-weed'), 'pollen');
-  assert.deepEqual(OVERLAY_KEYS.map(maximumLevelFor), [6, 12, 10, 10, 10]);
-  assert.equal(
-    maximumLevelFor('clouds'),
-    null,
-    'clouds moved to Satellite clouds',
-  );
+  assert.deepEqual(OVERLAY_KEYS.map(maximumLevelFor), [12, 10, 10, 10]);
+  for (const moved of ['clouds', 'temperature']) {
+    assert.equal(maximumLevelFor(moved), null, `${moved} moved upstream`);
+  }
   assert.equal(maximumLevelFor('fog'), null);
   assert.equal(sourceName('pollen', 'weed'), 'Google Pollen · Weed');
-  assert.equal(sourceName('temperature', 'weed'), 'NOAA GFS model');
+  assert.equal(sourceName('air-quality', 'weed'), 'Google Air Quality');
   assert.equal(normalizeMode('air-quality'), 'air-quality');
   assert.equal(normalizeMode('fog'), null);
   assert.equal(normalizeMode('clouds'), null);
+  assert.equal(normalizeMode('temperature'), null);
   assert.equal(normalizePollenType('grass'), 'grass');
   assert.equal(normalizePollenType('pine'), null);
 });
 
-test('chips: three modes, pollen types only in pollen mode, then three opacities', () => {
-  const temperature = buildRowControls(base).chips;
+test('chips: two modes, pollen types only in pollen mode, then three opacities', () => {
+  const air = buildRowControls(base).chips;
   assert.deepEqual(
-    temperature.map((chip) => chip.id),
+    air.map((chip) => chip.id),
     [
-      'mode-temperature',
       'mode-air-quality',
       'mode-pollen',
       'opacity-40',
@@ -53,18 +51,16 @@ test('chips: three modes, pollen types only in pollen mode, then three opacities
       'opacity-100',
     ],
   );
-  assert.deepEqual(temperature[0], {
-    id: 'mode-temperature',
-    label: 'Temp',
-    title: 'Air temperature at 2 m',
+  assert.deepEqual(air[0], {
+    id: 'mode-air-quality',
+    label: 'Air',
+    title: 'Air quality (US AQI)',
     active: true,
     disabled: false,
-    params: { mode: 'temperature' },
+    params: { mode: 'air-quality' },
   });
   assert.deepEqual(
-    temperature
-      .slice(3)
-      .map((chip) => [chip.label, chip.active, chip.params.opacity]),
+    air.slice(2).map((chip) => [chip.label, chip.active, chip.params.opacity]),
     [
       ['40%', false, 0.4],
       ['70%', true, 0.7],
@@ -79,7 +75,7 @@ test('chips: three modes, pollen types only in pollen mode, then three opacities
   }).chips;
   assert.deepEqual(
     pollen
-      .slice(3, 6)
+      .slice(2, 5)
       .map((chip) => [chip.id, chip.label, chip.active, chip.params]),
     [
       ['pollen-tree', 'Tree', false, { pollenType: 'tree' }],
@@ -110,28 +106,12 @@ test('Google modes are disabled with a reason only once the server reports no ke
     'Air quality (US AQI): needs a Google Maps API key',
   );
   assert.equal(
-    keyless.find((chip) => chip.id === 'mode-temperature').disabled,
-    false,
-  );
-  assert.equal(
     keyless.find((chip) => chip.id === 'opacity-40').disabled,
     false,
   );
 });
 
 test('legends carry text for every entry and the measured colours', () => {
-  assert.deepEqual(
-    buildLegend('temperature').map((item) => `${item.label} ${item.count}`),
-    [
-      '-30°C -22°F',
-      '-15°C 5°F',
-      '0°C 32°F',
-      '10°C 50°F',
-      '20°C 68°F',
-      '30°C 86°F',
-      '40°C 104°F',
-    ],
-  );
   assert.deepEqual(
     buildLegend('air-quality').map((item) => item.color),
     ['#00e400', '#ffff00', '#ff7e00', '#ff0000', '#8f3f97', '#7e0023'],

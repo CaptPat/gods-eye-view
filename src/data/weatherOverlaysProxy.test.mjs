@@ -4,11 +4,7 @@ import { readFileSync } from 'node:fs';
 import createViteConfig from '../../vite.config.js';
 import {
   DEFAULT_GOOGLE_TILE_BUDGET,
-  FAILURE_COOLDOWN_MS,
   GOOGLE_TILE_BUDGET_REASON,
-  GOOGLE_TILE_TTL_MS,
-  GRID_TTL_MS,
-  createTileCache,
   createWeatherOverlaysHandler,
   googleDailyBudgetFromEnv,
 } from '../../server/providers/weather-overlays.js';
@@ -79,16 +75,8 @@ function harness({
 } = {}) {
   const clock = { now: NOW };
   const logs = [];
-  const down = { grid: false };
   const net = upstream([
     ...routes,
-    [
-      'ncep_global.csvp',
-      () => {
-        if (down.grid) throw new Error('offline');
-        return new Response(text('gfs-tmp2m-30deg.csv'));
-      },
-    ],
     ['airquality.googleapis.com', pngResponse('google-air-quality-tile.png')],
     ['pollen.googleapis.com', pngResponse('google-pollen-tile.png')],
   ]);
@@ -101,40 +89,22 @@ function harness({
     log: (message) => logs.push(message),
     ...(googleTileBudget !== undefined ? { googleTileBudget } : {}),
   });
-  return { handler, net, logs, clock, down };
+  return { handler, net, logs, clock };
 }
 
-test('manifests: nearest GFS step and the current hour for Google modes; clouds is gone', async () => {
+test('manifests give the current hour for Google modes; clouds and temperature are gone', async () => {
   const h = harness();
-  assert.equal(
-    (await invoke(h.handler, '/manifest?mode=clouds')).status,
-    400,
-    'cloud cover moved to the Satellite clouds layer',
-  );
-  assert.equal(
-    (await invoke(h.handler, `/tiles/clouds/${T15}/3/1/2.png`)).status,
-    400,
-  );
-
-  const temperature = await invoke(h.handler, '/manifest?mode=temperature');
-  assert.deepEqual(temperature.json(), {
-    mode: 'temperature',
-    googleConfigured: true,
-    available: true,
-    time: T15,
-    stale: false,
-  });
-  await invoke(h.handler, '/manifest?mode=temperature');
-  assert.equal(
-    h.net.count('ncep_global.csvp'),
-    1,
-    'the grid is held for an hour',
-  );
-  assert.ok(
-    h.net.calls.some((href) =>
-      href.includes('tmp2m%5B(2026-09-14T15:00:00Z)%5D'),
-    ),
-  );
+  for (const moved of ['clouds', 'temperature']) {
+    assert.equal(
+      (await invoke(h.handler, `/manifest?mode=${moved}`)).status,
+      400,
+      `${moved} moved upstream (Satellite clouds, Wind)`,
+    );
+    assert.equal(
+      (await invoke(h.handler, `/tiles/${moved}/${T15}/3/1/2.png`)).status,
+      400,
+    );
+  }
 
   for (const mode of ['air-quality', 'pollen-weed']) {
     assert.deepEqual(
@@ -153,7 +123,7 @@ test('manifests: nearest GFS step and the current hour for Google modes; clouds 
   assert.equal((await invoke(h.handler, '/manifest')).status, 400);
 });
 
-test('without a Google key the Google modes are unavailable and their tiles 404; NOAA modes still work', async () => {
+test('without a Google key every mode is unavailable and tiles 404', async () => {
   const h = harness({ key: '' });
   assert.deepEqual(
     (await invoke(h.handler, '/manifest?mode=air-quality')).json(),
@@ -170,11 +140,10 @@ test('without a Google key the Google modes are unavailable and their tiles 404;
     (await invoke(h.handler, `/tiles/pollen-tree/${H16}/3/1/2.png`)).status,
     404,
   );
-  const temperature = (
-    await invoke(h.handler, '/manifest?mode=temperature')
-  ).json();
-  assert.equal(temperature.available, true);
-  assert.equal(temperature.googleConfigured, false);
+  assert.equal(
+    (await invoke(h.handler, '/manifest?mode=pollen-weed')).json().available,
+    false,
+  );
   assert.equal(h.net.count('googleapis.com'), 0);
 });
 
@@ -197,7 +166,6 @@ test('Google tiles use the server key, are never cached, and failures are not ca
   const miss = await invoke(h.handler, route);
   assert.equal(miss.status, 200);
   assert.equal(miss.headers['Content-Type'], 'image/png');
-  assert.equal(miss.headers['X-Overlay-Cache'], 'MISS');
   assert.equal(
     miss.headers['Cache-Control'],
     'no-store',
@@ -209,14 +177,12 @@ test('Google tiles use the server key, are never cached, and failures are not ca
       'https://airquality.googleapis.com/v1/mapTypes/US_AQI/heatmapTiles/3/1/2?key=TEST-KEY',
     ),
   );
-  const second = await invoke(h.handler, route);
+  await invoke(h.handler, route);
   assert.equal(
-    second.headers['X-Overlay-Cache'],
-    'MISS',
-    'an identical request is still a MISS: Google tiles are never cached',
+    h.net.count('US_AQI'),
+    2,
+    'an identical request goes upstream again: Google tiles are never cached',
   );
-  assert.equal(h.net.count('US_AQI'), 2);
-  assert.equal(GOOGLE_TILE_TTL_MS, 0);
 
   const pollen = `/tiles/pollen-grass/${H16}/5/7/12.png`;
   assert.equal((await invoke(h.handler, pollen)).status, 502);
@@ -248,70 +214,11 @@ test('Google tiles use the server key, are never cached, and failures are not ca
   );
 });
 
-test('temperature tiles are rendered from the GFS grid; a failed refresh falls back to the held grid as stale', async () => {
-  const h = harness();
-  const route = `/tiles/temperature/${T15}/0/0/0.png`;
-  const miss = await invoke(h.handler, route);
-  assert.equal(miss.status, 200);
-  assert.equal(miss.headers['X-Overlay-Cache'], 'MISS');
-  assert.equal(miss.buffer.subarray(1, 4).toString('ascii'), 'PNG');
-  assert.deepEqual(
-    [miss.buffer.readUInt32BE(16), miss.buffer.readUInt32BE(20)],
-    [256, 256],
-  );
-  assert.equal(
-    (await invoke(h.handler, route)).headers['X-Overlay-Cache'],
-    'HIT',
-  );
-  assert.equal(
-    (
-      await invoke(
-        h.handler,
-        `/tiles/temperature/${Date.UTC(2026, 8, 14, 14)}/0/0/0.png`,
-      )
-    ).status,
-    404,
-  );
-  assert.equal(
-    (
-      await invoke(
-        h.handler,
-        `/tiles/temperature/${Date.UTC(2026, 8, 15, 3)}/0/0/0.png`,
-      )
-    ).status,
-    404,
-  );
-  assert.equal(
-    (await invoke(h.handler, `/tiles/temperature/${T15}/7/0/0.png`)).status,
-    400,
-  );
-
-  h.down.grid = true;
-  h.clock.now += GRID_TTL_MS + 1;
-  assert.deepEqual(
-    (await invoke(h.handler, '/manifest?mode=temperature')).json(),
-    {
-      mode: 'temperature',
-      googleConfigured: true,
-      available: true,
-      time: T15,
-      stale: true,
-    },
-  );
-
-  const cold = harness();
-  cold.down.grid = true;
-  assert.equal(
-    (await invoke(cold.handler, '/manifest?mode=temperature')).status,
-    502,
-  );
-});
-
 test('manifest and tile rate limits are separate; methods, unknown paths and non-PNG bodies', async () => {
   const manifestLimited = harness({ limiter: () => false });
   const refused = await invoke(
     manifestLimited.handler,
-    '/manifest?mode=temperature',
+    '/manifest?mode=air-quality',
   );
   assert.equal(refused.status, 429);
   assert.equal(refused.headers['Retry-After'], '10');
@@ -333,7 +240,7 @@ test('manifest and tile rate limits are separate; methods, unknown paths and non
     429,
   );
   assert.equal(
-    (await invoke(tileLimited.handler, '/manifest?mode=temperature')).status,
+    (await invoke(tileLimited.handler, '/manifest?mode=air-quality')).status,
     200,
   );
 
@@ -341,7 +248,7 @@ test('manifest and tile rate limits are separate; methods, unknown paths and non
     routes: [['US_AQI', () => new Response('<html>not a tile</html>')]],
   });
   assert.equal(
-    (await invoke(h.handler, '/manifest?mode=temperature', 'POST')).status,
+    (await invoke(h.handler, '/manifest?mode=air-quality', 'POST')).status,
     405,
   );
   assert.equal((await invoke(h.handler, '/nope')).status, 404);
@@ -350,27 +257,13 @@ test('manifest and tile rate limits are separate; methods, unknown paths and non
     400,
   );
   assert.equal(
-    (await invoke(h.handler, `/tiles/temperature/${T15}/0/0/0.jpg`)).status,
+    (await invoke(h.handler, `/tiles/air-quality/${H16}/0/0/0.jpg`)).status,
     400,
   );
   assert.equal(
     (await invoke(h.handler, `/tiles/air-quality/${H16}/2/1/1.png`)).status,
     502,
   );
-});
-
-test('the tile cache evicts the oldest entry past its limit and prunes by age', () => {
-  const cache = createTileCache(2);
-  const one = Buffer.from('1');
-  cache.set('a', one, 0, 100);
-  cache.set('b', one, 0, 1000);
-  cache.set('c', one, 0, 1000);
-  assert.equal(cache.get('a', 1), null, 'evicted');
-  assert.equal(cache.size(), 2);
-  assert.equal(cache.get('b', 1000), one);
-  assert.equal(cache.get('b', 1001), null, 'expired on read');
-  cache.prune(5000);
-  assert.equal(cache.size(), 0);
 });
 
 test('the Google tile budget counts upstream fetches and blocks with a 429 once exhausted', async () => {
@@ -402,7 +295,7 @@ test('the Google tile budget counts upstream fetches and blocks with a 429 once 
   assert.equal(h.net.count('googleapis.com'), 2);
 });
 
-test('the Google manifest reports the budget-exhausted reason; NOAA modes are unaffected', async () => {
+test('the manifest reports the budget-exhausted reason for every mode', async () => {
   const h = harness({ googleTileBudget: 1 });
   await invoke(h.handler, `/tiles/air-quality/${H16}/3/1/2.png`);
   assert.deepEqual(
@@ -431,18 +324,6 @@ test('the Google manifest reports the budget-exhausted reason; NOAA modes are un
       stale: false,
     },
   );
-  const temperature = await invoke(h.handler, '/manifest?mode=temperature');
-  assert.equal(temperature.status, 200);
-  assert.equal(
-    temperature.json().available,
-    true,
-    'NOAA manifests are unaffected',
-  );
-  const temperatureTile = await invoke(
-    h.handler,
-    `/tiles/temperature/${T15}/0/0/0.png`,
-  );
-  assert.equal(temperatureTile.status, 200, 'NOAA tiles are unaffected');
 });
 
 test('the Google tile budget resets at the UTC day boundary', async () => {
@@ -488,46 +369,6 @@ test('googleDailyBudgetFromEnv reads a positive integer, else the default', () =
       `falls back for ${JSON.stringify(bad)}`,
     );
   }
-});
-
-test('a never-succeeded GFS grid failure is cooled down for 60 s, then retried; stale-if-held is unaffected', async () => {
-  const h = harness();
-  h.down.grid = true;
-  const route = `/tiles/temperature/${T15}/0/0/0.png`;
-  assert.equal((await invoke(h.handler, route)).status, 502);
-  assert.equal((await invoke(h.handler, route)).status, 502);
-  assert.equal(
-    h.net.count('ncep_global.csvp'),
-    1,
-    'cooled down: no second upstream call yet',
-  );
-
-  h.clock.now += FAILURE_COOLDOWN_MS + 1;
-  assert.equal((await invoke(h.handler, route)).status, 502);
-  assert.equal(
-    h.net.count('ncep_global.csvp'),
-    2,
-    'retried after the cooldown',
-  );
-
-  // Once a grid has loaded successfully, a later failure keeps its own
-  // stale-if-held behaviour (no cooldown latch, refreshed on every request).
-  h.down.grid = false;
-  h.clock.now += FAILURE_COOLDOWN_MS + 1;
-  const first = await invoke(h.handler, route);
-  assert.equal(first.status, 200);
-  const upstreamCallsAfterLoad = h.net.count('ncep_global.csvp');
-
-  h.down.grid = true;
-  h.clock.now += GRID_TTL_MS + 1;
-  await invoke(h.handler, '/manifest?mode=temperature');
-  h.clock.now += GRID_TTL_MS + 1;
-  await invoke(h.handler, '/manifest?mode=temperature');
-  assert.equal(
-    h.net.count('ncep_global.csvp'),
-    upstreamCallsAfterLoad + 2,
-    'every stale-if-held refresh still calls upstream, unaffected by the cooldown',
-  );
 });
 
 test('the plugin is registered in the Vite config at /api/weather-overlays', () => {

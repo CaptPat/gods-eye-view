@@ -1,7 +1,10 @@
 # Weather overlays layer — design
 
-Status: implemented (merged to fork main 2026-09-14, 3c71064). The Clouds mode was removed
-2026-10-01 in favour of upstream's Satellite clouds layer; Temperature is now the default mode.
+Status: implemented (merged to fork main 2026-09-14, 3c71064), then reshaped 2026-10-01. Clouds
+was removed for upstream's Satellite clouds, and Temperature for the Wind layer's Temperature field.
+The layer is now **Air Quality** (Air and Pollen modes; id `weather-overlays` and token `zo` kept)
+and drapes onto the Google 3D tiles through the tileset's own imagery layers instead of hiding.
+The text below records the original four-mode design.
 Fork: CaptPat/gods-eye-view (Cyclops View). Fork-only work; nothing is proposed upstream.
 
 ## Purpose

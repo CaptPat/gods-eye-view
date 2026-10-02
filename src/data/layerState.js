@@ -454,19 +454,13 @@ const OPTION_GROUPS = Object.freeze({
     }),
   ]),
   'weather-overlays': Object.freeze([
-    // `c` (clouds, cut for upstream's Satellite clouds) is retired: it decodes
-    // to nothing, so an old link opens the default mode. Never reuse it.
-    enumOption(
-      'mode',
-      'm',
-      'temperature',
-      ['temperature', 'air-quality', 'pollen'],
-      {
-        temperature: 't',
-        'air-quality': 'a',
-        pollen: 'p',
-      },
-    ),
+    // Air Quality layer (id kept for share links). `c` (clouds) and `t`
+    // (temperature) are retired for upstream's Satellite clouds and Wind: they
+    // decode to nothing, so an old link opens the default mode. Never reuse them.
+    enumOption('mode', 'm', 'air-quality', ['air-quality', 'pollen'], {
+      'air-quality': 'a',
+      pollen: 'p',
+    }),
     enumOption('pollenType', 'p', 'tree', ['tree', 'grass', 'weed'], {
       tree: 't',
       grass: 'g',
