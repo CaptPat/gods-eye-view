@@ -1,5 +1,7 @@
 # Changelog
 
+- Sea Ice and Marine Depths now drape onto the Google 3D tiles instead of hiding, as Air Quality does, and follow the map source back to the globe; they hide only on a map with no imagery surface. Along the 180° meridian, Cesium smears draped imagery on Google 3D (see docs/KNOWN-ISSUES.md).
+
 - Weather Overlays is now **Air Quality**: Google Air Quality (US AQI) and Pollen (tree, grass, weed). On Google 3D it drapes onto the 3D tiles instead of hiding, with Google's attribution on screen; it hides only on a map with no imagery surface. The Temperature mode is gone: the Wind layer's Temperature field draws the same GFS 2 m temperature (and on Google 3D too), so the NOAA GFS / PacIOOS ERDDAP source and its server tile renderer are removed. The layer keeps its id and share token `zo`; old links with Temperature (`m.t`) open Air Quality, and `t` is never reused.
 
 - Remove the Clouds mode from Weather Overlays; upstream's Satellite clouds layer serves the same NOAA global infrared mosaic, plus GOES regional imagery, a clouds-only filter and history playback. Weather Overlays now opens on Temperature and keeps Air Quality and Pollen. Old share links with the clouds mode (`m.c`) open Temperature, and `c` is never reused.

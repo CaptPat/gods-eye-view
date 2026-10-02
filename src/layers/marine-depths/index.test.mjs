@@ -22,13 +22,14 @@ function harness() {
       shown = false;
       calls.push('clear');
     },
-    reseat: () => calls.push('reseat'),
+    rehome: () => calls.push('rehome'),
     destroy: () => calls.push('destroy'),
   };
   const events = new EventTarget();
   const layer = createMarineDepthsLayer({
-    createImagery: (_viewer, { onTileError }) => {
+    createImagery: (_viewer, { onTileError, host }) => {
       state.onTileError = onTileError;
+      state.host = host;
       return imagery;
     },
     registerCredit: (_viewer, credit) => state.credited.push(credit),
@@ -37,8 +38,12 @@ function harness() {
     requestRender: (reason) => state.renders.push(reason),
     now: () => state.now,
   });
-  layer.init({});
-  return { layer, calls, state, events };
+  const viewer = {
+    scene: { globe: { show: true } },
+    imageryLayers: { id: 'globe' },
+  };
+  layer.init(viewer);
+  return { layer, calls, state, events, viewer };
 }
 
 test('enable shows the imagery and credits NOAA; disable clears it', async () => {
@@ -79,22 +84,44 @@ test('recent tile failures mark the row stale, then age out', () => {
   assert.equal(layer.getStats().status, 'ok');
 });
 
-test('a map-stack switch reseats the imagery; photoreal reports it hidden', () => {
-  const { layer, calls, events } = harness();
+test('on Google 3D the imagery drapes onto the tileset; stack changes re-home it', () => {
+  const { layer, calls, state, events, viewer } = harness();
   layer.enable({});
+  const tileset = { imageryLayers: { id: 'tileset' }, show: true };
+  viewer.scene.globe.show = false;
+  layer.attachMapStack({
+    getActiveId: () => 'photoreal',
+    getImageryHostTileset: () => tileset,
+  });
+  assert.deepEqual(state.host(), {
+    collection: tileset.imageryLayers,
+    kind: 'tileset',
+  });
+  assert.equal(layer.getStats().status, 'ok', 'shown, not hidden');
+
+  viewer.scene.globe.show = true;
   events.dispatchEvent(
     Object.assign(new Event('gev:map-stack-changed'), {
-      detail: { activeStack: { id: 'photoreal' } },
+      detail: { activeStack: { id: 'esri-imagery' } },
     }),
   );
-  assert.deepEqual(calls, ['show', 'reseat']);
+  assert.deepEqual(calls, ['show', 'rehome', 'rehome']);
+  assert.equal(state.host().kind, 'globe');
+});
+
+test('only a map source with no imagery surface hides the imagery', () => {
+  const { layer, viewer } = harness();
+  layer.enable({});
+  viewer.scene.globe.show = false;
+  layer.attachMapStack({
+    getActiveId: () => 'photoreal',
+    getImageryHostTileset: () => null,
+  });
   assert.deepEqual(layer.getStats(), {
     status: 'idle',
     source: 'NOAA',
-    statusMessage: 'Hidden by Google 3D map source',
+    statusMessage: 'Hidden by this map source · choose a globe map',
   });
-  layer.attachMapStack({ getActiveId: () => 'google-2d' });
-  assert.equal(layer.getStats().status, 'ok', 'the attached controller wins');
 });
 
 test('destroy disables, detaches and releases the imagery', () => {

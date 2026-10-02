@@ -64,6 +64,9 @@ export function createChartDepthsLayer() {
 /**
  * The two imagery layers behind one toggle: global bands below, chart depths
  * above them. `onTileError` hears provider tile failures for the status row.
+ * They go to the collection `host()` names: the globe's `imageryLayers`, the
+ * Google 3D tileset's own `imageryLayers` (Cesium drapes them onto the tiles),
+ * or none, in which case they wait detached until `rehome()` finds one.
  */
 export function createMarineDepthsImagery(
   viewer,
@@ -71,27 +74,31 @@ export function createMarineDepthsImagery(
     createBands = createDepthBandsLayer,
     createChart = createChartDepthsLayer,
     onTileError = () => {},
+    host = () => ({ collection: viewer.imageryLayers, kind: 'globe' }),
   } = {},
 ) {
   let layers = [];
+  let home = null;
   let removeErrorListeners = [];
 
-  function insert() {
+  function place() {
+    const collection = host()?.collection ?? null;
+    if (!collection) return null;
     // Bands first, then chart directly above them.
-    const index = Math.min(
-      marineDepthsInsertIndex(viewer),
-      viewer.imageryLayers.length,
-    );
-    layers.forEach((layer, offset) =>
-      viewer.imageryLayers.add(layer, index + offset),
-    );
+    const index = Math.min(marineDepthsInsertIndex(viewer), collection.length);
+    layers.forEach((layer, offset) => collection.add(layer, index + offset));
+    return collection;
   }
 
   function clear() {
     removeErrorListeners.forEach((remove) => remove());
     removeErrorListeners = [];
-    layers.forEach((layer) => viewer.imageryLayers.remove(layer, true));
+    layers.forEach((layer) => {
+      if (home) home.remove(layer, true);
+      else layer.destroy?.();
+    });
     layers = [];
+    home = null;
   }
 
   return {
@@ -103,14 +110,14 @@ export function createMarineDepthsImagery(
           layer.imageryProvider?.errorEvent?.addEventListener?.(onTileError),
         )
         .filter((remove) => typeof remove === 'function');
-      insert();
+      home = place();
     },
     shown: () => layers.length > 0,
-    /** Move the layers back above the base map after the stack changed beneath them. */
-    reseat() {
+    /** Move both layers to the current host, directly above any base map. */
+    rehome() {
       if (!layers.length) return;
-      layers.forEach((layer) => viewer.imageryLayers.remove(layer, false));
-      insert();
+      if (home) layers.forEach((layer) => home.remove(layer, false));
+      home = place();
     },
     clear,
     destroy: clear,

@@ -16,7 +16,7 @@ function harness(initialAnswer = DATED) {
   const imagery = {
     show: (day) => calls.push(['show', day]),
     clear: () => calls.push(['clear']),
-    reseat: () => calls.push(['reseat']),
+    rehome: () => calls.push(['rehome']),
     setAlpha: (alpha) => calls.push(['setAlpha', alpha]),
     destroy: () => calls.push(['destroy']),
   };
@@ -39,15 +39,22 @@ function harness(initialAnswer = DATED) {
         headers: state.answer.headers ?? {},
       });
     },
-    createImagery: () => imagery,
+    createImagery: (_viewer, options) => {
+      state.imageryOptions = options;
+      return imagery;
+    },
     registerCredit: (_viewer, credit) => state.credited.push(credit),
     credit: CREDIT,
     eventTarget: events,
     requestRender: (reason) => state.renders.push(reason),
     now: () => state.now,
   });
-  layer.init({});
-  return { layer, calls, state, events };
+  const viewer = {
+    scene: { globe: { show: true } },
+    imageryLayers: { id: 'globe' },
+  };
+  layer.init(viewer);
+  return { layer, calls, state, events, viewer };
 }
 
 const shows = (calls) => calls.filter(([name]) => name === 'show');
@@ -112,26 +119,48 @@ test('without a date from GIBS the latest day still draws, and the row says so',
   });
 });
 
-test('the Google 3D map source hides the imagery, and stack changes reseat it', async () => {
-  const { layer, calls, state, events } = harness();
+test('on Google 3D the imagery drapes onto the tileset; stack changes re-home it', async () => {
+  const { layer, calls, state, events, viewer } = harness();
   layer.enable({});
   await layer.update({}, {});
-  let active = 'photoreal';
-  layer.attachMapStack({ getActiveId: () => active });
+  const tileset = { imageryLayers: { id: 'tileset' }, show: true };
+  viewer.scene.globe.show = false;
+  layer.attachMapStack({
+    getActiveId: () => 'photoreal',
+    getImageryHostTileset: () => tileset,
+  });
+  assert.deepEqual(calls.at(-1), ['rehome'], 'attaching the stack re-homes');
+  assert.deepEqual(state.imageryOptions.host(), {
+    collection: tileset.imageryLayers,
+    kind: 'tileset',
+  });
+  assert.equal(layer.getStats().status, 'ok', 'shown, not hidden');
+
+  viewer.scene.globe.show = true;
+  events.dispatchEvent(
+    new CustomEvent('gev:map-stack-changed', {
+      detail: { activeStack: { id: 'esri-imagery' } },
+    }),
+  );
+  assert.deepEqual(calls.at(-1), ['rehome']);
+  assert.equal(state.imageryOptions.host().kind, 'globe');
+  assert.ok(state.renders.length > 1);
+});
+
+test('only a map source with no imagery surface hides the imagery', async () => {
+  const { layer, viewer } = harness();
+  layer.enable({});
+  await layer.update({}, {});
+  viewer.scene.globe.show = false;
+  layer.attachMapStack({
+    getActiveId: () => 'photoreal',
+    getImageryHostTileset: () => null,
+  });
   assert.deepEqual(layer.getStats(), {
     status: 'idle',
     source: 'GHRSST MUR',
-    statusMessage: 'Hidden by Google 3D map source',
+    statusMessage: 'Hidden by this map source · choose a globe map',
   });
-  active = 'globe';
-  events.dispatchEvent(
-    new CustomEvent('gev:map-stack-changed', {
-      detail: { activeStack: { id: 'globe' } },
-    }),
-  );
-  assert.deepEqual(calls.at(-1), ['reseat']);
-  assert.equal(layer.getStats().status, 'ok');
-  assert.ok(state.renders.length > 1);
 });
 
 test('an aborted manager refresh reports false; disabling clears; destroying stops listening', async () => {

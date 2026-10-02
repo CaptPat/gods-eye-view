@@ -121,7 +121,7 @@ test('show stacks bands then chart above the base map, once', () => {
   assert.equal(imagery.shown(), true);
 });
 
-test('reseat follows the stack; clear removes and destroys both layers', () => {
+test('rehome follows the stack; clear removes and destroys both layers', () => {
   const viewer = fakeViewer({ globeShown: false, base: false });
   const errors = [];
   const bands = fakeLayer('bands');
@@ -141,7 +141,7 @@ test('reseat follows the stack; clear removes and destroys both layers', () => {
 
   viewer.list.push({ base: true });
   viewer.scene.globe.show = true;
-  imagery.reseat();
+  imagery.rehome();
   assert.deepEqual(
     viewer.list.map((l) => l.name ?? 'base'),
     ['base', 'bands', 'chart'],
@@ -155,6 +155,74 @@ test('reseat follows the stack; clear removes and destroys both layers', () => {
   ]);
   assert.equal(chart.listeners.size, 0, 'error listeners are released');
   assert.equal(imagery.shown(), false);
-  imagery.reseat();
-  assert.equal(viewer.list.length, 1, 'nothing to reseat once cleared');
+  imagery.rehome();
+  assert.equal(viewer.list.length, 1, 'nothing to rehome once cleared');
+});
+
+/** A tileset's own imagery collection (Google 3D). */
+function fakeCollection() {
+  const list = [];
+  return {
+    list,
+    get length() {
+      return list.length;
+    },
+    add(layer, index) {
+      if (index === undefined) list.push(layer);
+      else list.splice(index, 0, layer);
+      return layer;
+    },
+    remove(layer) {
+      const index = list.indexOf(layer);
+      if (index < 0) return false;
+      list.splice(index, 1);
+      return true;
+    },
+  };
+}
+
+test('on Google 3D both layers drape onto the tileset in order, and follow the map source back', () => {
+  const viewer = fakeViewer({ globeShown: false, base: false });
+  const tileset = fakeCollection();
+  let host = { collection: tileset, kind: 'tileset' };
+  const imagery = createMarineDepthsImagery(viewer, {
+    createBands: () => fakeLayer('bands'),
+    createChart: () => fakeLayer('chart'),
+    host: () => host,
+  });
+  imagery.show();
+  assert.equal(viewer.list.length, 0, 'nothing on the hidden globe');
+  assert.deepEqual(
+    tileset.list.map((l) => l.name),
+    ['bands', 'chart'],
+  );
+
+  viewer.list.push({ base: true });
+  viewer.scene.globe.show = true;
+  host = { collection: viewer.imageryLayers, kind: 'globe' };
+  imagery.rehome();
+  assert.equal(tileset.list.length, 0);
+  assert.deepEqual(
+    viewer.list.map((l) => l.name ?? 'base'),
+    ['base', 'bands', 'chart'],
+  );
+});
+
+test('with nowhere to drape, both layers wait detached and are destroyed when cleared', () => {
+  const viewer = fakeViewer({ globeShown: false, base: false });
+  let destroyed = 0;
+  const detachable = (name) => ({
+    ...fakeLayer(name),
+    destroy: () => (destroyed += 1),
+  });
+  const imagery = createMarineDepthsImagery(viewer, {
+    createBands: () => detachable('bands'),
+    createChart: () => detachable('chart'),
+    host: () => ({ collection: null, kind: 'none' }),
+  });
+  imagery.show();
+  assert.equal(imagery.shown(), true);
+  assert.equal(viewer.list.length, 0);
+  imagery.clear();
+  assert.equal(destroyed, 2);
 });

@@ -21,25 +21,42 @@ function createDayLayer(day) {
   );
 }
 
-/** One imagery layer for the day shown; a new day replaces it. */
+/**
+ * One imagery layer for the day shown; a new day replaces it. It goes to the
+ * collection `host()` names: the globe's `imageryLayers`, the Google 3D
+ * tileset's own `imageryLayers` (Cesium drapes it onto the tiles), or none, in
+ * which case it waits detached until `rehome()` finds one.
+ */
 export function createSeaIceImagery(
   viewer,
-  { createLayer = createDayLayer } = {},
+  {
+    createLayer = createDayLayer,
+    host = () => ({ collection: viewer.imageryLayers, kind: 'globe' }),
+  } = {},
 ) {
   let layer = null;
+  let home = null;
   let shownDay = null;
   let alpha = 1;
 
-  function insert(target) {
-    viewer.imageryLayers.add(
-      target,
-      Math.min(seaIceInsertIndex(viewer), viewer.imageryLayers.length),
-    );
+  function place(target) {
+    const collection = host()?.collection ?? null;
+    if (collection) {
+      collection.add(
+        target,
+        Math.min(seaIceInsertIndex(viewer), collection.length),
+      );
+    }
+    return collection;
   }
 
   function clear() {
-    if (layer) viewer.imageryLayers.remove(layer, true);
+    if (layer) {
+      if (home) home.remove(layer, true);
+      else layer.destroy?.();
+    }
     layer = null;
+    home = null;
     shownDay = null;
   }
 
@@ -50,17 +67,17 @@ export function createSeaIceImagery(
       layer = createLayer(day);
       layer.alpha = alpha;
       shownDay = day;
-      insert(layer);
+      home = place(layer);
     },
     setAlpha(nextAlpha) {
       alpha = nextAlpha;
       if (layer) layer.alpha = alpha;
     },
-    /** Move the layer back above the base map after the stack changed beneath it. */
-    reseat() {
+    /** Move the layer to the current host, directly above any base map. */
+    rehome() {
       if (!layer) return;
-      viewer.imageryLayers.remove(layer, false);
-      insert(layer);
+      if (home) home.remove(layer, false);
+      home = place(layer);
     },
     clear,
     destroy: clear,

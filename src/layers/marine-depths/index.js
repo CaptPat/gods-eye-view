@@ -1,3 +1,4 @@
+import { NO_IMAGERY_HOST, resolveImageryHost } from '../../maps/imageryHost.js';
 import { createMarineDepthsImagery } from './imagery.js';
 import { MARINE_DEPTHS_META } from './model.js';
 
@@ -17,8 +18,8 @@ export const MARINE_DEPTHS_ERROR_WINDOW_MS = 60_000;
  * NOAA seafloor depth imagery above the base map: NCEI depth bands worldwide,
  * plus NOAA chart soundings and contours in US waters once the camera is
  * close. Static imagery, so nothing refreshes. Like Sea Ice, the imagery
- * drapes the globe only, so the photoreal 3D map source hides it and the row
- * says so.
+ * drapes the globe, or the tiles themselves on Google 3D; only a map source
+ * with neither hides it, and the row says so.
  */
 export function createMarineDepthsLayer({
   createImagery = createMarineDepthsImagery,
@@ -33,13 +34,17 @@ export function createMarineDepthsLayer({
   let enabledAt = null;
   let lastTileError = null;
   let mapStackController = null;
-  let mapStackId = null;
+  let viewer = null;
 
   const render = () => requestRender(MARINE_DEPTHS_META.id);
-  const onMapStack = (event) => {
-    mapStackId = event?.detail?.activeStack?.id ?? mapStackId;
+  const currentHost = () =>
+    resolveImageryHost({
+      viewer,
+      tileset: mapStackController?.getImageryHostTileset?.() ?? null,
+    });
+  const onMapStack = () => {
     if (!imagery) return;
-    imagery.reseat();
+    imagery.rehome();
     render();
   };
   const onTileError = () => {
@@ -54,12 +59,14 @@ export function createMarineDepthsLayer({
     updateInterval: 0,
 
     init(nextViewer) {
-      imagery = createImagery(nextViewer, { onTileError });
+      viewer = nextViewer;
+      imagery = createImagery(nextViewer, { onTileError, host: currentHost });
       eventTarget?.addEventListener?.(MAP_STACK_EVENT, onMapStack);
     },
 
     attachMapStack(mapStack) {
       mapStackController = mapStack ?? null;
+      onMapStack();
     },
 
     enable(nextViewer) {
@@ -88,18 +95,16 @@ export function createMarineDepthsLayer({
       eventTarget?.removeEventListener?.(MAP_STACK_EVENT, onMapStack);
       imagery?.destroy();
       imagery = null;
+      viewer = null;
     },
 
     getStats() {
       const name = MARINE_DEPTHS_META.source;
-      const activeStack = mapStackController
-        ? (mapStackController.getActiveId?.() ?? null)
-        : mapStackId;
-      if (activeStack === 'photoreal')
+      if (viewer && currentHost().kind === 'none')
         return {
           status: 'idle',
           source: name,
-          statusMessage: 'Hidden by Google 3D map source',
+          statusMessage: NO_IMAGERY_HOST,
         };
       if (
         enabled &&

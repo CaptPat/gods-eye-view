@@ -1,3 +1,4 @@
+import { NO_IMAGERY_HOST, resolveImageryHost } from '../../maps/imageryHost.js';
 import { createSeaIceImagery } from './imagery.js';
 import { SEA_ICE_META, SEA_ICE_PROBE_URL, parseLayerTime } from './model.js';
 
@@ -15,8 +16,8 @@ const LATEST_DAY = 'default';
  * NASA GIBS sea ice concentration imagery above the base map. Each refresh
  * asks GIBS which day is newest and pins the tiles to it; if that fails before
  * any day is shown, the newest day still draws under GIBS's `default` name.
- * Like Weather Overlays, the imagery drapes the globe only, so the photoreal
- * 3D map source hides it and the row says so.
+ * Like Air Quality, the imagery drapes the globe, or the tiles themselves on
+ * Google 3D; only a map source with neither hides it, and the row says so.
  */
 export function createSeaIceLayer({
   fetchImpl = (...args) => fetch(...args),
@@ -35,13 +36,17 @@ export function createSeaIceLayer({
   let loading = false;
   let request = null;
   let mapStackController = null;
-  let mapStackId = null;
+  let viewer = null;
 
   const render = () => requestRender(SEA_ICE_META.id);
-  const onMapStack = (event) => {
-    mapStackId = event?.detail?.activeStack?.id ?? mapStackId;
+  const currentHost = () =>
+    resolveImageryHost({
+      viewer,
+      tileset: mapStackController?.getImageryHostTileset?.() ?? null,
+    });
+  const onMapStack = () => {
     if (!imagery) return;
-    imagery.reseat();
+    imagery.rehome();
     render();
   };
 
@@ -60,13 +65,15 @@ export function createSeaIceLayer({
     updateInterval: SEA_ICE_REFRESH_MS,
 
     init(nextViewer) {
-      imagery = createImagery(nextViewer);
+      viewer = nextViewer;
+      imagery = createImagery(nextViewer, { host: currentHost });
       imagery.setAlpha(SEA_ICE_OPACITY);
       eventTarget?.addEventListener?.(MAP_STACK_EVENT, onMapStack);
     },
 
     attachMapStack(mapStack) {
       mapStackController = mapStack ?? null;
+      onMapStack();
     },
 
     enable(nextViewer) {
@@ -134,18 +141,16 @@ export function createSeaIceLayer({
       eventTarget?.removeEventListener?.(MAP_STACK_EVENT, onMapStack);
       imagery?.destroy();
       imagery = null;
+      viewer = null;
     },
 
     getStats() {
       const name = SEA_ICE_META.source;
-      const activeStack = mapStackController
-        ? (mapStackController.getActiveId?.() ?? null)
-        : mapStackId;
-      if (activeStack === 'photoreal')
+      if (viewer && currentHost().kind === 'none')
         return {
           status: 'idle',
           source: name,
-          statusMessage: 'Hidden by Google 3D map source',
+          statusMessage: NO_IMAGERY_HOST,
         };
       if (loading && shown === null)
         return { loading: true, source: name, loadingLabel: 'Loading sea ice' };

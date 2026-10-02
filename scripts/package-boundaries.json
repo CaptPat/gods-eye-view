@@ -1373,6 +1373,7 @@
   "sea-ice-layer": {
     "exports": ["./layers/sea-ice"],
     "modules": [
+      "src/maps/imageryHost.js",
       "src/layers/sea-ice/imagery.js",
       "src/layers/sea-ice/index.js",
       "src/layers/sea-ice/model.js"
@@ -1382,6 +1383,7 @@
   "marine-depths-layer": {
     "exports": ["./layers/marine-depths"],
     "modules": [
+      "src/maps/imageryHost.js",
       "src/layers/marine-depths/imagery.js",
       "src/layers/marine-depths/index.js",
       "src/layers/marine-depths/model.js"

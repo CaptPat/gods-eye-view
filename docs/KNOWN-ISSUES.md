@@ -106,6 +106,22 @@ Status: Open (source limits, by design)
 
 ---
 
+### Draped imagery smears along the 180° meridian on Google 3D (fork)
+Status: Open (Cesium limitation)
+
+- On the Google 3D map source, Air Quality, Sea Ice and Marine Depths (and
+  upstream's Recent Imagery) drape onto the 3D tiles. Where a tile straddles
+  the 180° meridian (the mid-Pacific, the Bering Sea, the Arctic), a narrow
+  zigzag of smeared imagery appears along the seam.
+- Cause: Cesium 1.138's 3D Tiles draping (`ModelImageryMapping.computeCartographicBoundingRectangle`)
+  takes the plain minimum and maximum longitude of a tile's vertices, so a tile
+  at ±180° gets a whole-world bounding rectangle and its seam triangles stretch
+  across all of the imagery. No fix is listed in Cesium's changelog through
+  1.146. The band narrows as you zoom in; a globe map source shows the seam
+  cleanly.
+
+---
+
 ### Satellite passes and analyst answers
 Status: Open (by design)
 
