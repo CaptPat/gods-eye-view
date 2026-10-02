@@ -1,5 +1,12 @@
 import { createStandaloneApplication } from './standalone/application.js';
 import { describeError } from './standalone/errors.js';
+import { installDrapeDatelineFix } from './maps/drapeDatelineFix.js';
+
+// Fork: stop imagery draped on Google 3D from smearing along 180° (see the module).
+const drapeFix = installDrapeDatelineFix();
+if (!drapeFix.applied && drapeFix.reason !== 'already installed') {
+  console.warn(`Draped-imagery date-line fix not applied: ${drapeFix.reason}`);
+}
 
 const application = createStandaloneApplication({
   googleApiKey: import.meta.env.GOOGLE_MAPS_API_KEY,

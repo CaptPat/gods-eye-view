@@ -106,19 +106,24 @@ Status: Open (source limits, by design)
 
 ---
 
-### Draped imagery smears along the 180° meridian on Google 3D (fork)
-Status: Open (Cesium limitation)
+### Draped imagery on Google 3D near the 180° meridian (fork)
+Status: Fixed in the fork by a runtime patch; one data gap open
 
-- On the Google 3D map source, Air Quality, Sea Ice and Marine Depths (and
-  upstream's Recent Imagery) drape onto the 3D tiles. Where a tile straddles
-  the 180° meridian (the mid-Pacific, the Bering Sea, the Arctic), a narrow
-  zigzag of smeared imagery appears along the seam.
-- Cause: Cesium 1.138's 3D Tiles draping (`ModelImageryMapping.computeCartographicBoundingRectangle`)
-  takes the plain minimum and maximum longitude of a tile's vertices, so a tile
-  at ±180° gets a whole-world bounding rectangle and its seam triangles stretch
-  across all of the imagery. No fix is listed in Cesium's changelog through
-  1.146. The band narrows as you zoom in; a globe map source shows the seam
-  cleanly.
+- Cesium 1.138's 3D Tiles draping takes the plain minimum and maximum
+  longitude of a tile's vertices (`ModelImageryMapping.computeCartographicBoundingRectangle`),
+  so a Google 3D tile straddling ±180° got a whole-world bounding rectangle and
+  smeared imagery in a zigzag along the seam. No fix is listed in Cesium's
+  changelog through 1.146.
+- `src/maps/drapeDatelineFix.js` patches it at start-up (installed from
+  `src/main.js`) for Cesium 1.138.0 only: seam tiles use unwrapped longitudes
+  across the bounding rectangle, texture coordinates, imagery coverage and the
+  shader's texture placement. On any other Cesium version it steps aside with a
+  console warning, and its tests fail until it is re-verified. At grazing
+  distance a faint hairline can remain along 180°.
+- Open: NASA GIBS serves no Sea Ice tiles in the last column west of 180° at
+  zoom 4 and above (HTTP 404). The globe falls back to the coarser zoom-3 tile;
+  Cesium's 3D Tiles draping does not fall back, so on Google 3D that strip of
+  Sea Ice is blank.
 
 ---
 
